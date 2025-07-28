@@ -9,9 +9,10 @@
       "lastChecked": "2024-01-15T10:30:00Z",
       "deployments": {
         "commands": [
-          ".claude/commands/kiro:*.md"
+          ".claude/commands/kiro/*.md"
         ]
-      }
+      },
+      "_comment": "kiro/ディレクトリ構造を保持してデプロイされます"
     },
     {
       "url": "https://github.com/vijaythecoder/awesome-claude-agents",
@@ -21,10 +22,31 @@
       "lastChecked": "2024-01-15T10:30:00Z",
       "deployments": {
         "agents": [
-          "agents/*.md",
-          ".claude/agents/*.md"
+          "agents/**/*.md",
+          ".claude/agents/**/*.md"
         ]
-      }
+      },
+      "_comment": "agents/以下のすべてのサブディレクトリ構造を保持"
+    },
+    {
+      "url": "https://github.com/example/multi-tool-repo",
+      "name": "multi-tool-repo",
+      "description": "Repository with multiple tool types",
+      "lastUpdated": "2024-01-15T12:00:00Z",
+      "lastChecked": "2024-01-15T12:00:00Z",
+      "deployments": {
+        "commands": [
+          ".claude/commands/**/*.md",
+          "commands/utils/*.md"
+        ],
+        "agents": [
+          ".claude/agents/chat/*.md"
+        ],
+        "hooks": [
+          ".claude/hooks/*.js"
+        ]
+      },
+      "_comment": "複数のツールタイプとディレクトリ構造の例"
     }
   ],
   "settings": {

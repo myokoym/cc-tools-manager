@@ -220,6 +220,9 @@ interface Config {
 
 ### デプロイメント処理
 - リポジトリ内のファイルをパターンマッチング
+- **ディレクトリ構造を保持してデプロイ**
+  - 例: `.claude/commands/kiro/spec-init.md` → `~/.claude/commands/kiro/spec-init.md`
+  - 例: `commands/utils/helper.md` → `~/.claude/commands/utils/helper.md`
 - 複数のパターンにマッチする場合は両方にデプロイ
 - 競合時の処理オプション（skip/overwrite/prompt）
 
