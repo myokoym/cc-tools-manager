@@ -1,0 +1,36 @@
+{
+  "version": "1.0.0",
+  "repositories": [
+    {
+      "url": "https://github.com/gotalab/claude-code-spec",
+      "name": "claude-code-spec",
+      "description": "Spec-driven development commands for Claude Code",
+      "lastUpdated": "2024-01-15T10:30:00Z",
+      "lastChecked": "2024-01-15T10:30:00Z",
+      "deployments": {
+        "commands": [
+          ".claude/commands/kiro:*.md"
+        ]
+      }
+    },
+    {
+      "url": "https://github.com/vijaythecoder/awesome-claude-agents",
+      "name": "awesome-claude-agents",
+      "description": "Collection of useful AI agents for Claude Code",
+      "lastUpdated": "2024-01-14T15:45:00Z",
+      "lastChecked": "2024-01-15T10:30:00Z",
+      "deployments": {
+        "agents": [
+          "agents/*.md",
+          ".claude/agents/*.md"
+        ]
+      }
+    }
+  ],
+  "settings": {
+    "autoUpdate": false,
+    "parallelOperations": true,
+    "conflictResolution": "prompt",
+    "checkInterval": "daily"
+  }
+}
