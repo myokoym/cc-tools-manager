@@ -1,140 +1,231 @@
-# CC Tools Manager - Technology Stack
+# CC Tools Manager - 技術スタック
 
-## Architecture
+## アーキテクチャ
 
-CC Tools Manager follows a simple command-line tool architecture designed for extensibility and ease of use.
+CC Tools Managerは、Node.jsベースのCLIツールとして設計され、NPX経由で簡単にインストール・実行できるようになっています。
 
-### High-Level Design
+### ハイレベル設計
 ```
 ┌─────────────────────┐     ┌────────────────────┐
-│   Command Layer     │────▶│  Repository List   │
-│  (CLI Interface)    │     │  (repo-list.md)    │
+│   CLIインターフェース │────▶│  リポジトリリスト   │
+│   (Commander.js)    │     │  (repo-list.md)    │
 └─────────────────────┘     └────────────────────┘
            │                           │
            ▼                           ▼
 ┌─────────────────────┐     ┌────────────────────┐
-│  Git Operations     │────▶│  GitHub Repos      │
-│  (clone/pull)       │     │  (Remote Sources)  │
+│    Git操作層        │────▶│  GitHubリポジトリ   │
+│  (simple-git)       │     │  (リモートソース)   │
 └─────────────────────┘     └────────────────────┘
            │
            ▼
 ┌─────────────────────┐     ┌────────────────────┐
-│  File Deployment    │────▶│  Local .claude/    │
-│  (copy/organize)    │     │  directories       │
+│  ファイルシステム層  │────▶│  ローカル.claude/  │
+│  (fs-extra)         │     │  ディレクトリ      │
 └─────────────────────┘     └────────────────────┘
 ```
 
-## Core Technologies
+## コア技術
 
-### Language & Runtime
-- **Primary Language**: Bash/Shell scripting (initial implementation)
-- **Future Consideration**: Python or Node.js for advanced features
-- **Compatibility**: POSIX-compliant for cross-platform support
+### 言語とランタイム
+- **プライマリ言語**: TypeScript/JavaScript
+- **ランタイム**: Node.js (16.x以上)
+- **パッケージマネージャー**: npm/yarn
+- **配布方法**: NPX経由での実行をサポート
 
-### Dependencies
-- **Git**: For repository cloning and updates
-- **Standard Unix Tools**: cp, mv, mkdir, find
-- **Optional**: jq for JSON processing (future features)
+### 主要な依存関係
+```json
+{
+  "dependencies": {
+    "commander": "^11.0.0",      // CLIフレームワーク
+    "simple-git": "^3.19.0",     // Git操作
+    "fs-extra": "^11.1.0",       // ファイルシステム操作
+    "chalk": "^5.3.0",           // ターミナルカラー
+    "ora": "^7.0.0",            // プログレスインジケーター
+    "inquirer": "^9.2.0",        // インタラクティブプロンプト
+    "winston": "^3.10.0"         // ロギング
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "typescript": "^5.0.0",
+    "eslint": "^8.0.0",
+    "prettier": "^3.0.0",
+    "jest": "^29.0.0"
+  }
+}
+```
 
-## Development Environment
+## 開発環境
 
-### Required Tools
-- Git (2.x or higher)
-- Bash (4.x or higher recommended)
-- Standard Unix utilities
+### 必要なツール
+- Node.js (16.x以上)
+- Git (2.x以上)
+- npm または yarn
 
-### Development Setup
+### 開発セットアップ
 ```bash
-# Clone the repository
+# リポジトリのクローン
 git clone <repository-url>
 cd cc-tools-manager
 
-# Make scripts executable
-chmod +x cc-tools-manager
+# 依存関係のインストール
+npm install
 
-# Add to PATH (optional)
-export PATH="$PATH:$(pwd)"
+# TypeScriptのビルド
+npm run build
+
+# 開発モードで実行
+npm run dev
+
+# グローバルインストール（オプション）
+npm link
 ```
 
-## Common Commands
-
-### Core Operations
+### NPX経由での実行
 ```bash
-# Register a new repository
-./cc-tools-manager register <github-url>
+# インストールせずに直接実行
+npx cc-tools-manager update
 
-# Update all registered repositories
-./cc-tools-manager update
-
-# Update specific repository
-./cc-tools-manager update <repo-name>
-
-# List registered repositories
-./cc-tools-manager list
-
-# Show status of all repositories
-./cc-tools-manager status
+# 特定のバージョンを実行
+npx cc-tools-manager@latest register <github-url>
 ```
 
-### Management Commands
+## 一般的なコマンド
+
+### コア操作
 ```bash
-# Remove a repository
-./cc-tools-manager remove <repo-name>
+# 新しいリポジトリを登録
+npx cc-tools-manager register <github-url>
 
-# Check for updates without applying
-./cc-tools-manager check
+# すべての登録済みリポジトリを更新
+npx cc-tools-manager update
 
-# Clean orphaned files
-./cc-tools-manager clean
+# 特定のリポジトリを更新
+npx cc-tools-manager update <repo-name>
+
+# 登録済みリポジトリを一覧表示
+npx cc-tools-manager list
+
+# すべてのリポジトリのステータスを表示
+npx cc-tools-manager status
 ```
 
-## Environment Variables
+### 管理コマンド
+```bash
+# リポジトリを削除
+npx cc-tools-manager remove <repo-name>
 
-### Configuration
-- `CC_TOOLS_HOME`: Base directory for tool storage (default: `~/.cc-tools`)
-- `CC_TOOLS_CLAUDE_DIR`: Target claude directory (default: `~/.claude`)
-- `CC_TOOLS_LOG_LEVEL`: Logging verbosity (default: `INFO`)
+# 更新をチェック（適用せず）
+npx cc-tools-manager check
 
-### Runtime Options
-- `CC_TOOLS_NO_COLOR`: Disable colored output
-- `CC_TOOLS_DRY_RUN`: Preview changes without applying
-- `CC_TOOLS_FORCE`: Force operations without confirmation
+# 孤立したファイルをクリーンアップ
+npx cc-tools-manager clean
 
-## Directory Structure
+# インタラクティブモード
+npx cc-tools-manager interactive
+```
 
-### Tool Storage
+## 環境変数
+
+### 設定
+- `CC_TOOLS_HOME`: ツール保存用のベースディレクトリ（デフォルト: `~/.cc-tools`）
+- `CC_TOOLS_CLAUDE_DIR`: ターゲットのclaudeディレクトリ（デフォルト: `~/.claude`）
+- `CC_TOOLS_LOG_LEVEL`: ログの詳細度（デフォルト: `INFO`）
+- `CC_TOOLS_CONFIG`: カスタム設定ファイルのパス
+
+### ランタイムオプション
+- `CC_TOOLS_NO_COLOR`: カラー出力を無効化
+- `CC_TOOLS_DRY_RUN`: 変更を適用せずプレビュー
+- `CC_TOOLS_FORCE`: 確認なしで操作を強制実行
+- `CC_TOOLS_PARALLEL`: 並列処理の有効化
+
+## ディレクトリ構造
+
+### ツール保存
 ```
 $CC_TOOLS_HOME/
-├── repos/              # Cloned repositories
-│   ├── commands/       # Command repositories
-│   └── agents/         # Agent repositories
-├── cache/              # Temporary files and metadata
-└── logs/               # Operation logs
+├── repos/              # クローンされたリポジトリ（フラットに保存）
+│   ├── repo-name-1/
+│   ├── repo-name-2/
+│   └── repo-name-3/
+├── cache/              # 一時ファイルとメタデータ
+├── config/             # 設定ファイル
+└── logs/               # 操作ログ
 ```
 
-### Deployment Targets
+### デプロイメントターゲット
 ```
 $CC_TOOLS_CLAUDE_DIR/
-├── commands/           # Deployed slash commands
-├── agents/             # Deployed AI agents
-└── config/             # Tool configurations
+├── commands/           # デプロイされたスラッシュコマンド
+├── agents/             # デプロイされたAIエージェント
+├── hooks/              # フック設定
+└── config/             # ツール設定
 ```
 
-## Data Management
+## データ管理
 
-### Repository Registry
-- **Format**: Markdown (repo-list.md)
-- **Structure**: Categorized by tool type
-- **Metadata**: URL, type, last update, status
+### リポジトリレジストリ
+- **フォーマット**: JSON (repositories.json)
+- **構造**: 動的に登録されたリポジトリのリスト
+- **メタデータ**: URL、名前、最終更新、デプロイメント情報
 
-### State Tracking
-- **Location**: `$CC_TOOLS_HOME/cache/state.json`
-- **Contents**: Repository states, versions, deployment status
-- **Update Frequency**: After each operation
+### 状態追跡
+- **場所**: `$CC_TOOLS_HOME/cache/state.json`
+- **内容**: リポジトリの状態、バージョン、デプロイメントステータス
+- **更新頻度**: 各操作後
 
-## Security Considerations
+### 設定ファイル
+```typescript
+interface Config {
+  version: string;
+  repositories: Repository[];
+  settings: {
+    autoUpdate: boolean;
+    parallelOperations: boolean;
+    conflictResolution: 'skip' | 'overwrite' | 'prompt';
+  };
+  mappings: {
+    [repoName: string]: {
+      source: string;
+      target: string;
+    }[];
+  };
+}
+```
 
-- **Git Authentication**: Use SSH keys or tokens for private repos
-- **File Permissions**: Preserve original permissions during deployment
-- **Validation**: Verify repository contents before deployment
-- **Sandboxing**: Future: isolated execution for untrusted tools
+## セキュリティ考慮事項
+
+- **Git認証**: プライベートリポジトリ用にSSHキーまたはトークンを使用
+- **ファイル権限**: デプロイメント時に元の権限を保持
+- **検証**: デプロイメント前にリポジトリの内容を検証
+- **サンドボックス**: 信頼できないツール用の分離実行（将来機能）
+- **依存関係の監査**: npm auditによる定期的なセキュリティチェック
+
+## デプロイメントパターン
+
+### サポートするディレクトリ構造
+1. **.claude プレフィックスパターン**
+   - `.claude/commands/*` → `~/.claude/commands/`
+   - `.claude/agents/*` → `~/.claude/agents/`
+   - `.claude/hooks/*` → `~/.claude/hooks/`
+   - `.claude/config/*` → `~/.claude/config/`
+   
+2. **直接パターン**（.claudeなし）
+   - `commands/*` → `~/.claude/commands/`
+   - `agents/*` → `~/.claude/agents/`
+   - `hooks/*` → `~/.claude/hooks/`
+   
+3. **ファイル名ベースパターン**（将来）
+   - `*.command.md` → `~/.claude/commands/`
+   - `*.agent.md` → `~/.claude/agents/`
+
+### デプロイメント処理
+- リポジトリ内のファイルをパターンマッチング
+- 複数のパターンにマッチする場合は両方にデプロイ
+- 競合時の処理オプション（skip/overwrite/prompt）
+
+## パフォーマンス最適化
+
+- **並列処理**: 複数のリポジトリを同時に処理
+- **増分更新**: 変更があったファイルのみを更新
+- **キャッシング**: リポジトリメタデータとファイルハッシュをキャッシュ
+- **遅延読み込み**: 必要なモジュールのみを動的にロード

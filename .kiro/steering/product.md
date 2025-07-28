@@ -1,44 +1,44 @@
-# CC Tools Manager - Product Overview
+# CC Tools Manager - 製品概要
 
-## Product Overview
+## 製品概要
 
-CC Tools Manager is a centralized management system for claude-code related tools and repositories. It automates the synchronization and deployment of Claude Code commands, agents, and other extensions from various GitHub repositories to local `.claude/` directories.
+CC Tools Managerは、Claude Code関連のツールとリポジトリを一元管理するシステムです。GitHubリポジトリからClaude Codeのコマンド、エージェント、その他の拡張機能をローカルの`.claude/`ディレクトリに自動的に同期・配置します。
 
-## Core Features
+## コア機能
 
-- **Repository Registration**: Register and track claude-code tool repositories from GitHub
-- **Automatic Synchronization**: Pull latest updates from registered repositories via git
-- **Smart Deployment**: Automatically place tool files in appropriate `.claude/**/*` directories
-- **Command Management**: Sync custom slash commands from registered repositories
-- **Agent Management**: Sync and organize AI agents from community repositories
-- **Batch Operations**: Update all registered repositories with a single command
+- **リポジトリ登録**: GitHubのclaude-codeツールリポジトリを登録・追跡
+- **自動同期**: gitを通じて登録済みリポジトリから最新の更新を取得
+- **スマートデプロイメント**: ツールファイルを適切な`.claude/**/*`ディレクトリに自動配置
+- **コマンド管理**: 登録リポジトリからカスタムスラッシュコマンドを同期
+- **エージェント管理**: コミュニティリポジトリからAIエージェントを同期・整理
+- **バッチ操作**: 単一コマンドですべての登録リポジトリを更新
 
-## Target Use Case
+## ターゲットユースケース
 
-### Primary Users
-- Claude Code power users managing multiple custom commands and agents
-- Teams sharing claude-code toolsets across projects
-- Developers maintaining collections of custom Claude Code extensions
+### 主要ユーザー
+- 複数のカスタムコマンドとエージェントを管理するClaude Codeパワーユーザー
+- プロジェクト間でclaude-codeツールセットを共有するチーム
+- カスタムClaude Code拡張機能のコレクションを維持する開発者
 
-### Specific Scenarios
-1. **Tool Collection Management**: Maintain a curated set of commands and agents from multiple sources
-2. **Team Synchronization**: Share approved toolsets across development teams
-3. **Version Control**: Track and update tools from their source repositories
-4. **Quick Setup**: Bootstrap new development environments with preferred toolsets
+### 具体的なシナリオ
+1. **ツールコレクション管理**: 複数のソースから厳選したコマンドとエージェントのセットを維持
+2. **チーム同期**: 承認されたツールセットを開発チーム全体で共有
+3. **バージョン管理**: ソースリポジトリからツールを追跡・更新
+4. **クイックセットアップ**: 好みのツールセットで新しい開発環境を素早く構築
 
-## Key Value Proposition
+## 主要な価値提案
 
-- **Centralized Control**: Manage all claude-code tools from a single location
-- **Automated Updates**: Stay current with tool improvements without manual intervention
-- **Repository Tracking**: Know exactly which tools come from which sources
-- **Selective Management**: Future support for enabling/disabling specific tools
-- **Community Integration**: Easily adopt tools from the claude-code ecosystem
-- **Consistency**: Ensure all team members use the same tool versions
+- **一元管理**: すべてのclaude-codeツールを単一の場所から管理
+- **自動更新**: 手動介入なしでツールの改善を最新状態に維持
+- **リポジトリ追跡**: どのツールがどのソースから来ているかを正確に把握
+- **選択的管理**: 特定のツールの有効化/無効化をサポート（将来機能）
+- **コミュニティ統合**: claude-codeエコシステムからツールを簡単に採用
+- **一貫性**: チームメンバー全員が同じツールバージョンを使用することを保証
 
-## Future Enhancements
+## 将来の拡張機能
 
-- **Toggle Functionality**: Enable/disable specific tools or repositories
-- **Version Pinning**: Lock tools to specific versions or commits
-- **Conflict Resolution**: Handle overlapping tools from different repositories
-- **Tool Discovery**: Browse and preview tools before installation
-- **Custom Mappings**: Configure custom deployment paths for specific tools
+- **トグル機能**: 特定のツールやリポジトリの有効化/無効化
+- **バージョン固定**: 特定のバージョンやコミットにツールをロック
+- **競合解決**: 異なるリポジトリからの重複ツールを処理
+- **ツール探索**: インストール前にツールをブラウズ・プレビュー
+- **カスタムマッピング**: 特定のツール用にカスタムデプロイメントパスを設定

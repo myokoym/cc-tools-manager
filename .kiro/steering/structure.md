@@ -1,202 +1,268 @@
-# CC Tools Manager - Project Structure
+# CC Tools Manager - プロジェクト構造
 
-## Root Directory Organization
+## ルートディレクトリ構成
 
 ```
 cc-tools-manager/
-├── cc-tools-manager*         # Main executable script
-├── repo-list.md             # Registry of managed repositories
-├── lib/                     # Core functionality modules
-├── scripts/                 # Helper scripts and utilities  
-├── tests/                   # Test suite
-├── docs/                    # Extended documentation
-└── .kiro/                   # Kiro spec-driven development
-    ├── steering/            # Project steering documents
-    └── specs/              # Feature specifications
+├── package.json             # プロジェクト定義とスクリプト
+├── tsconfig.json           # TypeScript設定
+├── .eslintrc.js            # ESLint設定
+├── .prettierrc             # Prettier設定
+├── jest.config.js          # Jest設定
+├── README.md               # プロジェクトドキュメント
+├── repositories.json       # 動的に管理されるリポジトリ情報（初期は存在しない）
+├── src/                    # ソースコード
+├── dist/                   # ビルド成果物
+├── tests/                  # テストスイート
+├── docs/                   # 詳細ドキュメント
+└── .kiro/                  # Kiro仕様駆動開発
+    ├── steering/           # プロジェクトステアリングドキュメント
+    └── specs/              # 機能仕様
 ```
 
-## Subdirectory Structures
+## サブディレクトリ構造
 
-### `lib/` - Core Modules
+### `src/` - ソースコード
 ```
-lib/
-├── core/                    # Core functionality
-│   ├── registry.sh         # Repository registry management
-│   ├── git-ops.sh          # Git operations wrapper
-│   └── deployment.sh       # File deployment logic
-├── commands/               # Command implementations
-│   ├── register.sh        # Register new repository
-│   ├── update.sh          # Update repositories
-│   ├── list.sh            # List repositories
-│   └── status.sh          # Show repository status
-└── utils/                  # Utility functions
-    ├── logging.sh         # Logging functionality
-    ├── colors.sh          # Terminal colors
-    └── validation.sh      # Input validation
+src/
+├── index.ts                # エントリーポイント
+├── cli.ts                  # CLIセットアップ（Commander.js）
+├── commands/               # コマンド実装
+│   ├── register.ts        # リポジトリ登録
+│   ├── update.ts          # リポジトリ更新
+│   ├── list.ts            # リポジトリ一覧
+│   ├── status.ts          # ステータス表示
+│   ├── remove.ts          # リポジトリ削除
+│   ├── clean.ts           # クリーンアップ
+│   └── interactive.ts     # インタラクティブモード
+├── core/                   # コア機能
+│   ├── registry.ts        # リポジトリレジストリ管理
+│   ├── git-manager.ts     # Git操作マネージャー
+│   ├── deployment.ts      # ファイルデプロイメント（パターンマッチングによる自動振り分け）
+│   └── config.ts          # 設定管理
+├── utils/                  # ユーティリティ
+│   ├── logger.ts          # ロギング（Winston）
+│   ├── file-system.ts     # ファイルシステム操作
+│   ├── validators.ts      # 入力検証
+│   └── helpers.ts         # ヘルパー関数
+├── types/                  # TypeScript型定義
+│   ├── index.ts           # 共通型
+│   ├── repository.ts      # リポジトリ関連型
+│   └── config.ts          # 設定関連型
+└── constants/             # 定数定義
+    ├── paths.ts           # パス定数
+    └── messages.ts        # メッセージ定数
 ```
 
-### `scripts/` - Utilities
-```
-scripts/
-├── install.sh              # Installation script
-├── uninstall.sh           # Cleanup script
-├── migrate.sh             # Migration utilities
-└── dev/                   # Development helpers
-    ├── test-runner.sh     # Run test suite
-    └── lint.sh            # Code quality checks
-```
-
-### `tests/` - Test Suite
+### `tests/` - テストスイート
 ```
 tests/
-├── unit/                   # Unit tests
-│   ├── registry_test.sh
-│   ├── git_ops_test.sh
-│   └── deployment_test.sh
-├── integration/            # Integration tests
-│   ├── full_cycle_test.sh
-│   └── multi_repo_test.sh
-└── fixtures/              # Test data
-    ├── sample-repos/
-    └── mock-claude-dir/
+├── unit/                   # ユニットテスト
+│   ├── commands/          # コマンドテスト
+│   │   ├── register.test.ts
+│   │   └── update.test.ts
+│   ├── core/              # コア機能テスト
+│   │   ├── registry.test.ts
+│   │   └── git-manager.test.ts
+│   └── utils/             # ユーティリティテスト
+├── integration/           # 統合テスト
+│   ├── full-cycle.test.ts # 完全なワークフローテスト
+│   └── multi-repo.test.ts # 複数リポジトリテスト
+├── e2e/                   # エンドツーエンドテスト
+│   └── cli.test.ts        # CLI全体のテスト
+└── fixtures/              # テストデータ
+    ├── mock-repos/        # モックリポジトリ
+    └── test-config/       # テスト設定
 ```
 
-## Code Organization Patterns
+### `docs/` - ドキュメント
+```
+docs/
+├── getting-started.md      # クイックスタートガイド
+├── commands.md            # コマンドリファレンス
+├── configuration.md       # 設定ガイド
+├── development.md         # 開発者ガイド
+└── api/                   # API ドキュメント（TypeDoc）
+```
 
-### Module Structure
-Each module follows a consistent pattern:
-```bash
-#!/usr/bin/env bash
-# Module: module_name
-# Description: Brief description
-# Dependencies: List of required modules
+## コード構成パターン
 
-# Source dependencies
-source "${LIB_DIR}/utils/logging.sh"
+### モジュール構造
+各モジュールは一貫したパターンに従います：
 
-# Module constants
-readonly MODULE_NAME_VERSION="1.0.0"
+```typescript
+// src/core/registry.ts
+import { Repository, RegistryConfig } from '../types';
+import { Logger } from '../utils/logger';
+import { REGISTRY_PATH } from '../constants/paths';
 
-# Public functions
-module_name_function() {
-    # Implementation
+export class Registry {
+  private logger: Logger;
+  private config: RegistryConfig;
+  
+  constructor(config: RegistryConfig) {
+    this.logger = new Logger('Registry');
+    this.config = config;
+  }
+  
+  // Public メソッド
+  async register(url: string): Promise<Repository> {
+    // 実装
+  }
+  
+  // Private メソッド
+  private validateUrl(url: string): boolean {
+    // 実装
+  }
 }
+```
 
-# Private functions (prefixed with _)
-_module_name_helper() {
-    # Implementation
+### コマンドパターン
+コマンドは標準化されたインターフェースに従います：
+
+```typescript
+// src/commands/register.ts
+import { Command } from 'commander';
+import { Registry } from '../core/registry';
+import { Logger } from '../utils/logger';
+
+export function registerCommand(program: Command): void {
+  program
+    .command('register <url>')
+    .description('新しいリポジトリを登録')
+    .option('-t, --type <type>', 'リポジトリタイプ', 'auto')
+    .action(async (url: string, options) => {
+      const logger = new Logger('register');
+      
+      try {
+        const registry = new Registry();
+        await registry.register(url);
+        logger.success('リポジトリを登録しました');
+      } catch (error) {
+        logger.error('登録に失敗しました', error);
+        process.exit(1);
+      }
+    });
 }
 ```
 
-### Command Pattern
-Commands follow a standardized interface:
-```bash
-# Command structure
-cmd_name() {
-    local args=("$@")
-    
-    # Validate arguments
-    _validate_cmd_name_args "${args[@]}"
-    
-    # Execute command logic
-    _execute_cmd_name "${args[@]}"
-    
-    # Return status
-    return $?
+## ファイル命名規則
+
+### ソースファイル
+- **TypeScriptファイル**: `kebab-case.ts`
+- **テストファイル**: `*.test.ts` または `*.spec.ts`
+- **型定義**: `types/*.ts`
+- **定数**: `UPPER_SNAKE_CASE` in `constants/*.ts`
+
+### 設定ファイル
+- **プロジェクト設定**: `*.config.js` または `.*rc`
+- **環境設定**: `.env.*`
+- **Git設定**: `.gitignore`, `.gitattributes`
+
+### ドキュメント
+- **Markdownファイル**: `kebab-case.md`
+- **ステアリングドキュメント**: `.kiro/steering/機能名.md`
+- **仕様**: `.kiro/specs/機能名/`
+
+## インポート構成
+
+### インポート順序
+1. Node.js組み込みモジュール
+2. 外部パッケージ
+3. 内部モジュール（絶対パス）
+4. 内部モジュール（相対パス）
+5. 型定義
+
+### インポート例
+```typescript
+// Node.js組み込み
+import { promises as fs } from 'fs';
+import path from 'path';
+
+// 外部パッケージ
+import { Command } from 'commander';
+import chalk from 'chalk';
+import ora from 'ora';
+
+// 内部モジュール（src/からの相対）
+import { Registry } from '../core/registry';
+import { Logger } from '../utils/logger';
+import { validateUrl } from '../utils/validators';
+
+// 型定義
+import type { Repository, RegistryConfig } from '../types';
+```
+
+## 主要なアーキテクチャ原則
+
+### 1. モジュラリティ
+- 各モジュールは単一の責任を持つ
+- モジュール間の明確なインターフェース
+- 最小限の依存関係
+
+### 2. 拡張性
+- 新しいコマンドはコアを変更せずに追加可能
+- リポジトリタイプはプラガブル
+- デプロイメント戦略は設定可能
+
+### 3. 安全性優先
+- すべての操作は元に戻せる
+- プレビュー用のドライランモード
+- アクション前の包括的な検証
+
+### 4. ユーザーエクスペリエンス
+- 明確なカラー付き出力
+- 長時間操作のプログレスインジケーター
+- 回復提案付きの有用なエラーメッセージ
+
+### 5. 保守性
+- 一貫したコーディングスタイル（ESLint + Prettier）
+- 包括的なドキュメント（JSDoc + TypeDoc）
+- 重要なパスのテストカバレッジ
+
+### 6. 設定より規約
+- シンプルなMarkdownでのリポジトリリスト
+- カスタマイズ用の環境変数
+- ハードコードされた値を最小限に
+
+## NPXサポートの実装
+
+### package.json設定
+```json
+{
+  "name": "cc-tools-manager",
+  "version": "1.0.0",
+  "bin": {
+    "cc-tools-manager": "./dist/index.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "dev": "ts-node src/index.ts",
+    "test": "jest",
+    "lint": "eslint src/**/*.ts",
+    "prepublishOnly": "npm run build"
+  }
 }
 ```
 
-## File Naming Conventions
+### エントリーポイント
+```typescript
+#!/usr/bin/env node
+// src/index.ts
+import { cli } from './cli';
 
-### Scripts and Modules
-- **Executable scripts**: `lowercase-with-hyphens`
-- **Library modules**: `lowercase_with_underscores.sh`
-- **Test files**: `*_test.sh`
-- **Configuration**: `.toolrc` or `config.sh`
-
-### Documentation
-- **Markdown files**: `lowercase-with-hyphens.md`
-- **Steering documents**: `descriptive-name.md` in `.kiro/steering/`
-- **Specifications**: `feature-name/` directories in `.kiro/specs/`
-
-### Generated Files
-- **Logs**: `YYYY-MM-DD-operation.log`
-- **State files**: `*.state.json`
-- **Cache files**: `*.cache`
-
-## Import Organization
-
-### Source Order
-1. Shell options and error handling
-2. Constants and globals
-3. External dependencies
-4. Internal library modules
-5. Function definitions
-6. Main execution logic
-
-### Example Import Structure
-```bash
-#!/usr/bin/env bash
-set -euo pipefail
-
-# Constants
-readonly SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-readonly LIB_DIR="${SCRIPT_DIR}/lib"
-
-# External utilities
-source "${LIB_DIR}/utils/logging.sh"
-source "${LIB_DIR}/utils/colors.sh"
-
-# Core modules
-source "${LIB_DIR}/core/registry.sh"
-source "${LIB_DIR}/core/git-ops.sh"
-
-# Command modules
-source "${LIB_DIR}/commands/update.sh"
+cli.parse(process.argv);
 ```
 
-## Key Architectural Principles
+## 将来の構造考慮事項
 
-### 1. Modularity
-- Each module has a single responsibility
-- Clear interfaces between modules
-- Minimal dependencies
+### 計画中の追加
+- `plugins/` - カスタムハンドラー用の拡張システム
+- `templates/` - リポジトリタイプテンプレート
+- `.github/` - CI/CDワークフロー
+- `examples/` - 使用例とレシピ
 
-### 2. Extensibility
-- New commands can be added without modifying core
-- Repository types are pluggable
-- Deployment strategies are configurable
-
-### 3. Safety First
-- All operations are reversible
-- Dry-run mode for preview
-- Comprehensive validation before actions
-
-### 4. User Experience
-- Clear, colored output
-- Progress indicators for long operations
-- Helpful error messages with recovery suggestions
-
-### 5. Maintainability
-- Consistent coding style
-- Comprehensive documentation
-- Test coverage for critical paths
-
-### 6. Configuration Over Code
-- Repository list in simple markdown
-- Environment variables for customization
-- Minimal hardcoded values
-
-## Future Structure Considerations
-
-### Planned Additions
-- `plugins/` - Extension system for custom handlers
-- `templates/` - Repository type templates
-- `.github/` - CI/CD workflows
-- `examples/` - Usage examples and recipes
-
-### Migration Path
-As the tool evolves from shell to a higher-level language:
-- Maintain backward compatibility
-- Gradual module replacement
-- Preserve existing file structures
+### マイグレーションパス
+- 後方互換性の維持
+- 段階的なモジュール置換
+- 既存のファイル構造の保持
