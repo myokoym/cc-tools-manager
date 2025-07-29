@@ -8,6 +8,7 @@
   },
   "scripts": {
     "build": "tsc",
+    "build:fast": "tsc --incremental",
     "dev": "tsx watch src/index.ts",
     "test": "jest",
     "lint": "eslint src --ext .ts",

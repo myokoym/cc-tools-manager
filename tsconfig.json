@@ -10,6 +10,8 @@
     /* Emit */
     "outDir": "./dist",                                  /* Specify an output folder for all emitted files. */
     "removeComments": true,                              /* Disable emitting comments. */
+    "incremental": true,                                 /* Enable incremental compilation */
+    "tsBuildInfoFile": "./.tsbuildinfo",                /* Specify the path to .tsbuildinfo incremental compilation file. */
 
     /* Interop Constraints */
     "esModuleInterop": true,                             /* Emit additional JavaScript to ease support for importing CommonJS modules. This enables 'allowSyntheticDefaultImports' for type compatibility. */
