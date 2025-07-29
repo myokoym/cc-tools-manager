@@ -28,29 +28,29 @@ import { logger } from '../utils/logger';
 export class DeploymentService implements IDeploymentService {
   private readonly patterns = {
     commands: [
-      '.claude/commands/**/*.{js,ts,mjs}',
-      'commands/**/*.{js,ts,mjs}',
-      '.claude/commands.{js,ts,mjs}',
-      'commands.{js,ts,mjs}'
+      '.claude/commands/**/*.{js,ts,mjs,md}',
+      'commands/**/*.{js,ts,mjs,md}',
+      '.claude/commands.{js,ts,mjs,md}',
+      'commands.{js,ts,mjs,md}'
     ],
     agents: [
-      '.claude/agents/**/*.{js,ts,mjs}',
-      'agents/**/*.{js,ts,mjs}',
-      '.claude/agents.{js,ts,mjs}',
-      'agents.{js,ts,mjs}'
+      '.claude/agents/**/*.{js,ts,mjs,md}',
+      'agents/**/*.{js,ts,mjs,md}',
+      '.claude/agents.{js,ts,mjs,md}',
+      'agents.{js,ts,mjs,md}'
     ],
     hooks: [
-      '.claude/hooks/**/*.{js,ts,mjs}',
-      'hooks/**/*.{js,ts,mjs}',
-      '.claude/hooks.{js,ts,mjs}',
-      'hooks.{js,ts,mjs}'
+      '.claude/hooks/**/*.{js,ts,mjs,md}',
+      'hooks/**/*.{js,ts,mjs,md}',
+      '.claude/hooks.{js,ts,mjs,md}',
+      'hooks.{js,ts,mjs,md}'
     ]
   };
 
   /**
    * リポジトリのファイルをデプロイする
    */
-  async deploy(repo: Repository): Promise<DeploymentResult> {
+  async deploy(repo: Repository, options?: { force?: boolean }): Promise<DeploymentResult> {
     logger.info(`Deploying files from ${repo.name}...`);
     
     const result: DeploymentResult = {
@@ -72,9 +72,10 @@ export class DeploymentService implements IDeploymentService {
         try {
           // ファイルが既に存在するかチェック
           if (await fileExists(targetPath)) {
+            const strategy: ConflictStrategy = options?.force ? 'overwrite' : 'prompt';
             const shouldContinue = await this.handleConflict(
               targetPath,
-              'prompt' // TODO: Add deploymentStrategy to Repository type
+              strategy
             );
             
             if (!shouldContinue) {
@@ -120,6 +121,8 @@ export class DeploymentService implements IDeploymentService {
   async detectPatterns(repoPath: string): Promise<PatternMatch[]> {
     const matches: PatternMatch[] = [];
     
+    logger.info(`Detecting patterns in: ${repoPath}`);
+    
     // 各ターゲットタイプのパターンを検査
     for (const [targetType, patterns] of Object.entries(this.patterns)) {
       for (const pattern of patterns) {
@@ -129,6 +132,8 @@ export class DeploymentService implements IDeploymentService {
             nodir: true,
             ignore: ['**/node_modules/**', '**/.git/**', '**/dist/**', '**/build/**']
           });
+          
+          logger.debug(`Pattern ${pattern} found ${files.length} files`);
           
           for (const file of files) {
             matches.push({

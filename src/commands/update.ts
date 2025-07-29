@@ -149,7 +149,7 @@ async function updateRepository(repositoryName: string | undefined, options: Upd
           }
           
           spinner.start('Deploying files...');
-          const deployResult = await deploymentService.deploy(repo);
+          const deployResult = await deploymentService.deploy(repo, { force: options.force });
           
           if (deployResult.deployed.length > 0) {
             spinner.succeed(`Deployed ${deployResult.deployed.length} files`);
