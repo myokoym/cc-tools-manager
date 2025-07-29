@@ -80,7 +80,7 @@ Display registered repositories:
 # Basic display
 npx cc-tools-manager list
 
-# Verbose display
+# Verbose display (with deployment file tree)
 npx cc-tools-manager list --verbose
 ```
 
@@ -96,6 +96,8 @@ owner/repo3         ○ Not Initialized             0    2025/1/20
 
 Total: 3 repositories
 ```
+
+📖 **See [Command Reference](docs/commands.md) for detailed information about the enhanced list command and other recent improvements.**
 
 ### Check Repository Status
 

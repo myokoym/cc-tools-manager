@@ -80,7 +80,7 @@ npx cc-tools-manager update --skip-deploy
 # 基本表示
 npx cc-tools-manager list
 
-# 詳細表示
+# 詳細表示（デプロイファイルツリー付き）
 npx cc-tools-manager list --verbose
 ```
 
@@ -96,6 +96,8 @@ owner/repo3         ○ Not Initialized             0    2025/1/20
 
 Total: 3 repositories
 ```
+
+📖 **拡張されたlistコマンドやその他の最近の改善については[コマンドリファレンス](docs/commands.ja.md)を参照してください。**
 
 ### リポジトリの状態確認
 
