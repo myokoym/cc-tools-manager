@@ -49,7 +49,7 @@ export interface IDeploymentService {
    * @param options - デプロイオプション
    * @returns デプロイメント結果
    */
-  deploy(repo: Repository, options?: { force?: boolean }): Promise<DeploymentResult>;
+  deploy(repo: Repository, options?: { interactive?: boolean }): Promise<DeploymentResult>;
 
   /**
    * リポジトリ内のパターンを検出する

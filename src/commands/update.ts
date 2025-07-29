@@ -13,6 +13,7 @@ import { StateManager } from '../core/StateManager';
 import { Repository } from '../types/repository';
 import { CC_TOOLS_HOME, REPOS_DIR } from '../constants/paths';
 import { ensureDir } from '../utils/file-system';
+import { promptYesNo } from '../utils/prompt';
 import * as fs from 'fs/promises';
 import ora from 'ora';
 
@@ -34,6 +35,7 @@ async function isGitRepository(dirPath: string): Promise<boolean> {
 interface UpdateOptions {
   force?: boolean;
   all?: boolean;
+  interactive?: boolean;
 }
 
 /**
@@ -129,27 +131,21 @@ async function updateRepository(repositoryName: string | undefined, options: Upd
         if (patterns.length > 0) {
           spinner.succeed(`Found ${patterns.length} deployable files`);
           
-          // デプロイメントを実行
+          // デプロイメント確認（--forceでスキップ）
           if (!options.force) {
-            const readline = await import('readline');
-            const rl = readline.createInterface({
-              input: process.stdin,
-              output: process.stdout
-            });
+            const shouldDeploy = await promptYesNo(
+              chalk.yellow('\nDeploy files? (y/N): '),
+              false
+            );
             
-            const answer = await new Promise<string>((resolve) => {
-              rl.question(chalk.yellow('\nDeploy files? (y/N): '), resolve);
-            });
-            rl.close();
-            
-            if (answer.toLowerCase() !== 'y') {
+            if (!shouldDeploy) {
               console.log(chalk.gray('Skipping deployment'));
               continue;
             }
           }
           
           spinner.start('Deploying files...');
-          const deployResult = await deploymentService.deploy(repo, { force: options.force });
+          const deployResult = await deploymentService.deploy(repo, { interactive: options.interactive });
           
           if (deployResult.deployed.length > 0) {
             spinner.succeed(`Deployed ${deployResult.deployed.length} files`);
@@ -220,6 +216,7 @@ async function updateRepository(repositoryName: string | undefined, options: Upd
 export const updateCommand = new Command('update')
   .description('Update repository to latest version')
   .argument('[repository]', 'Repository name to update')
-  .option('-f, --force', 'Skip confirmation prompts')
+  .option('-f, --force', 'Skip deployment confirmation prompt')
   .option('-a, --all', 'Update all repositories')
+  .option('-i, --interactive', 'Prompt before overwriting each file')
   .action(updateRepository);

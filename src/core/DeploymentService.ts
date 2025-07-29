@@ -1,7 +1,6 @@
 import { glob } from 'glob';
 import * as path from 'path';
-import * as readline from 'readline/promises';
-import { stdin as input, stdout as output } from 'process';
+import { promptYesNo } from '../utils/prompt';
 import {
   IDeploymentService,
   PatternMatch,
@@ -50,7 +49,7 @@ export class DeploymentService implements IDeploymentService {
   /**
    * リポジトリのファイルをデプロイする
    */
-  async deploy(repo: Repository, options?: { force?: boolean }): Promise<DeploymentResult> {
+  async deploy(repo: Repository, options?: { interactive?: boolean }): Promise<DeploymentResult> {
     logger.info(`Deploying files from ${repo.name}...`);
     
     const result: DeploymentResult = {
@@ -72,7 +71,8 @@ export class DeploymentService implements IDeploymentService {
         try {
           // ファイルが既に存在するかチェック
           if (await fileExists(targetPath)) {
-            const strategy: ConflictStrategy = options?.force ? 'overwrite' : 'prompt';
+            // デフォルトは上書き、--interactiveオプションでプロンプト表示
+            const strategy: ConflictStrategy = options?.interactive ? 'prompt' : 'overwrite';
             const shouldContinue = await this.handleConflict(
               targetPath,
               strategy
@@ -236,17 +236,11 @@ export class DeploymentService implements IDeploymentService {
    * ユーザーに競合の解決方法を尋ねる
    */
   private async promptForConflict(file: string): Promise<boolean> {
-    const rl = readline.createInterface({ input, output });
-    
-    try {
-      const answer = await rl.question(
-        `File ${file} already exists. Overwrite? [y/N]: `
-      );
-      
-      return answer.toLowerCase() === 'y' || answer.toLowerCase() === 'yes';
-    } finally {
-      rl.close();
-    }
+    return await promptYesNo(
+      `File ${file} already exists. Overwrite? [y/N]: `,
+      false,
+      30000 // 30秒のタイムアウト
+    );
   }
 
   /**
