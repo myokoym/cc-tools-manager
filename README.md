@@ -292,7 +292,9 @@ MIT License
 
 ## Contributing
 
-Pull requests are welcome! Please report bugs and feature requests to [Issues](https://github.com/yourusername/cc-tools-manager/issues).
+Pull requests are welcome! Please read our [Contributing Guidelines](CONTRIBUTING.md) before submitting a PR.
+
+**Note for contributors**: Documentation and code should be written in English only. Japanese translations are maintained separately by the project team.
 
 ## Credits
 
