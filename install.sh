@@ -58,6 +58,6 @@ echo "  cc-tools-manager --help"
 echo ""
 echo "To uninstall, run:"
 echo "  npm unlink -g cc-tools-manager"
-if [ "$INSTALL_DIR" != "$(pwd)" ]; then
-    echo "  rm -rf $INSTALL_DIR"
-fi
+echo ""
+echo "Installation directory:"
+echo "  $INSTALL_DIR"
