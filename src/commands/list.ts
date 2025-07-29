@@ -8,6 +8,7 @@ import chalk from 'chalk';
 import { RegistryService } from '../core/RegistryService';
 import { StateManager } from '../core/StateManager';
 import { Repository, RepositoryStatus } from '../types/repository';
+import { generateDeployedFilesTree } from '../utils/tree';
 
 /**
  * ステータスカラー定義
@@ -123,11 +124,8 @@ async function listRepositories(options: ListOptions): Promise<void> {
         // デプロイされたファイルの詳細を表示
         const repoState = await stateManager.getRepositoryState(repo.id);
         if (repoState && repoState.deployedFiles.length > 0) {
-          console.log('  Deployed Files:');
-          for (const file of repoState.deployedFiles) {
-            console.log(`    ${chalk.gray(file.source)} → ${chalk.blue(file.target)}`);
-            console.log(`      ${chalk.gray(`Deployed: ${new Date(file.deployedAt).toLocaleString()}`)}`);
-          }
+          const treeLines = generateDeployedFilesTree(repoState.deployedFiles);
+          treeLines.forEach(line => console.log(line));
         }
         
         console.log();
