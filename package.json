@@ -55,10 +55,10 @@
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/yourusername/cc-tools-manager.git"
+    "url": "https://github.com/myokoym/cc-tools-manager.git"
   },
   "bugs": {
-    "url": "https://github.com/yourusername/cc-tools-manager/issues"
+    "url": "https://github.com/myokoym/cc-tools-manager/issues"
   },
-  "homepage": "https://github.com/yourusername/cc-tools-manager#readme"
+  "homepage": "https://github.com/myokoym/cc-tools-manager#readme"
 }

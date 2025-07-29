@@ -30,13 +30,13 @@ npx cc-tools-manager --help
 インストールスクリプトを実行：
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/yourusername/cc-tools-manager/main/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/myokoym/cc-tools-manager/main/install.sh | bash
 ```
 
 またはクローンしてローカルで実行：
 
 ```bash
-git clone https://github.com/yourusername/cc-tools-manager.git
+git clone https://github.com/myokoym/cc-tools-manager.git
 cd cc-tools-manager
 ./install.sh
 ```
@@ -45,7 +45,7 @@ cd cc-tools-manager
 
 ```bash
 # リポジトリをクローン
-git clone https://github.com/yourusername/cc-tools-manager.git
+git clone https://github.com/myokoym/cc-tools-manager.git
 cd cc-tools-manager
 
 # 依存関係をインストール
@@ -69,7 +69,7 @@ cc-tools-manager --help
 ホットリロード付きの開発環境：
 
 ```bash
-git clone https://github.com/yourusername/cc-tools-manager.git
+git clone https://github.com/myokoym/cc-tools-manager.git
 cd cc-tools-manager
 npm install
 npm run dev
@@ -293,7 +293,7 @@ CC_TOOLS_LOG_LEVEL=DEBUG cc-tools-manager update
 
 ```bash
 # リポジトリのクローン
-git clone https://github.com/yourusername/cc-tools-manager.git
+git clone https://github.com/myokoym/cc-tools-manager.git
 cd cc-tools-manager
 
 # 依存関係のインストール

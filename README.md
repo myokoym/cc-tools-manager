@@ -30,13 +30,13 @@ npx cc-tools-manager --help
 Run the installation script:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/yourusername/cc-tools-manager/main/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/myokoym/cc-tools-manager/main/install.sh | bash
 ```
 
 Or clone and run locally:
 
 ```bash
-git clone https://github.com/yourusername/cc-tools-manager.git
+git clone https://github.com/myokoym/cc-tools-manager.git
 cd cc-tools-manager
 ./install.sh
 ```
@@ -45,7 +45,7 @@ cd cc-tools-manager
 
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/cc-tools-manager.git
+git clone https://github.com/myokoym/cc-tools-manager.git
 cd cc-tools-manager
 
 # Install dependencies
@@ -69,7 +69,7 @@ cc-tools-manager --help
 For development with hot reload:
 
 ```bash
-git clone https://github.com/yourusername/cc-tools-manager.git
+git clone https://github.com/myokoym/cc-tools-manager.git
 cd cc-tools-manager
 npm install
 npm run dev
@@ -293,7 +293,7 @@ CC_TOOLS_LOG_LEVEL=DEBUG cc-tools-manager update
 
 ```bash
 # Clone repository
-git clone https://github.com/yourusername/cc-tools-manager.git
+git clone https://github.com/myokoym/cc-tools-manager.git
 cd cc-tools-manager
 
 # Install dependencies

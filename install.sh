@@ -27,7 +27,7 @@ if [ -d "$INSTALL_DIR" ]; then
     git pull
 else
     echo "📥 Cloning repository..."
-    git clone https://github.com/yourusername/cc-tools-manager.git "$INSTALL_DIR"
+    git clone https://github.com/myokoym/cc-tools-manager.git "$INSTALL_DIR"
     cd "$INSTALL_DIR"
 fi
 
