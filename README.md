@@ -1,33 +1,35 @@
 # CC Tools Manager
 
-Claude Code関連ツール（コマンド、エージェント、その他の拡張機能）を一元管理するCLIツールです。GitHubリポジトリからツールを自動的に同期し、ローカルの`.claude/`ディレクトリに適切に配置します。
+[English](README.md) | [日本語](README.ja.md)
 
-## 特徴
+A CLI tool for centralized management of Claude Code related tools (commands, agents, and other extensions). It automatically syncs tools from GitHub repositories and properly deploys them to your local `.claude/` directory.
 
-- 🚀 NPX経由で簡単に実行可能
-- 📦 GitHubリポジトリからツールを自動同期
-- 🔄 並列処理による高速アップデート
-- 🎨 見やすいカラー出力とプログレス表示
-- 📂 ディレクトリ構造を保持したデプロイメント
-- ⚙️ 環境変数による柔軟な設定
+## Features
 
-## インストール
+- 🚀 Easy execution via NPX
+- 📦 Automatic tool synchronization from GitHub repositories
+- 🔄 Fast updates with parallel processing
+- 🎨 Clear colored output and progress display
+- 📂 Deployment with preserved directory structure
+- ⚙️ Flexible configuration via environment variables
 
-### NPX経由で実行（推奨）
+## Installation
 
-インストール不要で直接実行できます：
+### Run via NPX (Recommended)
+
+Run directly without installation:
 
 ```bash
 npx cc-tools-manager --help
 ```
 
-### グローバルインストール
+### Global Installation
 
 ```bash
 npm install -g cc-tools-manager
 ```
 
-### ローカル開発
+### Local Development
 
 ```bash
 git clone https://github.com/yourusername/cc-tools-manager.git
@@ -37,52 +39,52 @@ npm run build
 npm link
 ```
 
-## 使い方
+## Usage
 
-### リポジトリの登録
+### Register Repository
 
-GitHubのClaude Codeツールリポジトリを登録します：
+Register a GitHub Claude Code tools repository:
 
 ```bash
 npx cc-tools-manager register https://github.com/owner/repo
 
-# オプション付き
+# With options
 npx cc-tools-manager register https://github.com/owner/repo \
   --name "my-tools" \
   --tag "commands"
 ```
 
-### リポジトリの更新
+### Update Repository
 
-登録済みのリポジトリを最新版に更新します：
+Update registered repositories to the latest version:
 
 ```bash
-# すべてのリポジトリを更新
+# Update all repositories
 npx cc-tools-manager update
 
-# 特定のリポジトリのみ更新
+# Update specific repository only
 npx cc-tools-manager update owner/repo
 
-# 並列処理数を指定（デフォルト: 3）
+# Specify concurrent processing (default: 3)
 npx cc-tools-manager update --concurrent 5
 
-# デプロイメントをスキップ
+# Skip deployment
 npx cc-tools-manager update --skip-deploy
 ```
 
-### リポジトリ一覧の表示
+### List Repositories
 
-登録済みのリポジトリを一覧表示します：
+Display registered repositories:
 
 ```bash
-# 基本表示
+# Basic display
 npx cc-tools-manager list
 
-# 詳細表示
+# Verbose display
 npx cc-tools-manager list --verbose
 ```
 
-出力例：
+Example output:
 ```
 Registered Repositories:
 
@@ -95,201 +97,201 @@ owner/repo3         ○ Not Initialized             0    2025/1/20
 Total: 3 repositories
 ```
 
-### リポジトリの状態確認
+### Check Repository Status
 
-特定のリポジトリの詳細な状態を確認します：
+Check detailed status of a specific repository:
 
 ```bash
-# 特定のリポジトリ
+# Specific repository
 npx cc-tools-manager status owner/repo
 
-# すべてのリポジトリ
+# All repositories
 npx cc-tools-manager status
 
-# JSON形式で出力
+# Output in JSON format
 npx cc-tools-manager status --json
 ```
 
-### リポジトリの削除
+### Remove Repository
 
-登録済みのリポジトリを削除します：
+Remove a registered repository:
 
 ```bash
-# 確認付き削除
+# Remove with confirmation
 npx cc-tools-manager remove owner/repo
 
-# 確認なしで削除
+# Remove without confirmation
 npx cc-tools-manager remove owner/repo --force
 ```
 
-## ディレクトリ構造
+## Directory Structure
 
-CC Tools Managerは以下のディレクトリ構造を使用します：
+CC Tools Manager uses the following directory structure:
 
 ```
 ~/.cc-tools/
-├── repos/              # クローンされたリポジトリ
+├── repos/              # Cloned repositories
 │   ├── owner-repo1/
 │   └── owner-repo2/
-├── cache/              # キャッシュとメタデータ
-│   └── state.json      # 同期状態
-├── config/             # 設定ファイル
-│   └── settings.json   # カスタム設定
-└── logs/               # ログファイル
+├── cache/              # Cache and metadata
+│   └── state.json      # Sync state
+├── config/             # Configuration files
+│   └── settings.json   # Custom settings
+└── logs/               # Log files
     └── cc-tools.log
 
-~/.claude/              # デプロイ先
-├── commands/           # スラッシュコマンド
-├── agents/             # AIエージェント
-└── hooks/              # フック設定
+~/.claude/              # Deployment destination
+├── commands/           # Slash commands
+├── agents/             # AI agents
+└── hooks/              # Hook configurations
 ```
 
-## デプロイメントパターン
+## Deployment Patterns
 
-リポジトリ内のファイルは以下のパターンに従ってデプロイされます：
+Files in repositories are deployed according to the following patterns:
 
-### 1. .claude プレフィックスパターン
+### 1. .claude Prefix Pattern
 ```
-リポジトリ/.claude/commands/foo.md → ~/.claude/commands/foo.md
-リポジトリ/.claude/agents/bar.md → ~/.claude/agents/bar.md
-```
-
-### 2. 直接パターン（.claudeなし）
-```
-リポジトリ/commands/foo.md → ~/.claude/commands/foo.md
-リポジトリ/agents/bar.md → ~/.claude/agents/bar.md
+repository/.claude/commands/foo.md → ~/.claude/commands/foo.md
+repository/.claude/agents/bar.md → ~/.claude/agents/bar.md
 ```
 
-ディレクトリ構造は保持されます：
+### 2. Direct Pattern (without .claude)
 ```
-リポジトリ/commands/utils/helper.md → ~/.claude/commands/utils/helper.md
+repository/commands/foo.md → ~/.claude/commands/foo.md
+repository/agents/bar.md → ~/.claude/agents/bar.md
 ```
 
-## 環境変数
+Directory structure is preserved:
+```
+repository/commands/utils/helper.md → ~/.claude/commands/utils/helper.md
+```
 
-動作をカスタマイズする環境変数：
+## Environment Variables
 
-| 環境変数 | 説明 | デフォルト値 |
-|---------|------|------------|
-| `CC_TOOLS_HOME` | ツール保存用のベースディレクトリ | `~/.cc-tools` |
-| `CC_TOOLS_CLAUDE_DIR` | デプロイ先のclaudeディレクトリ | `~/.claude` |
-| `CC_TOOLS_LOG_LEVEL` | ログレベル（DEBUG, INFO, WARN, ERROR） | `INFO` |
-| `CC_TOOLS_NO_COLOR` | カラー出力を無効化 | - |
-| `CC_TOOLS_DRY_RUN` | 変更を適用せずプレビュー | - |
-| `CC_TOOLS_FORCE` | 確認プロンプトをスキップ | - |
+Environment variables to customize behavior:
 
-使用例：
+| Environment Variable | Description | Default |
+|---------------------|-------------|---------|
+| `CC_TOOLS_HOME` | Base directory for tool storage | `~/.cc-tools` |
+| `CC_TOOLS_CLAUDE_DIR` | Claude directory for deployment | `~/.claude` |
+| `CC_TOOLS_LOG_LEVEL` | Log level (DEBUG, INFO, WARN, ERROR) | `INFO` |
+| `CC_TOOLS_NO_COLOR` | Disable color output | - |
+| `CC_TOOLS_DRY_RUN` | Preview changes without applying | - |
+| `CC_TOOLS_FORCE` | Skip confirmation prompts | - |
+
+Usage examples:
 ```bash
-# カスタムディレクトリを使用
+# Use custom directory
 CC_TOOLS_HOME=/custom/path npx cc-tools-manager update
 
-# デバッグログを有効化
+# Enable debug logging
 CC_TOOLS_LOG_LEVEL=DEBUG npx cc-tools-manager update
 
-# ドライラン
+# Dry run
 CC_TOOLS_DRY_RUN=1 npx cc-tools-manager update
 ```
 
-## 競合解決
+## Conflict Resolution
 
-ファイルの競合が発生した場合の処理方法を設定できます：
+Configure how to handle file conflicts:
 
 ```bash
-# デフォルト: プロンプトで確認
+# Default: prompt for confirmation
 npx cc-tools-manager update
 
-# 既存ファイルをスキップ
+# Skip existing files
 npx cc-tools-manager update --conflict-resolution skip
 
-# 既存ファイルを上書き
+# Overwrite existing files
 npx cc-tools-manager update --conflict-resolution overwrite
 ```
 
-## トラブルシューティング
+## Troubleshooting
 
-### Git認証エラー
+### Git Authentication Errors
 
-プライベートリポジトリの場合、SSHキーまたはアクセストークンの設定が必要です：
+For private repositories, SSH key or access token configuration is required:
 
 ```bash
-# SSHキーを使用
+# Use SSH key
 git config --global url."git@github.com:".insteadOf "https://github.com/"
 
-# アクセストークンを使用
+# Use access token
 git config --global url."https://${GITHUB_TOKEN}@github.com/".insteadOf "https://github.com/"
 ```
 
-### 権限エラー
+### Permission Errors
 
-ファイルの書き込み権限を確認してください：
+Check file write permissions:
 
 ```bash
-# 権限を修正
+# Fix permissions
 chmod -R u+w ~/.claude
 chmod -R u+w ~/.cc-tools
 ```
 
-### ログの確認
+### Check Logs
 
-詳細なログは以下で確認できます：
+View detailed logs:
 
 ```bash
-# ログファイルを表示
+# Display log file
 tail -f ~/.cc-tools/logs/cc-tools.log
 
-# デバッグモードで実行
+# Run in debug mode
 CC_TOOLS_LOG_LEVEL=DEBUG npx cc-tools-manager update
 ```
 
-## 開発
+## Development
 
-### 必要な環境
+### Requirements
 
-- Node.js 18以上
-- Git 2.x以上
+- Node.js 18 or higher
+- Git 2.x or higher
 - TypeScript 5.x
 
-### セットアップ
+### Setup
 
 ```bash
-# リポジトリのクローン
+# Clone repository
 git clone https://github.com/yourusername/cc-tools-manager.git
 cd cc-tools-manager
 
-# 依存関係のインストール
+# Install dependencies
 npm install
 
-# 開発モードで実行
+# Run in development mode
 npm run dev
 
-# テストの実行
+# Run tests
 npm test
 
-# ビルド
+# Build
 npm run build
 ```
 
-### プロジェクト構造
+### Project Structure
 
 ```
 cc-tools-manager/
 ├── src/
-│   ├── commands/       # CLIコマンド
-│   ├── core/           # コアサービス
-│   ├── utils/          # ユーティリティ
-│   └── types/          # TypeScript型定義
-├── tests/              # テストスイート
-└── dist/               # ビルド成果物
+│   ├── commands/       # CLI commands
+│   ├── core/           # Core services
+│   ├── utils/          # Utilities
+│   └── types/          # TypeScript type definitions
+├── tests/              # Test suite
+└── dist/               # Build artifacts
 ```
 
-## ライセンス
+## License
 
 MIT License
 
-## 貢献
+## Contributing
 
-プルリクエストを歓迎します！バグ報告や機能要望は[Issues](https://github.com/yourusername/cc-tools-manager/issues)までお願いします。
+Pull requests are welcome! Please report bugs and feature requests to [Issues](https://github.com/yourusername/cc-tools-manager/issues).
 
-## クレジット
+## Credits
 
-CC Tools Managerは、Claude Codeコミュニティのツール管理を簡単にするために作られました。
+CC Tools Manager was created to simplify tool management for the Claude Code community.

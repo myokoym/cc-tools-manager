@@ -1,7 +1,7 @@
 {
   "name": "cc-tools-manager",
   "version": "1.0.0",
-  "description": "Claude Code関連ツールの一元管理システム",
+  "description": "Centralized management system for Claude Code related tools",
   "main": "dist/index.js",
   "bin": {
     "cc-tools-manager": "./dist/index.js"

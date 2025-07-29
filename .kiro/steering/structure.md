@@ -1,94 +1,94 @@
-# CC Tools Manager - プロジェクト構造
+# CC Tools Manager - Project Structure
 
-## ルートディレクトリ構成
+## Root Directory Structure
 
 ```
 cc-tools-manager/
-├── package.json             # プロジェクト定義とスクリプト
-├── tsconfig.json           # TypeScript設定
-├── .eslintrc.js            # ESLint設定
-├── .prettierrc             # Prettier設定
-├── jest.config.js          # Jest設定
-├── README.md               # プロジェクトドキュメント
-├── repositories.json       # 動的に管理されるリポジトリ情報（初期は存在しない）
-├── src/                    # ソースコード
-├── dist/                   # ビルド成果物
-├── tests/                  # テストスイート
-├── docs/                   # 詳細ドキュメント
-└── .kiro/                  # Kiro仕様駆動開発
-    ├── steering/           # プロジェクトステアリングドキュメント
-    └── specs/              # 機能仕様
+├── package.json             # Project definition and scripts
+├── tsconfig.json           # TypeScript configuration
+├── .eslintrc.js            # ESLint configuration
+├── .prettierrc             # Prettier configuration
+├── jest.config.js          # Jest configuration
+├── README.md               # Project documentation
+├── repositories.json       # Dynamically managed repository information (initially doesn't exist)
+├── src/                    # Source code
+├── dist/                   # Build artifacts
+├── tests/                  # Test suites
+├── docs/                   # Detailed documentation
+└── .kiro/                  # Kiro spec-driven development
+    ├── steering/           # Project steering documents
+    └── specs/              # Feature specifications
 ```
 
-## サブディレクトリ構造
+## Subdirectory Structure
 
-### `src/` - ソースコード
+### `src/` - Source Code
 ```
 src/
-├── index.ts                # エントリーポイント
-├── cli.ts                  # CLIセットアップ（Commander.js）
-├── commands/               # コマンド実装
-│   ├── register.ts        # リポジトリ登録
-│   ├── update.ts          # リポジトリ更新
-│   ├── list.ts            # リポジトリ一覧
-│   ├── status.ts          # ステータス表示
-│   ├── remove.ts          # リポジトリ削除
-│   ├── clean.ts           # クリーンアップ
-│   └── interactive.ts     # インタラクティブモード
-├── core/                   # コア機能
-│   ├── registry.ts        # リポジトリレジストリ管理
-│   ├── git-manager.ts     # Git操作マネージャー
-│   ├── deployment.ts      # ファイルデプロイメント（パターンマッチングによる自動振り分け）
-│   └── config.ts          # 設定管理
-├── utils/                  # ユーティリティ
-│   ├── logger.ts          # ロギング（Winston）
-│   ├── file-system.ts     # ファイルシステム操作
-│   ├── validators.ts      # 入力検証
-│   └── helpers.ts         # ヘルパー関数
-├── types/                  # TypeScript型定義
-│   ├── index.ts           # 共通型
-│   ├── repository.ts      # リポジトリ関連型
-│   └── config.ts          # 設定関連型
-└── constants/             # 定数定義
-    ├── paths.ts           # パス定数
-    └── messages.ts        # メッセージ定数
+├── index.ts                # Entry point
+├── cli.ts                  # CLI setup (Commander.js)
+├── commands/               # Command implementations
+│   ├── register.ts        # Repository registration
+│   ├── update.ts          # Repository update
+│   ├── list.ts            # Repository listing
+│   ├── status.ts          # Status display
+│   ├── remove.ts          # Repository removal
+│   ├── clean.ts           # Cleanup
+│   └── interactive.ts     # Interactive mode
+├── core/                   # Core functionality
+│   ├── registry.ts        # Repository registry management
+│   ├── git-manager.ts     # Git operations manager
+│   ├── deployment.ts      # File deployment (automatic routing via pattern matching)
+│   └── config.ts          # Configuration management
+├── utils/                  # Utilities
+│   ├── logger.ts          # Logging (Winston)
+│   ├── file-system.ts     # File system operations
+│   ├── validators.ts      # Input validation
+│   └── helpers.ts         # Helper functions
+├── types/                  # TypeScript type definitions
+│   ├── index.ts           # Common types
+│   ├── repository.ts      # Repository-related types
+│   └── config.ts          # Configuration-related types
+└── constants/             # Constant definitions
+    ├── paths.ts           # Path constants
+    └── messages.ts        # Message constants
 ```
 
-### `tests/` - テストスイート
+### `tests/` - Test Suites
 ```
 tests/
-├── unit/                   # ユニットテスト
-│   ├── commands/          # コマンドテスト
+├── unit/                   # Unit tests
+│   ├── commands/          # Command tests
 │   │   ├── register.test.ts
 │   │   └── update.test.ts
-│   ├── core/              # コア機能テスト
+│   ├── core/              # Core functionality tests
 │   │   ├── registry.test.ts
 │   │   └── git-manager.test.ts
-│   └── utils/             # ユーティリティテスト
-├── integration/           # 統合テスト
-│   ├── full-cycle.test.ts # 完全なワークフローテスト
-│   └── multi-repo.test.ts # 複数リポジトリテスト
-├── e2e/                   # エンドツーエンドテスト
-│   └── cli.test.ts        # CLI全体のテスト
-└── fixtures/              # テストデータ
-    ├── mock-repos/        # モックリポジトリ
-    └── test-config/       # テスト設定
+│   └── utils/             # Utility tests
+├── integration/           # Integration tests
+│   ├── full-cycle.test.ts # Complete workflow tests
+│   └── multi-repo.test.ts # Multiple repository tests
+├── e2e/                   # End-to-end tests
+│   └── cli.test.ts        # CLI comprehensive tests
+└── fixtures/              # Test data
+    ├── mock-repos/        # Mock repositories
+    └── test-config/       # Test configurations
 ```
 
-### `docs/` - ドキュメント
+### `docs/` - Documentation
 ```
 docs/
-├── getting-started.md      # クイックスタートガイド
-├── commands.md            # コマンドリファレンス
-├── configuration.md       # 設定ガイド
-├── development.md         # 開発者ガイド
-└── api/                   # API ドキュメント（TypeDoc）
+├── getting-started.md      # Quick start guide
+├── commands.md            # Command reference
+├── configuration.md       # Configuration guide
+├── development.md         # Developer guide
+└── api/                   # API documentation (TypeDoc)
 ```
 
-## コード構成パターン
+## Code Organization Patterns
 
-### モジュール構造
-各モジュールは一貫したパターンに従います：
+### Module Structure
+Each module follows a consistent pattern:
 
 ```typescript
 // src/core/registry.ts
@@ -105,20 +105,20 @@ export class Registry {
     this.config = config;
   }
   
-  // Public メソッド
+  // Public methods
   async register(url: string): Promise<Repository> {
-    // 実装
+    // Implementation
   }
   
-  // Private メソッド
+  // Private methods
   private validateUrl(url: string): boolean {
-    // 実装
+    // Implementation
   }
 }
 ```
 
-### コマンドパターン
-コマンドは標準化されたインターフェースに従います：
+### Command Pattern
+Commands follow a standardized interface:
 
 ```typescript
 // src/commands/register.ts
@@ -129,105 +129,105 @@ import { Logger } from '../utils/logger';
 export function registerCommand(program: Command): void {
   program
     .command('register <url>')
-    .description('新しいリポジトリを登録')
-    .option('-t, --type <type>', 'リポジトリタイプ', 'auto')
+    .description('Register a new repository')
+    .option('-t, --type <type>', 'Repository type', 'auto')
     .action(async (url: string, options) => {
       const logger = new Logger('register');
       
       try {
         const registry = new Registry();
         await registry.register(url);
-        logger.success('リポジトリを登録しました');
+        logger.success('Repository registered successfully');
       } catch (error) {
-        logger.error('登録に失敗しました', error);
+        logger.error('Registration failed', error);
         process.exit(1);
       }
     });
 }
 ```
 
-## ファイル命名規則
+## File Naming Conventions
 
-### ソースファイル
-- **TypeScriptファイル**: `kebab-case.ts`
-- **テストファイル**: `*.test.ts` または `*.spec.ts`
-- **型定義**: `types/*.ts`
-- **定数**: `UPPER_SNAKE_CASE` in `constants/*.ts`
+### Source Files
+- **TypeScript files**: `kebab-case.ts`
+- **Test files**: `*.test.ts` or `*.spec.ts`
+- **Type definitions**: `types/*.ts`
+- **Constants**: `UPPER_SNAKE_CASE` in `constants/*.ts`
 
-### 設定ファイル
-- **プロジェクト設定**: `*.config.js` または `.*rc`
-- **環境設定**: `.env.*`
-- **Git設定**: `.gitignore`, `.gitattributes`
+### Configuration Files
+- **Project configuration**: `*.config.js` or `.*rc`
+- **Environment configuration**: `.env.*`
+- **Git configuration**: `.gitignore`, `.gitattributes`
 
-### ドキュメント
-- **Markdownファイル**: `kebab-case.md`
-- **ステアリングドキュメント**: `.kiro/steering/機能名.md`
-- **仕様**: `.kiro/specs/機能名/`
+### Documentation
+- **Markdown files**: `kebab-case.md`
+- **Steering documents**: `.kiro/steering/feature-name.md`
+- **Specifications**: `.kiro/specs/feature-name/`
 
-## インポート構成
+## Import Organization
 
-### インポート順序
-1. Node.js組み込みモジュール
-2. 外部パッケージ
-3. 内部モジュール（絶対パス）
-4. 内部モジュール（相対パス）
-5. 型定義
+### Import Order
+1. Node.js built-in modules
+2. External packages
+3. Internal modules (absolute paths)
+4. Internal modules (relative paths)
+5. Type definitions
 
-### インポート例
+### Import Examples
 ```typescript
-// Node.js組み込み
+// Node.js built-ins
 import { promises as fs } from 'fs';
 import path from 'path';
 
-// 外部パッケージ
+// External packages
 import { Command } from 'commander';
 import chalk from 'chalk';
 import ora from 'ora';
 
-// 内部モジュール（src/からの相対）
+// Internal modules (relative from src/)
 import { Registry } from '../core/registry';
 import { Logger } from '../utils/logger';
 import { validateUrl } from '../utils/validators';
 
-// 型定義
+// Type definitions
 import type { Repository, RegistryConfig } from '../types';
 ```
 
-## 主要なアーキテクチャ原則
+## Key Architecture Principles
 
-### 1. モジュラリティ
-- 各モジュールは単一の責任を持つ
-- モジュール間の明確なインターフェース
-- 最小限の依存関係
+### 1. Modularity
+- Each module has a single responsibility
+- Clear interfaces between modules
+- Minimal dependencies
 
-### 2. 拡張性
-- 新しいコマンドはコアを変更せずに追加可能
-- リポジトリタイプはプラガブル
-- デプロイメント戦略は設定可能
+### 2. Extensibility
+- New commands can be added without modifying core
+- Repository types are pluggable
+- Deployment strategies are configurable
 
-### 3. 安全性優先
-- すべての操作は元に戻せる
-- プレビュー用のドライランモード
-- アクション前の包括的な検証
+### 3. Safety First
+- All operations are reversible
+- Dry-run mode for preview
+- Comprehensive validation before actions
 
-### 4. ユーザーエクスペリエンス
-- 明確なカラー付き出力
-- 長時間操作のプログレスインジケーター
-- 回復提案付きの有用なエラーメッセージ
+### 4. User Experience
+- Clear, colorized output
+- Progress indicators for long operations
+- Helpful error messages with recovery suggestions
 
-### 5. 保守性
-- 一貫したコーディングスタイル（ESLint + Prettier）
-- 包括的なドキュメント（JSDoc + TypeDoc）
-- 重要なパスのテストカバレッジ
+### 5. Maintainability
+- Consistent coding style (ESLint + Prettier)
+- Comprehensive documentation (JSDoc + TypeDoc)
+- Test coverage for critical paths
 
-### 6. 設定より規約
-- シンプルなMarkdownでのリポジトリリスト
-- カスタマイズ用の環境変数
-- ハードコードされた値を最小限に
+### 6. Convention over Configuration
+- Simple markdown for repository lists
+- Environment variables for customization
+- Minimal hardcoded values
 
-## NPXサポートの実装
+## NPX Support Implementation
 
-### package.json設定
+### package.json Configuration
 ```json
 {
   "name": "cc-tools-manager",
@@ -245,7 +245,7 @@ import type { Repository, RegistryConfig } from '../types';
 }
 ```
 
-### エントリーポイント
+### Entry Point
 ```typescript
 #!/usr/bin/env node
 // src/index.ts
@@ -254,19 +254,19 @@ import { cli } from './cli';
 cli.parse(process.argv);
 ```
 
-## 将来の構造考慮事項
+## Future Structure Considerations
 
-### 計画中の追加
-- `plugins/` - カスタムハンドラー用の拡張システム
-- `templates/` - リポジトリタイプテンプレート
-- `.github/` - CI/CDワークフロー
-- `examples/` - 使用例とレシピ
+### Planned Additions
+- `plugins/` - Extension system for custom handlers
+- `templates/` - Repository type templates
+- `.github/` - CI/CD workflows
+- `examples/` - Usage examples and recipes
 
-### マイグレーションパス
-- 後方互換性の維持
-- 段階的なモジュール置換
-- 既存のファイル構造の保持
+### Migration Path
+- Maintain backward compatibility
+- Gradual module replacement
+- Preserve existing file structures
 
-## 関連情報
+## Related Information
 
-- **ランタイムディレクトリ構造**: 実行時に使用されるディレクトリ（`~/.cc-tools/`、`~/.claude/`など）については、[tech.md](./tech.md#ランタイムディレクトリ構造)を参照してください。
+- **Runtime Directory Structure**: For directories used at runtime (`~/.cc-tools/`, `~/.claude/`, etc.), see [tech.md](./tech.md#runtime-directory-structure).
