@@ -20,7 +20,7 @@
     "tools",
     "manager"
   ],
-  "author": "",
+  "author": "myokoym@gmail.com",
   "license": "MIT",
   "dependencies": {
     "chalk": "^4.1.2",
