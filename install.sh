@@ -25,13 +25,15 @@ if [ -f "package.json" ] && grep -q '"name": "cc-tools-manager"' package.json 2>
     INSTALL_DIR=$(pwd)
 else
     # Running from curl or different location, need to clone
-    INSTALL_DIR="$HOME/.cc-tools-manager"
+    CC_TOOLS_HOME="${CC_TOOLS_HOME:-$HOME/.cc-tools}"
+    INSTALL_DIR="$CC_TOOLS_HOME/src/cc-tools-manager"
     if [ -d "$INSTALL_DIR" ]; then
         echo "📁 Directory $INSTALL_DIR already exists. Updating..."
         cd "$INSTALL_DIR"
         git pull
     else
         echo "📥 Cloning repository..."
+        mkdir -p "$(dirname "$INSTALL_DIR")"
         git clone https://github.com/myokoym/cc-tools-manager.git "$INSTALL_DIR"
         cd "$INSTALL_DIR"
     fi
