@@ -33,6 +33,10 @@ Run the installation script:
 curl -fsSL https://raw.githubusercontent.com/myokoym/cc-tools-manager/main/install.sh | bash
 ```
 
+When installed via curl, cc-tools-manager will be cloned to:
+- Default: `~/.cc-tools/src/cc-tools-manager`
+- Custom: `$CC_TOOLS_HOME/src/cc-tools-manager` (if CC_TOOLS_HOME is set)
+
 Or clone and run locally:
 
 ```bash
@@ -182,6 +186,8 @@ CC Tools Manager uses the following directory structure:
 
 ```
 ~/.cc-tools/
+├── src/                # Source installations
+│   └── cc-tools-manager/  # CC Tools Manager itself (when installed via curl)
 ├── repos/              # Cloned repositories
 │   ├── owner-repo1/
 │   └── owner-repo2/

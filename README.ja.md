@@ -33,6 +33,10 @@ npx cc-tools-manager --help
 curl -fsSL https://raw.githubusercontent.com/myokoym/cc-tools-manager/main/install.sh | bash
 ```
 
+curl経由でインストールした場合、cc-tools-managerは以下にクローンされます：
+- デフォルト: `~/.cc-tools/src/cc-tools-manager`
+- カスタム: `$CC_TOOLS_HOME/src/cc-tools-manager` (CC_TOOLS_HOMEが設定されている場合)
+
 またはクローンしてローカルで実行：
 
 ```bash
@@ -182,6 +186,8 @@ CC Tools Managerは以下のディレクトリ構造を使用します：
 
 ```
 ~/.cc-tools/
+├── src/                # ソースインストール
+│   └── cc-tools-manager/  # CC Tools Manager本体（curl経由でインストールした場合）
 ├── repos/              # クローンされたリポジトリ
 │   ├── owner-repo1/
 │   └── owner-repo2/
