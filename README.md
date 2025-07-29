@@ -275,6 +275,20 @@ cc-tools-manager update --conflict-resolution skip
 cc-tools-manager update --conflict-resolution overwrite
 ```
 
+## Performance Notes
+
+If you experience slow startup times (>1 second), try:
+
+1. **Use direct node execution**: `node /path/to/cc-tools-manager/dist/index.js` instead of global command
+2. **Use npx**: `npx cc-tools-manager` can be faster than globally installed version
+3. **Check your environment**: Some environments (WSL, nvm) may add overhead to command startup
+
+For best performance:
+```bash
+# Create an alias in your shell configuration
+alias cctm='node /path/to/cc-tools-manager/dist/index.js'
+```
+
 ## Troubleshooting
 
 ### Git Authentication Errors

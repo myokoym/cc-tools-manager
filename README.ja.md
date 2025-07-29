@@ -275,6 +275,20 @@ cc-tools-manager update --conflict-resolution skip
 cc-tools-manager update --conflict-resolution overwrite
 ```
 
+## パフォーマンスに関する注意
+
+起動時間が遅い（1秒以上）場合は、以下を試してください：
+
+1. **直接node実行を使用**: グローバルコマンドの代わりに `node /path/to/cc-tools-manager/dist/index.js`
+2. **npxを使用**: `npx cc-tools-manager` はグローバルインストール版より高速な場合があります
+3. **環境を確認**: 一部の環境（WSL、nvm）はコマンド起動にオーバーヘッドを追加する可能性があります
+
+最高のパフォーマンスのために：
+```bash
+# シェル設定にエイリアスを作成
+alias cctm='node /path/to/cc-tools-manager/dist/index.js'
+```
+
 ## トラブルシューティング
 
 ### Git認証エラー
