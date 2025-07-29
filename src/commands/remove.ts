@@ -7,11 +7,17 @@ import { Command } from 'commander';
 import inquirer from 'inquirer';
 import chalk from 'chalk';
 import ora from 'ora';
+import * as path from 'path';
 import { RegistryService } from '../core/RegistryService';
+import { StateManager } from '../core/StateManager';
 import { NotFoundError } from '../utils/errors';
+import { remove as removeFile, fileExists } from '../utils/file-system';
+import { REPOS_DIR } from '../constants/paths';
 
 interface RemoveOptions {
   force?: boolean;
+  keepFiles?: boolean;
+  keepRepo?: boolean;
 }
 
 /**
@@ -24,6 +30,8 @@ export function createRemoveCommand(): Command {
     .description('Remove a repository from the registry')
     .argument('<repository>', 'Repository name or ID to remove')
     .option('-f, --force', 'Skip confirmation prompt')
+    .option('--keep-files', 'Keep deployed files')
+    .option('--keep-repo', 'Keep local repository clone')
     .action(async (repository: string, options: RemoveOptions) => {
       await handleRemove(repository, options);
     });
@@ -36,6 +44,7 @@ export function createRemoveCommand(): Command {
  */
 async function handleRemove(nameOrId: string, options: RemoveOptions): Promise<void> {
   const registryService = new RegistryService();
+  const stateManager = new StateManager();
   const spinner = ora();
 
   try {
@@ -94,17 +103,75 @@ async function handleRemove(nameOrId: string, options: RemoveOptions): Promise<v
       }
     }
 
+    // デプロイされたファイルを取得
+    const deployedFiles = await stateManager.removeRepositoryState(repository.id);
+    let filesRemoved = 0;
+    let repoRemoved = false;
+
+    // デプロイされたファイルを削除（オプションが指定されていない場合）
+    if (!options.keepFiles && deployedFiles.length > 0) {
+      spinner.start(`Removing ${deployedFiles.length} deployed file(s)...`);
+      
+      for (const filePath of deployedFiles) {
+        try {
+          if (await fileExists(filePath)) {
+            await removeFile(filePath);
+            filesRemoved++;
+          }
+        } catch (error) {
+          console.warn(chalk.yellow(`\n⚠  Could not remove file: ${filePath}`));
+        }
+      }
+      
+      spinner.succeed(`${filesRemoved} deployed file(s) removed`);
+    }
+
+    // ローカルリポジトリを削除（オプションが指定されていない場合）
+    if (!options.keepRepo && repository.localPath) {
+      spinner.start('Removing local repository clone...');
+      
+      try {
+        const repoPath = repository.localPath;
+        if (await fileExists(repoPath)) {
+          await removeFile(repoPath);
+          repoRemoved = true;
+          spinner.succeed('Local repository removed');
+        } else {
+          spinner.info('Local repository not found');
+        }
+      } catch (error) {
+        spinner.warn('Could not remove local repository');
+      }
+    }
+
     // リポジトリを削除
-    spinner.start('Removing repository...');
+    spinner.start('Removing repository from registry...');
     await registryService.remove(repository.id);
-    spinner.succeed('Repository removed successfully');
+    spinner.succeed('Repository removed from registry');
 
     // 成功メッセージ
     console.log(chalk.green(`\n✓ Repository '${repository.name}' has been removed`));
     
-    if (totalDeployments > 0) {
-      console.log(chalk.yellow('\n⚠  Note: Deployed components may still be active.'));
-      console.log(chalk.yellow('   Consider running cleanup commands if necessary.'));
+    // 削除内容のサマリー
+    if (filesRemoved > 0 || repoRemoved) {
+      console.log(chalk.gray('\nCleaned up:'));
+      if (filesRemoved > 0) {
+        console.log(chalk.gray(`  - ${filesRemoved} deployed file(s)`));
+      }
+      if (repoRemoved) {
+        console.log(chalk.gray(`  - Local repository clone`));
+      }
+    }
+    
+    // 保持されたものの通知
+    if (options.keepFiles || options.keepRepo) {
+      console.log(chalk.yellow('\nRetained:'));
+      if (options.keepFiles && deployedFiles.length > 0) {
+        console.log(chalk.yellow(`  - ${deployedFiles.length} deployed file(s)`));
+      }
+      if (options.keepRepo && repository.localPath) {
+        console.log(chalk.yellow(`  - Local repository at ${repository.localPath}`));
+      }
     }
 
   } catch (error) {

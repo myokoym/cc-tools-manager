@@ -6,6 +6,7 @@ import {
   IDeploymentService,
   PatternMatch,
   DeploymentResult,
+  DeployedFile,
   ConflictStrategy
 } from './interfaces/IDeploymentService';
 import { Repository } from '../types';
@@ -84,7 +85,19 @@ export class DeploymentService implements IDeploymentService {
           
           // ファイルをコピー
           await this.copyWithStructure(sourcePath, targetPath);
-          result.deployed.push(match.file);
+          
+          // ファイルのハッシュを計算
+          const hash = await getFileHash(targetPath);
+          
+          // デプロイ情報を記録
+          const deployedFile: DeployedFile = {
+            source: match.file,
+            target: targetPath,
+            hash: hash,
+            deployedAt: new Date().toISOString()
+          };
+          
+          result.deployed.push(deployedFile);
           logger.info(`✓ Deployed: ${match.file}`);
           
         } catch (error) {

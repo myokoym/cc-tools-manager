@@ -11,14 +11,25 @@ export interface PatternMatch {
 }
 
 /**
+ * Deployed File Info
+ * デプロイされたファイルの詳細情報
+ */
+export interface DeployedFile {
+  source: string;      // ソースファイルパス（リポジトリ内の相対パス）
+  target: string;      // ターゲットファイルパス（絶対パス）
+  hash: string;        // ファイルのハッシュ値
+  deployedAt: string;  // デプロイ日時（ISO 8601）
+}
+
+/**
  * Deployment Result
  * デプロイメント操作の結果
  */
 export interface DeploymentResult {
-  deployed: string[];
-  skipped: string[];
-  failed: string[];
-  conflicts: string[];
+  deployed: DeployedFile[];   // デプロイされたファイルの詳細情報
+  skipped: string[];          // スキップされたファイル
+  failed: string[];           // 失敗したファイル
+  conflicts: string[];        // 競合したファイル
 }
 
 /**

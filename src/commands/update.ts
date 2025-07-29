@@ -9,6 +9,7 @@ import * as path from 'path';
 import { RegistryService } from '../core/RegistryService';
 import { GitManager } from '../core/GitManager';
 import { DeploymentService } from '../core/DeploymentService';
+import { StateManager } from '../core/StateManager';
 import { Repository } from '../types/repository';
 import { CC_TOOLS_HOME, REPOS_DIR } from '../constants/paths';
 import { ensureDir } from '../utils/file-system';
@@ -41,6 +42,7 @@ interface UpdateOptions {
 async function updateRepository(repositoryName: string | undefined, options: UpdateOptions): Promise<void> {
   const registryService = new RegistryService();
   const deploymentService = new DeploymentService();
+  const stateManager = new StateManager();
   
   try {
     const repositories = await registryService.list();
@@ -75,6 +77,8 @@ async function updateRepository(repositoryName: string | undefined, options: Upd
         // Git pull
         spinner.start('Pulling latest changes...');
         
+        let gitUpdateResult;
+        
         if (!repo.localPath || !(await isGitRepository(repo.localPath))) {
           // リポジトリがまだクローンされていない場合、クローンする
           spinner.text = 'Cloning repository...';
@@ -92,18 +96,27 @@ async function updateRepository(repositoryName: string | undefined, options: Upd
           // データベースのlocalPathを更新
           await registryService.update(repo.id, { localPath: repoDir });
           
+          // クローンの場合の仮の更新結果
+          gitUpdateResult = {
+            filesChanged: 0,
+            insertions: 0,
+            deletions: 0,
+            currentCommit: await gitManager.getLatestCommit(repo),
+            previousCommit: ''
+          };
+          
           spinner.succeed('Repository cloned successfully');
         } else {
           // ディレクトリが存在することを確認
           await ensureDir(repo.localPath);
           
           const gitManager = new GitManager(path.dirname(repo.localPath));
-          const pullResult = await gitManager.pull(repo);
+          gitUpdateResult = await gitManager.pull(repo);
           
-          if (pullResult.filesChanged === 0) {
+          if (gitUpdateResult.filesChanged === 0) {
             spinner.succeed('Already up to date');
           } else {
-            spinner.succeed(`Updated: ${pullResult.filesChanged} files changed, +${pullResult.insertions} -${pullResult.deletions}`);
+            spinner.succeed(`Updated: ${gitUpdateResult.filesChanged} files changed, +${gitUpdateResult.insertions} -${gitUpdateResult.deletions}`);
           }
         }
         
@@ -155,8 +168,20 @@ async function updateRepository(repositoryName: string | undefined, options: Upd
             deployments: updatedDeployments,
             lastUpdatedAt: new Date().toISOString()
           });
+          
+          // StateManagerに状態を保存
+          await stateManager.updateRepositoryState(repo, gitUpdateResult, deployResult);
         } else {
           spinner.succeed('No deployment files found');
+          
+          // デプロイがない場合でも状態を更新
+          const emptyDeployResult = {
+            deployed: [],
+            skipped: [],
+            failed: [],
+            conflicts: []
+          };
+          await stateManager.updateRepositoryState(repo, gitUpdateResult, emptyDeployResult);
         }
         
         // ステータスを更新

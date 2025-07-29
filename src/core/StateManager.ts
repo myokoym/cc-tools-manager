@@ -116,38 +116,18 @@ export class StateManager implements IStateManager {
   }
 
   /**
-   * デプロイされたファイルのハッシュを計算
+   * デプロイされたファイルの情報を取得
    */
-  private async calculateDeployedFileHashes(
+  private getDeployedFileInfo(
     deploymentResult: DeploymentResult
-  ): Promise<Array<{ source: string; target: string; hash: string; deployedAt: string }>> {
-    const deployedFiles = [];
-    const deployedAt = new Date().toISOString();
-
-    for (const filename of deploymentResult.deployed) { // TODO: Update interface to use deployed instead of deployedFiles
-      try {
-        // For now, we'll use the filename as both source and target
-        // TODO: Update DeploymentResult to include source/target mapping
-        const hash = await getFileHash(filename);
-        deployedFiles.push({
-          source: filename,
-          target: filename,
-          hash,
-          deployedAt
-        });
-      } catch (error) {
-        console.error(`Failed to calculate hash for ${filename}:`, error);
-        // ハッシュ計算に失敗してもデプロイメント情報は記録
-        deployedFiles.push({
-          source: filename,
-          target: filename,
-          hash: 'unknown',
-          deployedAt
-        });
-      }
-    }
-
-    return deployedFiles;
+  ): Array<{ source: string; target: string; hash: string; deployedAt: string }> {
+    // DeploymentResultには既にDeployedFile情報が含まれているので、そのまま返す
+    return deploymentResult.deployed.map(file => ({
+      source: file.source,
+      target: file.target,
+      hash: file.hash,
+      deployedAt: file.deployedAt
+    }));
   }
 
   async updateRepositoryState(
@@ -157,7 +137,7 @@ export class StateManager implements IStateManager {
   ): Promise<void> {
     const state = await this.loadState();
     
-    const deployedFiles = await this.calculateDeployedFileHashes(deploymentResult);
+    const deployedFiles = this.getDeployedFileInfo(deploymentResult);
     
     state.repositories[repo.id] = {
       lastSync: new Date().toISOString(),
@@ -200,6 +180,23 @@ export class StateManager implements IStateManager {
     const state = await this.loadState();
     state.metadata.lastCleanup = new Date().toISOString();
     await this.saveState();
+  }
+
+  /**
+   * リポジトリの状態を削除する
+   */
+  async removeRepositoryState(repoId: string): Promise<string[]> {
+    const state = await this.loadState();
+    
+    // デプロイされたファイルのリストを取得
+    const deployedFiles = state.repositories[repoId]?.deployedFiles.map(f => f.target) || [];
+    
+    // 状態から削除
+    delete state.repositories[repoId];
+    await this.saveState();
+    
+    // デプロイされたファイルのパスを返す
+    return deployedFiles;
   }
 
   /**

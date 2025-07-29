@@ -126,7 +126,12 @@ describe('Update Command', () => {
     ];
 
     const mockDeployResult = {
-      deployed: ['commands/test.js'],
+      deployed: [{
+        source: 'commands/test.js',
+        target: '/Users/test/.claude/commands/test.js',
+        hash: 'abc123',
+        deployedAt: new Date().toISOString()
+      }],
       skipped: [],
       failed: [],
       conflicts: []
