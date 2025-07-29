@@ -19,16 +19,22 @@ if [ "$NODE_VERSION" -lt 18 ]; then
     exit 1
 fi
 
-# Clone the repository
-INSTALL_DIR="$HOME/.cc-tools-manager"
-if [ -d "$INSTALL_DIR" ]; then
-    echo "📁 Directory $INSTALL_DIR already exists. Updating..."
-    cd "$INSTALL_DIR"
-    git pull
+# Check if we're running from within the repository
+if [ -f "package.json" ] && grep -q '"name": "cc-tools-manager"' package.json 2>/dev/null; then
+    echo "📂 Running from local repository..."
+    INSTALL_DIR=$(pwd)
 else
-    echo "📥 Cloning repository..."
-    git clone https://github.com/myokoym/cc-tools-manager.git "$INSTALL_DIR"
-    cd "$INSTALL_DIR"
+    # Running from curl or different location, need to clone
+    INSTALL_DIR="$HOME/.cc-tools-manager"
+    if [ -d "$INSTALL_DIR" ]; then
+        echo "📁 Directory $INSTALL_DIR already exists. Updating..."
+        cd "$INSTALL_DIR"
+        git pull
+    else
+        echo "📥 Cloning repository..."
+        git clone https://github.com/myokoym/cc-tools-manager.git "$INSTALL_DIR"
+        cd "$INSTALL_DIR"
+    fi
 fi
 
 # Install dependencies
@@ -50,4 +56,6 @@ echo "  cc-tools-manager --help"
 echo ""
 echo "To uninstall, run:"
 echo "  npm unlink -g cc-tools-manager"
-echo "  rm -rf $INSTALL_DIR"
+if [ "$INSTALL_DIR" != "$(pwd)" ]; then
+    echo "  rm -rf $INSTALL_DIR"
+fi
