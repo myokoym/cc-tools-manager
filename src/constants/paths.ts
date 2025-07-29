@@ -10,6 +10,7 @@ export const CC_TOOLS_HOME = process.env.CC_TOOLS_HOME || path.join(os.homedir()
 export const CLAUDE_DIR = process.env.CLAUDE_DIR || path.join(os.homedir(), '.claude');
 
 // ツール関連のパス
+export const REPOS_DIR = path.join(CC_TOOLS_HOME, 'repos');
 export const TOOLS_DIR = path.join(CC_TOOLS_HOME, 'tools');
 export const TEMPLATES_DIR = path.join(CC_TOOLS_HOME, 'templates');
 export const CONFIG_FILE = path.join(CC_TOOLS_HOME, 'config.json');

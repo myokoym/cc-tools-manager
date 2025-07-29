@@ -7,7 +7,7 @@ import {
   GitStatus 
 } from './interfaces/IGitManager';
 import { Repository } from '../types';
-import { TOOLS_DIR } from '../constants/paths';
+import { REPOS_DIR } from '../constants/paths';
 import { createError } from '../utils/errors';
 import { Logger } from '../utils/logger';
 
@@ -21,9 +21,17 @@ export class GitManager implements IGitManager {
   private git: SimpleGit;
   private logger: Logger;
 
-  constructor(logger?: Logger) {
+  constructor(baseDir?: string, logger?: Logger) {
+    // baseDirが指定されない場合はREPOS_DIRを使用
+    const dir = baseDir || REPOS_DIR;
+    
+    // ディレクトリが存在しない場合は作成
+    if (!require('fs').existsSync(dir)) {
+      require('fs').mkdirSync(dir, { recursive: true });
+    }
+    
     this.git = simpleGit({
-      baseDir: TOOLS_DIR,
+      baseDir: dir,
       binary: 'git',
       maxConcurrentProcesses: 6,
       trimmed: false,
@@ -230,7 +238,7 @@ export class GitManager implements IGitManager {
     
     // URLからリポジトリ名を抽出
     const repoName = this.extractRepoName(repo.url);
-    return path.join(TOOLS_DIR, repoName);
+    return path.join(REPOS_DIR, repoName);
   }
 
   /**

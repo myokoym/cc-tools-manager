@@ -5,11 +5,27 @@
 
 import { Command } from 'commander';
 import chalk from 'chalk';
+import * as path from 'path';
 import { RegistryService } from '../core/RegistryService';
 import { GitManager } from '../core/GitManager';
 import { DeploymentService } from '../core/DeploymentService';
 import { Repository } from '../types/repository';
+import { CC_TOOLS_HOME, REPOS_DIR } from '../constants/paths';
+import { ensureDir } from '../utils/file-system';
+import * as fs from 'fs/promises';
 import ora from 'ora';
+
+/**
+ * ディレクトリがGitリポジトリかどうかを確認
+ */
+async function isGitRepository(dirPath: string): Promise<boolean> {
+  try {
+    await fs.access(path.join(dirPath, '.git'));
+    return true;
+  } catch {
+    return false;
+  }
+}
 
 /**
  * 更新オプション
@@ -24,7 +40,6 @@ interface UpdateOptions {
  */
 async function updateRepository(repositoryName: string | undefined, options: UpdateOptions): Promise<void> {
   const registryService = new RegistryService();
-  const gitManager = new GitManager();
   const deploymentService = new DeploymentService();
   
   try {
@@ -38,9 +53,7 @@ async function updateRepository(repositoryName: string | undefined, options: Upd
     // 更新対象のリポジトリを特定
     let targetRepos: Repository[];
     
-    if (options.all) {
-      targetRepos = repositories;
-    } else if (repositoryName) {
+    if (repositoryName) {
       const repo = repositories.find(r => r.name === repositoryName);
       if (!repo) {
         console.error(chalk.red(`Repository "${repositoryName}" not found.`));
@@ -48,8 +61,8 @@ async function updateRepository(repositoryName: string | undefined, options: Upd
       }
       targetRepos = [repo];
     } else {
-      console.error(chalk.red('Please specify a repository name or use --all flag.'));
-      process.exit(1);
+      // リポジトリ名が指定されていない場合は全リポジトリを更新
+      targetRepos = repositories;
     }
     
     // 各リポジトリを更新
@@ -62,17 +75,36 @@ async function updateRepository(repositoryName: string | undefined, options: Upd
         // Git pull
         spinner.start('Pulling latest changes...');
         
-        if (!repo.localPath) {
-          spinner.fail('Repository not cloned locally');
-          continue;
-        }
-        
-        const pullResult = await gitManager.pull(repo);
-        
-        if (pullResult.filesChanged === 0) {
-          spinner.succeed('Already up to date');
+        if (!repo.localPath || !(await isGitRepository(repo.localPath))) {
+          // リポジトリがまだクローンされていない場合、クローンする
+          spinner.text = 'Cloning repository...';
+          const repoDir = repo.localPath || path.join(REPOS_DIR, repo.name.replace('/', '-'));
+          
+          // localPathを設定
+          repo.localPath = repoDir;
+          
+          // ディレクトリを作成
+          await ensureDir(path.dirname(repoDir));
+          
+          const gitManager = new GitManager();
+          await gitManager.clone(repo);
+          
+          // データベースのlocalPathを更新
+          await registryService.update(repo.id, { localPath: repoDir });
+          
+          spinner.succeed('Repository cloned successfully');
         } else {
-          spinner.succeed(`Updated: ${pullResult.filesChanged} files changed, +${pullResult.insertions} -${pullResult.deletions}`);
+          // ディレクトリが存在することを確認
+          await ensureDir(repo.localPath);
+          
+          const gitManager = new GitManager(path.dirname(repo.localPath));
+          const pullResult = await gitManager.pull(repo);
+          
+          if (pullResult.filesChanged === 0) {
+            spinner.succeed('Already up to date');
+          } else {
+            spinner.succeed(`Updated: ${pullResult.filesChanged} files changed, +${pullResult.insertions} -${pullResult.deletions}`);
+          }
         }
         
         // デプロイメントの再検出と更新
