@@ -75,6 +75,20 @@ npm install
 npm run dev
 ```
 
+### Uninstallation
+
+To uninstall cc-tools-manager:
+
+```bash
+# Remove global command
+npm unlink -g cc-tools-manager
+
+# The installation directory will be shown during install
+# You can manually remove it if needed
+```
+
+Note: For safety reasons, the uninstall process does not automatically remove directories. Please verify the path before manual deletion.
+
 ## Usage
 
 ### Register Repository
