@@ -13,6 +13,7 @@ import { StateManager } from '../core/StateManager';
 import { NotFoundError } from '../utils/errors';
 import { remove as removeFile, fileExists } from '../utils/file-system';
 import { REPOS_DIR } from '../constants/paths';
+import { selectRepository, displayNumberedRepositories } from '../utils/repository-selector';
 
 interface RemoveOptions {
   force?: boolean;
@@ -48,13 +49,18 @@ async function handleRemove(nameOrId: string, options: RemoveOptions): Promise<v
   const spinner = ora();
 
   try {
-    // リポジトリを検索
+    // リポジトリを検索（番号またはID/名前）
     spinner.start('Finding repository...');
-    const repository = await registryService.find(nameOrId);
+    const repository = await selectRepository(nameOrId);
     spinner.stop();
 
     if (!repository) {
       console.error(chalk.red(`✗ Repository not found: ${nameOrId}`));
+      // 利用可能なリポジトリを表示
+      const repositories = await registryService.list();
+      if (repositories.length > 0) {
+        displayNumberedRepositories(repositories);
+      }
       process.exit(1);
     }
 

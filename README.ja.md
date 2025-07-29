@@ -116,8 +116,11 @@ cc-tools-manager register https://github.com/owner/repo \
 # すべてのリポジトリを更新
 cc-tools-manager update
 
-# 特定のリポジトリのみ更新
+# 特定のリポジトリを名前で更新
 cc-tools-manager update owner/repo
+
+# 特定のリポジトリを番号で更新（list出力の番号）
+cc-tools-manager update 2
 
 # 並列処理数を指定（デフォルト: 3）
 cc-tools-manager update --concurrent 5
@@ -142,14 +145,16 @@ cc-tools-manager list --verbose
 ```
 Registered Repositories:
 
-Name                Status              Deployments    Registered          
-────────────────────────────────────────────────────────────────────────
-owner/repo1         ● Active                      5    2025/1/15           
-owner/repo2         ✗ Error                       0    2025/1/10           
-owner/repo3         ○ Not Initialized             0    2025/1/20           
+#   Name                Status              Deployments    Registered          
+────────────────────────────────────────────────────────────────────────────
+1   owner/repo1         ● Active                      5    2025/1/15           
+2   owner/repo2         ✗ Error                       0    2025/1/10           
+3   owner/repo3         ○ Not Initialized             0    2025/1/20           
 
 Total: 3 repositories
 ```
+
+**注意**: list出力の番号は他のコマンド（update、remove、status）でも使用できます。
 
 📖 **拡張されたlistコマンドやその他の最近の改善については[コマンドリファレンス](docs/commands.ja.md)を参照してください。**
 
@@ -175,6 +180,9 @@ cc-tools-manager status --json
 ```bash
 # 確認付き削除
 cc-tools-manager remove owner/repo
+
+# 番号で削除
+cc-tools-manager remove 2
 
 # 確認なしで削除
 cc-tools-manager remove owner/repo --force

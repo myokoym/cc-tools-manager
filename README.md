@@ -116,8 +116,11 @@ Update registered repositories to the latest version:
 # Update all repositories
 cc-tools-manager update
 
-# Update specific repository only
+# Update specific repository by name
 cc-tools-manager update owner/repo
+
+# Update specific repository by number (from list output)
+cc-tools-manager update 2
 
 # Specify concurrent processing (default: 3)
 cc-tools-manager update --concurrent 5
@@ -142,14 +145,16 @@ Example output:
 ```
 Registered Repositories:
 
-Name                Status              Deployments    Registered          
-────────────────────────────────────────────────────────────────────────
-owner/repo1         ● Active                      5    2025/1/15           
-owner/repo2         ✗ Error                       0    2025/1/10           
-owner/repo3         ○ Not Initialized             0    2025/1/20           
+#   Name                Status              Deployments    Registered          
+────────────────────────────────────────────────────────────────────────────
+1   owner/repo1         ● Active                      5    2025/1/15           
+2   owner/repo2         ✗ Error                       0    2025/1/10           
+3   owner/repo3         ○ Not Initialized             0    2025/1/20           
 
 Total: 3 repositories
 ```
+
+**Note**: You can use the numbers from the list output with other commands (update, remove, status).
 
 📖 **See [Command Reference](docs/commands.md) for detailed information about the enhanced list command and other recent improvements.**
 
@@ -175,6 +180,9 @@ Remove a registered repository:
 ```bash
 # Remove with confirmation
 cc-tools-manager remove owner/repo
+
+# Remove by number
+cc-tools-manager remove 2
 
 # Remove without confirmation
 cc-tools-manager remove owner/repo --force

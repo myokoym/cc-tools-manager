@@ -7,6 +7,7 @@ import { Command } from 'commander';
 import chalk from 'chalk';
 import { RegistryService } from '../core/RegistryService';
 import { Repository, RepositoryStatus } from '../types/repository';
+import { selectRepository, displayNumberedRepositories } from '../utils/repository-selector';
 
 /**
  * ステータスカラー定義
@@ -34,12 +35,16 @@ async function showStatus(repositoryName?: string): Promise<void> {
   
   try {
     if (repositoryName) {
-      // 特定のリポジトリのステータスを表示
-      const repositories = await registryService.list();
-      const repo = repositories.find(r => r.name === repositoryName);
+      // 特定のリポジトリのステータスを表示（番号またはID/名前）
+      const repo = await selectRepository(repositoryName);
       
       if (!repo) {
         console.error(chalk.red(`Repository "${repositoryName}" not found.`));
+        // 利用可能なリポジトリを表示
+        const repositories = await registryService.list();
+        if (repositories.length > 0) {
+          displayNumberedRepositories(repositories);
+        }
         process.exit(1);
       }
       

@@ -16,6 +16,7 @@ import { ensureDir } from '../utils/file-system';
 import { promptYesNo } from '../utils/prompt';
 import * as fs from 'fs/promises';
 import ora from 'ora';
+import { selectRepository, displayNumberedRepositories } from '../utils/repository-selector';
 
 /**
  * ディレクトリがGitリポジトリかどうかを確認
@@ -58,9 +59,14 @@ async function updateRepository(repositoryName: string | undefined, options: Upd
     let targetRepos: Repository[];
     
     if (repositoryName) {
-      const repo = repositories.find(r => r.name === repositoryName);
+      // 番号またはID/名前で検索
+      const repo = await selectRepository(repositoryName);
       if (!repo) {
         console.error(chalk.red(`Repository "${repositoryName}" not found.`));
+        // 利用可能なリポジトリを表示
+        if (repositories.length > 0) {
+          displayNumberedRepositories(repositories);
+        }
         process.exit(1);
       }
       targetRepos = [repo];

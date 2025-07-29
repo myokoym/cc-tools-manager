@@ -49,8 +49,8 @@ async function listRepositories(options: ListOptions): Promise<void> {
     console.log(chalk.bold('\nRegistered Repositories:\n'));
     
     // テーブルヘッダー
-    const headers = ['Name', 'Status', 'Deployments', 'Registered'];
-    const columnWidths = [40, 20, 15, 20];
+    const headers = ['#', 'Name', 'Status', 'Deployments', 'Registered'];
+    const columnWidths = [4, 36, 20, 15, 20];
     
     // ヘッダー行を表示
     console.log(
@@ -61,7 +61,7 @@ async function listRepositories(options: ListOptions): Promise<void> {
     console.log(chalk.gray('─'.repeat(columnWidths.reduce((a, b) => a + b, 0))));
     
     // リポジトリ情報を表示
-    repositories.forEach((repo) => {
+    repositories.forEach((repo, index) => {
       const deploymentCount = 
         (repo.deployments.commands?.length || 0) +
         (repo.deployments.agents?.length || 0) +
@@ -71,10 +71,11 @@ async function listRepositories(options: ListOptions): Promise<void> {
       const statusColorFn = statusColors[repo.status];
       
       const row = [
-        repo.name.padEnd(columnWidths[0]),
-        statusColorFn(statusDisplay[repo.status]).padEnd(columnWidths[1] + 10), // カラーコードの分を追加
-        deploymentCount.toString().padEnd(columnWidths[2]),
-        registeredDate.padEnd(columnWidths[3])
+        chalk.gray((index + 1).toString().padEnd(columnWidths[0])),
+        repo.name.padEnd(columnWidths[1]),
+        statusColorFn(statusDisplay[repo.status]).padEnd(columnWidths[2] + 10), // カラーコードの分を追加
+        deploymentCount.toString().padEnd(columnWidths[3]),
+        registeredDate.padEnd(columnWidths[4])
       ];
       
       console.log(row.join(''));
