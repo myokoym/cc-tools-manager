@@ -39,6 +39,9 @@ tsconfig.tsbuildinfo
 logs/
 *.log
 
+# Runtime data
+.cc-tools/
+
 # Temporary files
 tmp/
 temp/
