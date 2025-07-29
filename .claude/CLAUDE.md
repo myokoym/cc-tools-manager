@@ -103,3 +103,39 @@ All documentation files should include language switcher links at the top:
 - **README.ja.md**: Japanese translation
 - **.claude/CLAUDE.md**: This file (English only, as it's for Claude Code)
 - **INTERNATIONALIZATION_NOTES.md**: Work log (English only)
+
+## Blog Post Format
+
+When creating blog posts in the `blogs/` directory:
+
+### Required Front Matter
+All blog posts must include YAML front matter:
+
+```yaml
+---
+title: "Blog Post Title"
+date: YYYY-MM-DD
+author: username
+tags: [tag1, tag2, tag3]
+category: category-name
+---
+```
+
+For Japanese posts, add `lang: ja`:
+```yaml
+---
+title: "ブログ記事タイトル"
+date: YYYY-MM-DD
+author: username
+tags: [tag1, tag2, tag3]
+category: category-name
+lang: ja
+---
+```
+
+### File Naming
+- English: `descriptive-slug.md`
+- Japanese: `descriptive-slug.ja.md`
+
+### Categories & Tags
+See `blogs/README.md` for standard categories and common tags.
