@@ -3,15 +3,15 @@ import path from 'path';
 import fs from 'fs';
 import { CC_TOOLS_HOME, LOGS_DIR } from '../constants/paths';
 
-// ログディレクトリの作成
-const createLogDirectory = () => {
-  if (!fs.existsSync(LOGS_DIR)) {
+// ログディレクトリの遅延作成
+let logDirCreated = false;
+const ensureLogDirectory = () => {
+  if (!logDirCreated && !fs.existsSync(LOGS_DIR)) {
     fs.mkdirSync(LOGS_DIR, { recursive: true });
+    logDirCreated = true;
   }
   return LOGS_DIR;
 };
-
-const logDir = createLogDirectory();
 
 // カスタムログフォーマット
 const customFormat = winston.format.combine(
@@ -34,40 +34,59 @@ const consoleFormat = winston.format.combine(
   })
 );
 
-// ロガーインスタンスの作成
-const logger = winston.createLogger({
-  level: process.env.LOG_LEVEL || 'info',
-  format: customFormat,
-  defaultMeta: { service: 'cc-tools-manager' },
-  transports: [
-    // エラーログファイル
-    new winston.transports.File({
-      filename: path.join(logDir, 'error.log'),
-      level: 'error',
-      maxsize: 5242880, // 5MB
-      maxFiles: 5,
-    }),
-    // 全ログファイル
-    new winston.transports.File({
-      filename: path.join(logDir, 'combined.log'),
-      maxsize: 5242880, // 5MB
-      maxFiles: 5,
-    }),
-  ],
-});
+// ロガーインスタンスの遅延作成
+let logger: winston.Logger | null = null;
+let fileTransportsAdded = false;
 
-// 開発環境ではコンソールにも出力
-if (process.env.NODE_ENV !== 'production') {
-  logger.add(
-    new winston.transports.Console({
-      format: consoleFormat,
-    })
-  );
-}
+const getLogger = (): winston.Logger => {
+  if (!logger) {
+    logger = winston.createLogger({
+      level: process.env.CC_TOOLS_LOG_LEVEL || 'error', // デフォルトをerrorに変更
+      format: customFormat,
+      defaultMeta: { service: 'cc-tools-manager' },
+      transports: [],
+    });
+
+    // コンソール出力の制御
+    const enableConsoleLog = process.env.CC_TOOLS_LOG_CONSOLE === 'true' || 
+                           process.env.NODE_ENV === 'development';
+    
+    if (enableConsoleLog && process.env.NODE_ENV !== 'production') {
+      logger.add(
+        new winston.transports.Console({
+          format: consoleFormat,
+        })
+      );
+    }
+  }
+
+  // ファイルトランスポートの遅延追加
+  if (!fileTransportsAdded && process.env.CC_TOOLS_LOG_FILE !== 'false') {
+    const shouldAddFileTransports = logger.level !== 'silent' && logger.level !== 'none';
+    if (shouldAddFileTransports) {
+      const logDir = ensureLogDirectory();
+      logger.add(new winston.transports.File({
+        filename: path.join(logDir, 'error.log'),
+        level: 'error',
+        maxsize: 5242880, // 5MB
+        maxFiles: 5,
+      }));
+      logger.add(new winston.transports.File({
+        filename: path.join(logDir, 'combined.log'),
+        maxsize: 5242880, // 5MB
+        maxFiles: 5,
+      }));
+      fileTransportsAdded = true;
+    }
+  }
+
+  return logger;
+};
 
 // テスト環境では出力を無効化
 if (process.env.NODE_ENV === 'test') {
-  logger.transports.forEach((transport) => {
+  const testLogger = getLogger();
+  testLogger.transports.forEach((transport) => {
     transport.silent = true;
   });
 }
@@ -75,10 +94,11 @@ if (process.env.NODE_ENV === 'test') {
 // Loggerクラスのラッパー
 export class Logger {
   info(message: string, meta?: any) {
-    logger.info(message, meta);
+    getLogger().info(message, meta);
   }
 
   error(message: string, error?: Error | any) {
+    const logger = getLogger();
     if (error instanceof Error) {
       logger.error(message, { error: error.message, stack: error.stack });
     } else {
@@ -87,27 +107,36 @@ export class Logger {
   }
 
   warn(message: string, meta?: any) {
-    logger.warn(message, meta);
+    getLogger().warn(message, meta);
   }
 
   debug(message: string, meta?: any) {
-    logger.debug(message, meta);
+    getLogger().debug(message, meta);
   }
 }
 
-export default logger;
+// 遅延初期化されたloggerのプロキシ
+const loggerProxy = new Proxy({} as winston.Logger, {
+  get(_target, prop) {
+    const actualLogger = getLogger();
+    return actualLogger[prop as keyof winston.Logger];
+  }
+});
+
+export default loggerProxy;
 
 // 名前付きエクスポートとして logger を追加
-export { logger };
+export { loggerProxy as logger };
 
 // 便利なメソッドのエクスポート
-export const logInfo = (message: string, meta?: any) => logger.info(message, meta);
+export const logInfo = (message: string, meta?: any) => getLogger().info(message, meta);
 export const logError = (message: string, error?: Error | any) => {
+  const logger = getLogger();
   if (error instanceof Error) {
     logger.error(message, { error: error.message, stack: error.stack });
   } else {
     logger.error(message, error);
   }
 };
-export const logWarn = (message: string, meta?: any) => logger.warn(message, meta);
-export const logDebug = (message: string, meta?: any) => logger.debug(message, meta);
+export const logWarn = (message: string, meta?: any) => getLogger().warn(message, meta);
+export const logDebug = (message: string, meta?: any) => getLogger().debug(message, meta);

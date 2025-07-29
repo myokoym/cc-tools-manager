@@ -3,20 +3,11 @@
  */
 
 import { Command } from 'commander';
-import { RegistryService } from './core/RegistryService';
-import { StateManager } from './core/StateManager';
-import { ConfigurationManager } from './core/ConfigurationManager';
-import { logger } from './utils/logger';
 import { listCommand, statusCommand, updateCommand } from './commands';
 import { createRemoveCommand } from './commands/remove';
 import createRegisterCommand from './commands/register';
 
 const program = new Command();
-
-// Initialize services
-const stateManager = new StateManager();
-const registryService = new RegistryService(); // デフォルトでCC_TOOLS_HOMEを使用
-const configManager = ConfigurationManager.getInstance();
 
 program
   .name('cc-tools-manager')

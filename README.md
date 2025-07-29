@@ -241,7 +241,9 @@ Environment variables to customize behavior:
 |---------------------|-------------|---------|
 | `CC_TOOLS_HOME` | Base directory for tool storage | `~/.cc-tools` |
 | `CC_TOOLS_CLAUDE_DIR` | Claude directory for deployment | `~/.claude` |
-| `CC_TOOLS_LOG_LEVEL` | Log level (DEBUG, INFO, WARN, ERROR) | `INFO` |
+| `CC_TOOLS_LOG_LEVEL` | Log level (DEBUG, INFO, WARN, ERROR) | `ERROR` |
+| `CC_TOOLS_LOG_CONSOLE` | Enable console logging (true/false) | `false` |
+| `CC_TOOLS_LOG_FILE` | Enable file logging (true/false) | `true` |
 | `CC_TOOLS_NO_COLOR` | Disable color output | - |
 | `CC_TOOLS_DRY_RUN` | Preview changes without applying | - |
 | `CC_TOOLS_FORCE` | Skip confirmation prompts | - |

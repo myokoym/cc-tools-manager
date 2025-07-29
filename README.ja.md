@@ -241,7 +241,9 @@ CC Tools Managerは以下のディレクトリ構造を使用します：
 |---------|------|------------|
 | `CC_TOOLS_HOME` | ツール保存用のベースディレクトリ | `~/.cc-tools` |
 | `CC_TOOLS_CLAUDE_DIR` | デプロイ先のclaudeディレクトリ | `~/.claude` |
-| `CC_TOOLS_LOG_LEVEL` | ログレベル（DEBUG, INFO, WARN, ERROR） | `INFO` |
+| `CC_TOOLS_LOG_LEVEL` | ログレベル（DEBUG, INFO, WARN, ERROR） | `ERROR` |
+| `CC_TOOLS_LOG_CONSOLE` | コンソールログを有効化（true/false） | `false` |
+| `CC_TOOLS_LOG_FILE` | ファイルログを有効化（true/false） | `true` |
 | `CC_TOOLS_NO_COLOR` | カラー出力を無効化 | - |
 | `CC_TOOLS_DRY_RUN` | 変更を適用せずプレビュー | - |
 | `CC_TOOLS_FORCE` | 確認プロンプトをスキップ | - |
