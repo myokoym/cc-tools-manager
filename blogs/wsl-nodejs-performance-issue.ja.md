@@ -1,3 +1,12 @@
+---
+title: "WSL2でNode.js CLIツールが異常に遅い！13秒→0.2秒に改善した話"
+date: 2025-07-30
+author: myokoym
+tags: [wsl2, nodejs, performance, cli, typescript]
+category: performance
+lang: ja
+---
+
 # WSL2でNode.js CLIツールが異常に遅い！13秒→0.2秒に改善した話
 
 ## TL;DR

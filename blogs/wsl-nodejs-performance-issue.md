@@ -1,3 +1,11 @@
+---
+title: "Solving Node.js CLI Tool Performance Issues in WSL2: From 13s to 0.2s"
+date: 2025-07-30
+author: myokoym
+tags: [wsl2, nodejs, performance, cli, typescript]
+category: performance
+---
+
 # Solving Node.js CLI Tool Performance Issues in WSL2: From 13s to 0.2s
 
 ## TL;DR
