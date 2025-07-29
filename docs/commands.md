@@ -11,7 +11,7 @@ Display registered repositories with their status and deployment information.
 #### Basic Usage
 
 ```bash
-npx cc-tools-manager list
+cc-tools-manager list
 ```
 
 Shows a table with:
@@ -23,7 +23,7 @@ Shows a table with:
 #### Verbose Mode
 
 ```bash
-npx cc-tools-manager list --verbose
+cc-tools-manager list --verbose
 ```
 
 In verbose mode, the command additionally displays:
@@ -81,7 +81,7 @@ Remove a repository and clean up all associated files.
 
 Example:
 ```bash
-npx cc-tools-manager remove owner/repo
+cc-tools-manager remove owner/repo
 
 # Output:
 Removing repository owner/repo...

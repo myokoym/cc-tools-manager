@@ -15,28 +15,64 @@ Claude Code関連ツール（コマンド、エージェント、その他の拡
 
 ## インストール
 
-### NPX経由で実行（推奨）
+> **注意**: このパッケージはまだnpmに公開されていません。例に示されているNPXコマンドは、npm公開後に利用可能になります。現在は以下のローカルインストール方法のいずれかを使用してください。
 
-インストール不要で直接実行できます：
+### 将来: NPX経由で実行（npm公開後）
+
+npmに公開されたら、インストール不要で直接実行できるようになります：
 
 ```bash
 npx cc-tools-manager --help
 ```
 
-### グローバルインストール
+### 現在: クイックインストール（推奨）
+
+インストールスクリプトを実行：
 
 ```bash
-npm install -g cc-tools-manager
+curl -fsSL https://raw.githubusercontent.com/yourusername/cc-tools-manager/main/install.sh | bash
 ```
 
-### ローカル開発
+またはクローンしてローカルで実行：
+
+```bash
+git clone https://github.com/yourusername/cc-tools-manager.git
+cd cc-tools-manager
+./install.sh
+```
+
+### 手動インストール
+
+```bash
+# リポジトリをクローン
+git clone https://github.com/yourusername/cc-tools-manager.git
+cd cc-tools-manager
+
+# 依存関係をインストール
+npm install
+
+# プロジェクトをビルド
+npm run build
+
+# グローバルリンクを作成
+npm link
+```
+
+インストール後、コマンドをグローバルに使用できます：
+
+```bash
+cc-tools-manager --help
+```
+
+### 開発セットアップ
+
+ホットリロード付きの開発環境：
 
 ```bash
 git clone https://github.com/yourusername/cc-tools-manager.git
 cd cc-tools-manager
 npm install
-npm run build
-npm link
+npm run dev
 ```
 
 ## 使い方
@@ -46,10 +82,10 @@ npm link
 GitHubのClaude Codeツールリポジトリを登録します：
 
 ```bash
-npx cc-tools-manager register https://github.com/owner/repo
+cc-tools-manager register https://github.com/owner/repo
 
 # オプション付き
-npx cc-tools-manager register https://github.com/owner/repo \
+cc-tools-manager register https://github.com/owner/repo \
   --name "my-tools" \
   --tag "commands"
 ```
@@ -60,16 +96,16 @@ npx cc-tools-manager register https://github.com/owner/repo \
 
 ```bash
 # すべてのリポジトリを更新
-npx cc-tools-manager update
+cc-tools-manager update
 
 # 特定のリポジトリのみ更新
-npx cc-tools-manager update owner/repo
+cc-tools-manager update owner/repo
 
 # 並列処理数を指定（デフォルト: 3）
-npx cc-tools-manager update --concurrent 5
+cc-tools-manager update --concurrent 5
 
 # デプロイメントをスキップ
-npx cc-tools-manager update --skip-deploy
+cc-tools-manager update --skip-deploy
 ```
 
 ### リポジトリ一覧の表示
@@ -78,10 +114,10 @@ npx cc-tools-manager update --skip-deploy
 
 ```bash
 # 基本表示
-npx cc-tools-manager list
+cc-tools-manager list
 
 # 詳細表示（デプロイファイルツリー付き）
-npx cc-tools-manager list --verbose
+cc-tools-manager list --verbose
 ```
 
 出力例：
@@ -105,13 +141,13 @@ Total: 3 repositories
 
 ```bash
 # 特定のリポジトリ
-npx cc-tools-manager status owner/repo
+cc-tools-manager status owner/repo
 
 # すべてのリポジトリ
-npx cc-tools-manager status
+cc-tools-manager status
 
 # JSON形式で出力
-npx cc-tools-manager status --json
+cc-tools-manager status --json
 ```
 
 ### リポジトリの削除
@@ -120,10 +156,10 @@ npx cc-tools-manager status --json
 
 ```bash
 # 確認付き削除
-npx cc-tools-manager remove owner/repo
+cc-tools-manager remove owner/repo
 
 # 確認なしで削除
-npx cc-tools-manager remove owner/repo --force
+cc-tools-manager remove owner/repo --force
 ```
 
 ## ディレクトリ構造
@@ -185,13 +221,13 @@ CC Tools Managerは以下のディレクトリ構造を使用します：
 使用例：
 ```bash
 # カスタムディレクトリを使用
-CC_TOOLS_HOME=/custom/path npx cc-tools-manager update
+CC_TOOLS_HOME=/custom/path cc-tools-manager update
 
 # デバッグログを有効化
-CC_TOOLS_LOG_LEVEL=DEBUG npx cc-tools-manager update
+CC_TOOLS_LOG_LEVEL=DEBUG cc-tools-manager update
 
 # ドライラン
-CC_TOOLS_DRY_RUN=1 npx cc-tools-manager update
+CC_TOOLS_DRY_RUN=1 cc-tools-manager update
 ```
 
 ## 競合解決
@@ -200,13 +236,13 @@ CC_TOOLS_DRY_RUN=1 npx cc-tools-manager update
 
 ```bash
 # デフォルト: プロンプトで確認
-npx cc-tools-manager update
+cc-tools-manager update
 
 # 既存ファイルをスキップ
-npx cc-tools-manager update --conflict-resolution skip
+cc-tools-manager update --conflict-resolution skip
 
 # 既存ファイルを上書き
-npx cc-tools-manager update --conflict-resolution overwrite
+cc-tools-manager update --conflict-resolution overwrite
 ```
 
 ## トラブルシューティング
@@ -242,7 +278,7 @@ chmod -R u+w ~/.cc-tools
 tail -f ~/.cc-tools/logs/cc-tools.log
 
 # デバッグモードで実行
-CC_TOOLS_LOG_LEVEL=DEBUG npx cc-tools-manager update
+CC_TOOLS_LOG_LEVEL=DEBUG cc-tools-manager update
 ```
 
 ## 開発

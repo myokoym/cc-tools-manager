@@ -11,7 +11,7 @@
 #### 基本的な使い方
 
 ```bash
-npx cc-tools-manager list
+cc-tools-manager list
 ```
 
 以下の情報をテーブル形式で表示：
@@ -23,7 +23,7 @@ npx cc-tools-manager list
 #### 詳細表示モード
 
 ```bash
-npx cc-tools-manager list --verbose
+cc-tools-manager list --verbose
 ```
 
 詳細表示モードでは、追加で以下を表示：
@@ -81,7 +81,7 @@ Total: 2 repositories
 
 例：
 ```bash
-npx cc-tools-manager remove owner/repo
+cc-tools-manager remove owner/repo
 
 # 出力：
 Removing repository owner/repo...

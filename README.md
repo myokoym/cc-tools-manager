@@ -15,28 +15,64 @@ A CLI tool for centralized management of Claude Code related tools (commands, ag
 
 ## Installation
 
-### Run via NPX (Recommended)
+> **Note**: This package is not yet published to npm. NPX commands shown in examples will be available after npm publication. For now, please use one of the local installation methods below.
 
-Run directly without installation:
+### Future: Run via NPX (After npm publication)
+
+Once published to npm, you'll be able to run directly without installation:
 
 ```bash
 npx cc-tools-manager --help
 ```
 
-### Global Installation
+### Current: Quick Install (Recommended)
+
+Run the installation script:
 
 ```bash
-npm install -g cc-tools-manager
+curl -fsSL https://raw.githubusercontent.com/yourusername/cc-tools-manager/main/install.sh | bash
 ```
 
-### Local Development
+Or clone and run locally:
+
+```bash
+git clone https://github.com/yourusername/cc-tools-manager.git
+cd cc-tools-manager
+./install.sh
+```
+
+### Manual Installation
+
+```bash
+# Clone the repository
+git clone https://github.com/yourusername/cc-tools-manager.git
+cd cc-tools-manager
+
+# Install dependencies
+npm install
+
+# Build the project
+npm run build
+
+# Create global link
+npm link
+```
+
+After installation, you can use the command globally:
+
+```bash
+cc-tools-manager --help
+```
+
+### Development Setup
+
+For development with hot reload:
 
 ```bash
 git clone https://github.com/yourusername/cc-tools-manager.git
 cd cc-tools-manager
 npm install
-npm run build
-npm link
+npm run dev
 ```
 
 ## Usage
@@ -46,10 +82,10 @@ npm link
 Register a GitHub Claude Code tools repository:
 
 ```bash
-npx cc-tools-manager register https://github.com/owner/repo
+cc-tools-manager register https://github.com/owner/repo
 
 # With options
-npx cc-tools-manager register https://github.com/owner/repo \
+cc-tools-manager register https://github.com/owner/repo \
   --name "my-tools" \
   --tag "commands"
 ```
@@ -60,16 +96,16 @@ Update registered repositories to the latest version:
 
 ```bash
 # Update all repositories
-npx cc-tools-manager update
+cc-tools-manager update
 
 # Update specific repository only
-npx cc-tools-manager update owner/repo
+cc-tools-manager update owner/repo
 
 # Specify concurrent processing (default: 3)
-npx cc-tools-manager update --concurrent 5
+cc-tools-manager update --concurrent 5
 
 # Skip deployment
-npx cc-tools-manager update --skip-deploy
+cc-tools-manager update --skip-deploy
 ```
 
 ### List Repositories
@@ -78,10 +114,10 @@ Display registered repositories:
 
 ```bash
 # Basic display
-npx cc-tools-manager list
+cc-tools-manager list
 
 # Verbose display (with deployment file tree)
-npx cc-tools-manager list --verbose
+cc-tools-manager list --verbose
 ```
 
 Example output:
@@ -105,13 +141,13 @@ Check detailed status of a specific repository:
 
 ```bash
 # Specific repository
-npx cc-tools-manager status owner/repo
+cc-tools-manager status owner/repo
 
 # All repositories
-npx cc-tools-manager status
+cc-tools-manager status
 
 # Output in JSON format
-npx cc-tools-manager status --json
+cc-tools-manager status --json
 ```
 
 ### Remove Repository
@@ -120,10 +156,10 @@ Remove a registered repository:
 
 ```bash
 # Remove with confirmation
-npx cc-tools-manager remove owner/repo
+cc-tools-manager remove owner/repo
 
 # Remove without confirmation
-npx cc-tools-manager remove owner/repo --force
+cc-tools-manager remove owner/repo --force
 ```
 
 ## Directory Structure
@@ -185,13 +221,13 @@ Environment variables to customize behavior:
 Usage examples:
 ```bash
 # Use custom directory
-CC_TOOLS_HOME=/custom/path npx cc-tools-manager update
+CC_TOOLS_HOME=/custom/path cc-tools-manager update
 
 # Enable debug logging
-CC_TOOLS_LOG_LEVEL=DEBUG npx cc-tools-manager update
+CC_TOOLS_LOG_LEVEL=DEBUG cc-tools-manager update
 
 # Dry run
-CC_TOOLS_DRY_RUN=1 npx cc-tools-manager update
+CC_TOOLS_DRY_RUN=1 cc-tools-manager update
 ```
 
 ## Conflict Resolution
@@ -200,13 +236,13 @@ Configure how to handle file conflicts:
 
 ```bash
 # Default: prompt for confirmation
-npx cc-tools-manager update
+cc-tools-manager update
 
 # Skip existing files
-npx cc-tools-manager update --conflict-resolution skip
+cc-tools-manager update --conflict-resolution skip
 
 # Overwrite existing files
-npx cc-tools-manager update --conflict-resolution overwrite
+cc-tools-manager update --conflict-resolution overwrite
 ```
 
 ## Troubleshooting
@@ -242,7 +278,7 @@ View detailed logs:
 tail -f ~/.cc-tools/logs/cc-tools.log
 
 # Run in debug mode
-CC_TOOLS_LOG_LEVEL=DEBUG npx cc-tools-manager update
+CC_TOOLS_LOG_LEVEL=DEBUG cc-tools-manager update
 ```
 
 ## Development
