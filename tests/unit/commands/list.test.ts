@@ -4,11 +4,13 @@
 
 import { listCommand } from '../../../src/commands/list';
 import { RegistryService } from '../../../src/core/RegistryService';
+import { StateManager } from '../../../src/core/StateManager';
 import { Repository } from '../../../src/types/repository';
 import chalk from 'chalk';
 
 // Mock dependencies
 jest.mock('../../../src/core/RegistryService');
+jest.mock('../../../src/core/StateManager');
 jest.mock('chalk', () => ({
   bold: jest.fn((text: string) => text),
   gray: jest.fn((text: string) => text),
@@ -16,10 +18,12 @@ jest.mock('chalk', () => ({
   green: jest.fn((text: string) => text),
   red: jest.fn((text: string) => text),
   cyan: jest.fn((text: string) => text),
+  blue: jest.fn((text: string) => text),
 }));
 
 describe('List Command', () => {
   let mockRegistryService: jest.Mocked<RegistryService>;
+  let mockStateManager: jest.Mocked<StateManager>;
   let consoleLogSpy: jest.SpyInstance;
   let consoleErrorSpy: jest.SpyInstance;
   let processExitSpy: jest.SpyInstance;
@@ -35,6 +39,10 @@ describe('List Command', () => {
 
     // Mock RegistryService
     mockRegistryService = new RegistryService() as jest.Mocked<RegistryService>;
+    
+    // Mock StateManager
+    mockStateManager = new StateManager() as jest.Mocked<StateManager>;
+    mockStateManager.getRepositoryState = jest.fn().mockResolvedValue(null);
   });
 
   afterEach(() => {
@@ -65,8 +73,8 @@ describe('List Command', () => {
 
       await listCommand.parseAsync(['node', 'test', 'list']);
 
-      expect(consoleLogSpy).toHaveBeenCalledWith('No repositories registered.');
-      expect(consoleLogSpy).toHaveBeenCalledWith('Use "cc-tools-manager register <url>" to add a repository.');
+      expect(consoleLogSpy).toHaveBeenCalledWith(chalk.yellow('No repositories registered.'));
+      expect(consoleLogSpy).toHaveBeenCalledWith(chalk.gray('Use "cc-tools-manager register <url>" to add a repository.'));
     });
 
     it('should display repositories in table format', async () => {
@@ -102,7 +110,7 @@ describe('List Command', () => {
       await listCommand.parseAsync(['node', 'test', 'list']);
 
       // Verify header
-      expect(consoleLogSpy).toHaveBeenCalledWith('\nRegistered Repositories:\n');
+      expect(consoleLogSpy).toHaveBeenCalledWith(chalk.bold('\nRegistered Repositories:\n'));
       
       // Verify table headers
       const logCalls = consoleLogSpy.mock.calls.map(call => call[0]);
@@ -119,8 +127,7 @@ describe('List Command', () => {
       expect(allLogs.some(log => log.includes('owner/repo2'))).toBe(true);
       
       // Verify summary
-      const grayLogs = consoleLogSpy.mock.calls.map(call => call[0]);
-      expect(grayLogs.some(log => log.includes('Total: 2 repositories'))).toBe(true);
+      expect(consoleLogSpy).toHaveBeenCalledWith(chalk.gray('Total: 2 repositories'));
     });
 
     it('should display detailed information with --verbose flag', async () => {
@@ -144,17 +151,17 @@ describe('List Command', () => {
       await listCommand.parseAsync(['node', 'test', 'list', '--verbose']);
 
       // Verify detailed information sections
-      expect(consoleLogSpy).toHaveBeenCalledWith('\nDetailed Information:\n');
-      expect(consoleLogSpy).toHaveBeenCalledWith('owner/repo:');
+      expect(consoleLogSpy).toHaveBeenCalledWith(chalk.bold('\nDetailed Information:\n'));
+      expect(consoleLogSpy).toHaveBeenCalledWith(chalk.bold('owner/repo:'));
       
       const allLogs = consoleLogSpy.mock.calls.map(call => call[0]);
-      expect(allLogs).toContain('  ID: 123abc');
-      expect(allLogs).toContain('  URL: https://github.com/owner/repo');
-      expect(allLogs).toContain('  Local Path: /path/to/repo');
+      expect(allLogs).toContain(`  ID: ${chalk.gray('123abc')}`);
+      expect(allLogs).toContain(`  URL: ${chalk.gray('https://github.com/owner/repo')}`);
+      expect(allLogs).toContain(`  Local Path: ${chalk.gray('/path/to/repo')}`);
       expect(allLogs).toContain('  Deployments:');
-      expect(allLogs).toContain('    Commands: cmd1');
-      expect(allLogs).toContain('    Agents: agent1');
-      expect(allLogs).toContain('    Hooks: hook1');
+      expect(allLogs).toContain(`    Commands: ${chalk.cyan('cmd1')}`);
+      expect(allLogs).toContain(`    Agents: ${chalk.cyan('agent1')}`);
+      expect(allLogs).toContain(`    Hooks: ${chalk.cyan('hook1')}`);
     });
 
     it('should handle errors gracefully', async () => {
@@ -163,7 +170,7 @@ describe('List Command', () => {
 
       await listCommand.parseAsync(['node', 'test', 'list']);
 
-      expect(consoleErrorSpy).toHaveBeenCalledWith('Error listing repositories:', error);
+      expect(consoleErrorSpy).toHaveBeenCalledWith(chalk.red('Error listing repositories:'), error);
       expect(processExitSpy).toHaveBeenCalledWith(1);
     });
 

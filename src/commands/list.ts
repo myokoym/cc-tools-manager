@@ -6,6 +6,7 @@
 import { Command } from 'commander';
 import chalk from 'chalk';
 import { RegistryService } from '../core/RegistryService';
+import { StateManager } from '../core/StateManager';
 import { Repository, RepositoryStatus } from '../types/repository';
 
 /**
@@ -31,6 +32,7 @@ const statusDisplay: Record<RepositoryStatus, string> = {
  */
 async function listRepositories(options: ListOptions): Promise<void> {
   const registryService = new RegistryService();
+  const stateManager = new StateManager();
   
   try {
     // リポジトリ一覧を取得
@@ -85,7 +87,7 @@ async function listRepositories(options: ListOptions): Promise<void> {
     if (options.verbose) {
       console.log(chalk.bold('\nDetailed Information:\n'));
       
-      repositories.forEach((repo) => {
+      for (const repo of repositories) {
         console.log(chalk.bold(`${repo.name}:`));
         console.log(`  ID: ${chalk.gray(repo.id)}`);
         console.log(`  URL: ${chalk.gray(repo.url)}`);
@@ -118,8 +120,18 @@ async function listRepositories(options: ListOptions): Promise<void> {
           }
         }
         
+        // デプロイされたファイルの詳細を表示
+        const repoState = await stateManager.getRepositoryState(repo.id);
+        if (repoState && repoState.deployedFiles.length > 0) {
+          console.log('  Deployed Files:');
+          for (const file of repoState.deployedFiles) {
+            console.log(`    ${chalk.gray(file.source)} → ${chalk.blue(file.target)}`);
+            console.log(`      ${chalk.gray(`Deployed: ${new Date(file.deployedAt).toLocaleString()}`)}`);
+          }
+        }
+        
         console.log();
-      });
+      }
     }
     
     // ヒント
