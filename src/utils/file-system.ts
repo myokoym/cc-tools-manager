@@ -3,6 +3,7 @@ import { existsSync, createReadStream, createWriteStream } from 'fs';
 import path from 'path';
 import { pipeline } from 'stream/promises';
 import crypto from 'crypto';
+import os from 'os';
 
 /**
  * ディレクトリが存在しない場合は作成
@@ -136,7 +137,7 @@ export async function getFileHash(filePath: string, algorithm = 'sha256'): Promi
  * テンポラリファイルを作成
  */
 export async function createTempFile(prefix = 'temp', extension = ''): Promise<string> {
-  const tmpDir = path.join(process.cwd(), '.tmp');
+  const tmpDir = path.join(os.tmpdir(), 'cc-tools-manager');
   await ensureDir(tmpDir);
   
   const fileName = `${prefix}-${Date.now()}-${Math.random().toString(36).substring(2)}${extension}`;

@@ -15,7 +15,7 @@ const program = new Command();
 
 // Initialize services
 const stateManager = new StateManager();
-const registryService = new RegistryService(stateManager);
+const registryService = new RegistryService(); // デフォルトでCC_TOOLS_HOMEを使用
 const configManager = ConfigurationManager.getInstance();
 
 program

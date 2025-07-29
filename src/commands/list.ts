@@ -78,7 +78,7 @@ async function listRepositories(options: ListOptions): Promise<void> {
     });
     
     // サマリー
-    console.log(chalk.gray('\n─'.repeat(columnWidths.reduce((a, b) => a + b, 0))));
+    console.log(chalk.gray('─'.repeat(columnWidths.reduce((a, b) => a + b, 0))));
     console.log(chalk.gray(`Total: ${repositories.length} repositories`));
     
     // 詳細表示オプション

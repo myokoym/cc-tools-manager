@@ -1,14 +1,14 @@
 import winston from 'winston';
 import path from 'path';
 import fs from 'fs';
+import { CC_TOOLS_HOME, LOGS_DIR } from '../constants/paths';
 
 // ログディレクトリの作成
 const createLogDirectory = () => {
-  const logDir = path.join(process.cwd(), 'logs');
-  if (!fs.existsSync(logDir)) {
-    fs.mkdirSync(logDir, { recursive: true });
+  if (!fs.existsSync(LOGS_DIR)) {
+    fs.mkdirSync(LOGS_DIR, { recursive: true });
   }
-  return logDir;
+  return LOGS_DIR;
 };
 
 const logDir = createLogDirectory();

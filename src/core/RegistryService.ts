@@ -8,6 +8,7 @@ import * as path from 'path';
 import { createHash } from 'crypto';
 import { IRegistryService } from './interfaces/IRegistryService';
 import { Repository, RepositoryDeployments } from '../types';
+import { CC_TOOLS_HOME } from '../constants/paths';
 import { ValidationError, ConflictError, NotFoundError } from '../utils/errors';
 
 export class RegistryService implements IRegistryService {
@@ -15,10 +16,10 @@ export class RegistryService implements IRegistryService {
   private repositories: Map<string, Repository> = new Map();
   private loaded: boolean = false;
 
-  constructor(stateManager?: any) {
-    // StateManagerはオプショナルとして互換性を保つ
-    const dataDir = path.join(process.cwd(), '.cc-tools');
-    this.registryPath = path.join(dataDir, 'repositories.json');
+  constructor(dataDir?: string) {
+    // dataDir引数を受け付けるが、デフォルトはCC_TOOLS_HOME
+    const dir = dataDir || CC_TOOLS_HOME;
+    this.registryPath = path.join(dir, 'repositories.json');
   }
 
   /**
