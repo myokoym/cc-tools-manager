@@ -68,8 +68,8 @@ async function handleRegister(url: string, options: { dataDir: string }): Promis
     
     // 次のステップの案内
     console.log('\n' + chalk.blue('📋 Next Steps:'));
-    console.log(chalk.gray('1.'), `Run ${chalk.white('ccpm init ' + repository.name)} to initialize the repository`);
-    console.log(chalk.gray('2.'), `Run ${chalk.white('ccpm deploy ' + repository.name)} to deploy tools`);
+    console.log(chalk.gray('•'), `Run ${chalk.white('ccpm update ' + repository.name)} to clone and deploy the tools`);
+    console.log(chalk.gray('•'), `Run ${chalk.white('ccpm list')} to see all registered repositories`);
     
     // ログ記録
     logger.info('Repository registered', {
