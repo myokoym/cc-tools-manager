@@ -1,4 +1,4 @@
-# Claude Code Package Manager
+# Claude Code Package Manager (ccpm)
 
 [English](README.md) | [日本語](README.ja.md)
 
