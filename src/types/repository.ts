@@ -1,7 +1,7 @@
 /**
  * リポジトリ関連の型定義
  * 
- * CC Tools Managerで管理するリポジトリの構造と
+ * Claude Code Package Managerで管理するリポジトリの構造と
  * 関連する型を定義します。
  */
 

@@ -68,7 +68,7 @@ describe('ConfigurationManager', () => {
       await configManager.initialize();
       const config = configManager.getConfiguration();
 
-      expect(config.paths.home).toBe(path.join(homedir(), '.cc-tools'));
+      expect(config.paths.home).toBe(path.join(homedir(), '.ccpm'));
       expect(config.paths.claudeDir).toBe(path.join(homedir(), '.claude'));
       expect(config.behavior.autoUpdate).toBe(false);
       expect(config.behavior.parallelOperations).toBe(false);
@@ -77,11 +77,11 @@ describe('ConfigurationManager', () => {
     });
 
     it('環境変数を適用する', async () => {
-      process.env.CC_TOOLS_HOME = '/custom/home';
-      process.env.CC_TOOLS_CLAUDE_DIR = '/custom/claude';
-      process.env.CC_TOOLS_PARALLEL = 'true';
-      process.env.CC_TOOLS_LOG_LEVEL = 'DEBUG';
-      process.env.CC_TOOLS_CONFLICT = 'overwrite';
+      process.env.CCPM_HOME = '/custom/home';
+      process.env.CCPM_CLAUDE_DIR = '/custom/claude';
+      process.env.CCPM_PARALLEL = 'true';
+      process.env.CCPM_LOG_LEVEL = 'DEBUG';
+      process.env.CCPM_CONFLICT = 'overwrite';
       
       mockFs.readFile.mockRejectedValue({ code: 'ENOENT' });
 
@@ -148,8 +148,8 @@ describe('ConfigurationManager', () => {
       mockFs.readFile.mockResolvedValue(JSON.stringify(fileConfig));
 
       // 環境変数
-      process.env.CC_TOOLS_LOG_LEVEL = 'INFO';
-      process.env.CC_TOOLS_PARALLEL = 'true';
+      process.env.CCPM_LOG_LEVEL = 'INFO';
+      process.env.CCPM_PARALLEL = 'true';
 
       // CLIオプション
       const options: GlobalCLIOptions = {
@@ -263,7 +263,7 @@ describe('ConfigurationManager', () => {
       mockFs.readFile.mockRejectedValue({ code: 'ENOENT' });
       
       // まず設定を変更
-      process.env.CC_TOOLS_LOG_LEVEL = 'DEBUG';
+      process.env.CCPM_LOG_LEVEL = 'DEBUG';
       await configManager.initialize();
       expect(configManager.get('logging.level')).toBe('DEBUG');
 
@@ -294,7 +294,7 @@ describe('ConfigurationManager', () => {
 
     it('並列処理モードで警告を出力する', async () => {
       mockFs.readFile.mockRejectedValue({ code: 'ENOENT' });
-      process.env.CC_TOOLS_PARALLEL = 'true';
+      process.env.CCPM_PARALLEL = 'true';
 
       await configManager.initialize();
       
@@ -310,10 +310,10 @@ describe('ConfigurationManager', () => {
       mockFs.readFile.mockRejectedValue({ code: 'ENOENT' });
 
       // true/false の文字列を正しく処理
-      process.env.CC_TOOLS_PARALLEL = 'false';
-      process.env.CC_TOOLS_AUTO_UPDATE = 'false';
-      process.env.CC_TOOLS_DRY_RUN = 'true';
-      process.env.CC_TOOLS_FORCE = 'yes';
+      process.env.CCPM_PARALLEL = 'false';
+      process.env.CCPM_AUTO_UPDATE = 'false';
+      process.env.CCPM_DRY_RUN = 'true';
+      process.env.CCPM_FORCE = 'yes';
 
       await configManager.initialize();
       const config = configManager.getConfiguration();
@@ -327,8 +327,8 @@ describe('ConfigurationManager', () => {
     it('無効な環境変数値を無視する', async () => {
       mockFs.readFile.mockRejectedValue({ code: 'ENOENT' });
 
-      process.env.CC_TOOLS_LOG_LEVEL = 'invalid';
-      process.env.CC_TOOLS_CONFLICT = 'invalid';
+      process.env.CCPM_LOG_LEVEL = 'invalid';
+      process.env.CCPM_CONFLICT = 'invalid';
 
       await configManager.initialize();
       const config = configManager.getConfiguration();

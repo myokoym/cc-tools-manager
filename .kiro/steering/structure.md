@@ -1,9 +1,9 @@
-# CC Tools Manager - Project Structure
+# Claude Code Package Manager - Project Structure
 
 ## Root Directory Structure
 
 ```
-cc-tools-manager/
+claude-code-package-manager/
 ├── package.json             # Project definition and scripts
 ├── tsconfig.json           # TypeScript configuration
 ├── .eslintrc.js            # ESLint configuration
@@ -230,10 +230,10 @@ import type { Repository, RegistryConfig } from '../types';
 ### package.json Configuration
 ```json
 {
-  "name": "cc-tools-manager",
+  "name": "claude-code-package-manager",
   "version": "1.0.0",
   "bin": {
-    "cc-tools-manager": "./dist/index.js"
+    "ccpm": "./dist/index.js"
   },
   "scripts": {
     "build": "tsc",
@@ -269,4 +269,4 @@ cli.parse(process.argv);
 
 ## Related Information
 
-- **Runtime Directory Structure**: For directories used at runtime (`~/.cc-tools/`, `~/.claude/`, etc.), see [tech.md](./tech.md#runtime-directory-structure).
+- **Runtime Directory Structure**: For directories used at runtime (`~/.ccpm/`, `~/.claude/`, etc.), see [tech.md](./tech.md#runtime-directory-structure).

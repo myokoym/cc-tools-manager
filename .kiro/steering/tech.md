@@ -1,8 +1,8 @@
-# CC Tools Manager - Technology Stack
+# Claude Code Package Manager - Technology Stack
 
 ## Architecture
 
-CC Tools Manager is designed as a Node.js-based CLI tool that can be easily installed and executed via NPX.
+Claude Code Package Manager is designed as a Node.js-based CLI tool that can be easily installed and executed via NPX.
 
 ### High-Level Design
 ```
@@ -65,7 +65,7 @@ CC Tools Manager is designed as a Node.js-based CLI tool that can be easily inst
 ```bash
 # Clone repository
 git clone <repository-url>
-cd cc-tools-manager
+cd claude-code-package-manager
 
 # Install dependencies
 npm install
@@ -83,10 +83,10 @@ npm link
 ### Execution via NPX
 ```bash
 # Run directly without installation
-npx cc-tools-manager update
+npx ccpm update
 
 # Run specific version
-npx cc-tools-manager@latest register <github-url>
+npx ccpm@latest register <github-url>
 ```
 
 ## Common Commands
@@ -94,49 +94,49 @@ npx cc-tools-manager@latest register <github-url>
 ### Core Operations
 ```bash
 # Register a new repository
-npx cc-tools-manager register <github-url>
+npx ccpm register <github-url>
 
 # Update all registered repositories
-npx cc-tools-manager update
+npx ccpm update
 
 # Update specific repository
-npx cc-tools-manager update <repo-name>
+npx ccpm update <repo-name>
 
 # List registered repositories
-npx cc-tools-manager list
+npx ccpm list
 
 # Show status of all repositories
-npx cc-tools-manager status
+npx ccpm status
 ```
 
 ### Management Commands
 ```bash
 # Remove repository
-npx cc-tools-manager remove <repo-name>
+npx ccpm remove <repo-name>
 
 # Check for updates (without applying)
-npx cc-tools-manager check
+npx ccpm check
 
 # Clean up orphaned files
-npx cc-tools-manager clean
+npx ccpm clean
 
 # Interactive mode
-npx cc-tools-manager interactive
+npx ccpm interactive
 ```
 
 ## Environment Variables
 
 ### Configuration
-- `CC_TOOLS_HOME`: Base directory for tool storage (default: `~/.cc-tools`)
-- `CC_TOOLS_CLAUDE_DIR`: Target claude directory (default: `~/.claude`)
-- `CC_TOOLS_LOG_LEVEL`: Log verbosity (default: `INFO`)
-- `CC_TOOLS_CONFIG`: Path to custom configuration file
+- `CCPM_HOME`: Base directory for tool storage (default: `~/.ccpm`)
+- `CCPM_CLAUDE_DIR`: Target claude directory (default: `~/.claude`)
+- `CCPM_LOG_LEVEL`: Log verbosity (default: `INFO`)
+- `CCPM_CONFIG`: Path to custom configuration file
 
 ### Runtime Options
-- `CC_TOOLS_NO_COLOR`: Disable color output
-- `CC_TOOLS_DRY_RUN`: Preview changes without applying
-- `CC_TOOLS_FORCE`: Force operations without confirmation
-- `CC_TOOLS_PARALLEL`: Enable parallel processing
+- `CCPM_NO_COLOR`: Disable color output
+- `CCPM_DRY_RUN`: Preview changes without applying
+- `CCPM_FORCE`: Force operations without confirmation
+- `CCPM_PARALLEL`: Enable parallel processing
 
 ## Runtime Directory Structure
 
@@ -144,7 +144,7 @@ npx cc-tools-manager interactive
 Directories used at runtime, separate from the project source code.
 
 ```
-$CC_TOOLS_HOME/
+$CCPM_HOME/
 ├── repos/              # Cloned repositories (stored flat)
 │   ├── repo-name-1/
 │   ├── repo-name-2/
@@ -156,7 +156,7 @@ $CC_TOOLS_HOME/
 
 ### Deployment Target
 ```
-$CC_TOOLS_CLAUDE_DIR/
+$CCPM_CLAUDE_DIR/
 ├── commands/           # Deployed slash commands
 ├── agents/             # Deployed AI agents
 ├── hooks/              # Hook configurations
@@ -171,7 +171,7 @@ $CC_TOOLS_CLAUDE_DIR/
 - **Metadata**: URL, name, last update, deployment information
 
 ### State Tracking
-- **Location**: `$CC_TOOLS_HOME/cache/state.json`
+- **Location**: `$CCPM_HOME/cache/state.json`
 - **Content**: Repository states, versions, deployment status
 - **Update Frequency**: After each operation
 

@@ -1,10 +1,10 @@
 {
-  "name": "cc-tools-manager",
+  "name": "claude-code-package-manager",
   "version": "0.1.0",
   "description": "Centralized management system for Claude Code related tools",
   "main": "dist/index.js",
   "bin": {
-    "cc-tools-manager": "./dist/index.js"
+    "ccpm": "./dist/index.js"
   },
   "scripts": {
     "build": "tsc",
@@ -56,10 +56,10 @@
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/myokoym/cc-tools-manager.git"
+    "url": "https://github.com/myokoym/claude-code-package-manager.git"
   },
   "bugs": {
-    "url": "https://github.com/myokoym/cc-tools-manager/issues"
+    "url": "https://github.com/myokoym/claude-code-package-manager/issues"
   },
-  "homepage": "https://github.com/myokoym/cc-tools-manager#readme"
+  "homepage": "https://github.com/myokoym/claude-code-package-manager#readme"
 }

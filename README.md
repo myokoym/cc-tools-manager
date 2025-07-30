@@ -1,4 +1,4 @@
-# CC Tools Manager
+# Claude Code Package Manager
 
 [English](README.md) | [日本語](README.ja.md)
 
@@ -22,7 +22,7 @@ A CLI tool for centralized management of Claude Code related tools (commands, ag
 Once published to npm, you'll be able to run directly without installation:
 
 ```bash
-npx cc-tools-manager --help
+npx ccpm --help
 ```
 
 ### Current: Quick Install (Recommended)
@@ -30,18 +30,18 @@ npx cc-tools-manager --help
 Run the installation script:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/myokoym/cc-tools-manager/main/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/myokoym/claude-code-package-manager/main/install.sh | bash
 ```
 
-When installed via curl, cc-tools-manager will be cloned to:
-- Default: `~/.cc-tools/src/cc-tools-manager`
-- Custom: `$CC_TOOLS_HOME/src/cc-tools-manager` (if CC_TOOLS_HOME is set)
+When installed via curl, ccpm will be cloned to:
+- Default: `~/.ccpm/src/claude-code-package-manager`
+- Custom: `$CCPM_HOME/src/claude-code-package-manager` (if CCPM_HOME is set)
 
 Or clone and run locally:
 
 ```bash
-git clone https://github.com/myokoym/cc-tools-manager.git
-cd cc-tools-manager
+git clone https://github.com/myokoym/claude-code-package-manager.git
+cd claude-code-package-manager
 ./install.sh
 ```
 
@@ -49,8 +49,8 @@ cd cc-tools-manager
 
 ```bash
 # Clone the repository
-git clone https://github.com/myokoym/cc-tools-manager.git
-cd cc-tools-manager
+git clone https://github.com/myokoym/claude-code-package-manager.git
+cd claude-code-package-manager
 
 # Install dependencies
 npm install
@@ -65,7 +65,7 @@ npm link
 After installation, you can use the command globally:
 
 ```bash
-cc-tools-manager --help
+ccpm --help
 ```
 
 ### Development Setup
@@ -73,19 +73,19 @@ cc-tools-manager --help
 For development with hot reload:
 
 ```bash
-git clone https://github.com/myokoym/cc-tools-manager.git
-cd cc-tools-manager
+git clone https://github.com/myokoym/claude-code-package-manager.git
+cd claude-code-package-manager
 npm install
 npm run dev
 ```
 
 ### Uninstallation
 
-To uninstall cc-tools-manager:
+To uninstall ccpm:
 
 ```bash
 # Remove global command
-npm unlink -g cc-tools-manager
+npm unlink -g claude-code-package-manager
 
 # The installation directory will be shown during install
 # You can manually remove it if needed
@@ -100,10 +100,10 @@ Note: For safety reasons, the uninstall process does not automatically remove di
 Register a GitHub Claude Code tools repository:
 
 ```bash
-cc-tools-manager register https://github.com/owner/repo
+ccpm register https://github.com/owner/repo
 
 # With options
-cc-tools-manager register https://github.com/owner/repo \
+ccpm register https://github.com/owner/repo \
   --name "my-tools" \
   --tag "commands"
 ```
@@ -114,19 +114,19 @@ Update registered repositories to the latest version:
 
 ```bash
 # Update all repositories
-cc-tools-manager update
+ccpm update
 
 # Update specific repository by name
-cc-tools-manager update owner/repo
+ccpm update owner/repo
 
 # Update specific repository by number (from list output)
-cc-tools-manager update 2
+ccpm update 2
 
 # Specify concurrent processing (default: 3)
-cc-tools-manager update --concurrent 5
+ccpm update --concurrent 5
 
 # Skip deployment
-cc-tools-manager update --skip-deploy
+ccpm update --skip-deploy
 ```
 
 ### List Repositories
@@ -135,10 +135,10 @@ Display registered repositories:
 
 ```bash
 # Basic display
-cc-tools-manager list
+ccpm list
 
 # Verbose display (with deployment file tree)
-cc-tools-manager list --verbose
+ccpm list --verbose
 ```
 
 Example output:
@@ -164,13 +164,13 @@ Check detailed status of a specific repository:
 
 ```bash
 # Specific repository
-cc-tools-manager status owner/repo
+ccpm status owner/repo
 
 # All repositories
-cc-tools-manager status
+ccpm status
 
 # Output in JSON format
-cc-tools-manager status --json
+ccpm status --json
 ```
 
 ### Remove Repository
@@ -179,13 +179,13 @@ Remove a registered repository:
 
 ```bash
 # Remove with confirmation
-cc-tools-manager remove owner/repo
+ccpm remove owner/repo
 
 # Remove by number
-cc-tools-manager remove 2
+ccpm remove 2
 
 # Remove without confirmation
-cc-tools-manager remove owner/repo --force
+ccpm remove owner/repo --force
 ```
 
 ## Directory Structure
@@ -195,7 +195,7 @@ CC Tools Manager uses the following directory structure:
 ```
 ~/.cc-tools/
 ├── src/                # Source installations
-│   └── cc-tools-manager/  # CC Tools Manager itself (when installed via curl)
+│   └── claude-code-package-manager/  # CC Tools Manager itself (when installed via curl)
 ├── repos/              # Cloned repositories
 │   ├── owner-repo1/
 │   └── owner-repo2/
@@ -239,25 +239,25 @@ Environment variables to customize behavior:
 
 | Environment Variable | Description | Default |
 |---------------------|-------------|---------|
-| `CC_TOOLS_HOME` | Base directory for tool storage | `~/.cc-tools` |
-| `CC_TOOLS_CLAUDE_DIR` | Claude directory for deployment | `~/.claude` |
-| `CC_TOOLS_LOG_LEVEL` | Log level (DEBUG, INFO, WARN, ERROR) | `ERROR` |
-| `CC_TOOLS_LOG_CONSOLE` | Enable console logging (true/false) | `false` |
-| `CC_TOOLS_LOG_FILE` | Enable file logging (true/false) | `true` |
-| `CC_TOOLS_NO_COLOR` | Disable color output | - |
-| `CC_TOOLS_DRY_RUN` | Preview changes without applying | - |
-| `CC_TOOLS_FORCE` | Skip confirmation prompts | - |
+| `CCPM_HOME` | Base directory for tool storage | `~/.ccpm` |
+| `CCPM_CLAUDE_DIR` | Claude directory for deployment | `~/.claude` |
+| `CCPM_LOG_LEVEL` | Log level (DEBUG, INFO, WARN, ERROR) | `ERROR` |
+| `CCPM_LOG_CONSOLE` | Enable console logging (true/false) | `false` |
+| `CCPM_LOG_FILE` | Enable file logging (true/false) | `true` |
+| `CCPM_NO_COLOR` | Disable color output | - |
+| `CCPM_DRY_RUN` | Preview changes without applying | - |
+| `CCPM_FORCE` | Skip confirmation prompts | - |
 
 Usage examples:
 ```bash
 # Use custom directory
-CC_TOOLS_HOME=/custom/path cc-tools-manager update
+CCPM_HOME=/custom/path ccpm update
 
 # Enable debug logging
-CC_TOOLS_LOG_LEVEL=DEBUG cc-tools-manager update
+CCPM_LOG_LEVEL=DEBUG ccpm update
 
 # Dry run
-CC_TOOLS_DRY_RUN=1 cc-tools-manager update
+CCPM_DRY_RUN=1 ccpm update
 ```
 
 ## Conflict Resolution
@@ -266,27 +266,27 @@ Configure how to handle file conflicts:
 
 ```bash
 # Default: prompt for confirmation
-cc-tools-manager update
+ccpm update
 
 # Skip existing files
-cc-tools-manager update --conflict-resolution skip
+ccpm update --conflict-resolution skip
 
 # Overwrite existing files
-cc-tools-manager update --conflict-resolution overwrite
+ccpm update --conflict-resolution overwrite
 ```
 
 ## Performance Notes
 
 If you experience slow startup times (>1 second), try:
 
-1. **Use direct node execution**: `node /path/to/cc-tools-manager/dist/index.js` instead of global command
-2. **Use npx**: `npx cc-tools-manager` can be faster than globally installed version
+1. **Use direct node execution**: `node /path/to/claude-code-package-manager/dist/index.js` instead of global command
+2. **Use npx**: `npx ccpm` can be faster than globally installed version
 3. **Check your environment**: Some environments (WSL, nvm) may add overhead to command startup
 
 For best performance:
 ```bash
 # Create an alias in your shell configuration
-alias cctm='node /path/to/cc-tools-manager/dist/index.js'
+alias cctm='node /path/to/claude-code-package-manager/dist/index.js'
 ```
 
 ## Troubleshooting
@@ -322,7 +322,7 @@ View detailed logs:
 tail -f ~/.cc-tools/logs/cc-tools.log
 
 # Run in debug mode
-CC_TOOLS_LOG_LEVEL=DEBUG cc-tools-manager update
+CCPM_LOG_LEVEL=DEBUG ccpm update
 ```
 
 ## Development
@@ -337,8 +337,8 @@ CC_TOOLS_LOG_LEVEL=DEBUG cc-tools-manager update
 
 ```bash
 # Clone repository
-git clone https://github.com/myokoym/cc-tools-manager.git
-cd cc-tools-manager
+git clone https://github.com/myokoym/claude-code-package-manager.git
+cd claude-code-package-manager
 
 # Install dependencies
 npm install
@@ -356,7 +356,7 @@ npm run build
 ### Project Structure
 
 ```
-cc-tools-manager/
+claude-code-package-manager/
 ├── src/
 │   ├── commands/       # CLI commands
 │   ├── core/           # Core services

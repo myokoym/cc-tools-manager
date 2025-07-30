@@ -1,12 +1,12 @@
 #!/usr/bin/env node
 /**
- * cc-tools-manager - Claude Code Tools Manager
+ * ccpm - Claude Code Package Manager
  * Main entry point for the application
  */
 
 // 即座に進捗表示（最小限のインポート前に）
 if (!process.argv.includes('--version') && !process.argv.includes('-V')) {
-  process.stdout.write('Starting cc-tools-manager...\r');
+  process.stdout.write('Starting ccpm...\r');
 }
 
 import { cli } from './cli';

@@ -10,7 +10,7 @@ export const SUCCESS_MESSAGES = {
   CONFIG_UPDATED: 'Claudeの設定が更新されました',
   BACKUP_CREATED: (path: string) => `バックアップが作成されました: ${path}`,
   TEMPLATE_CREATED: (name: string) => `テンプレート '${name}' が作成されました`,
-  INIT_COMPLETE: 'CC Tools Managerの初期化が完了しました',
+  INIT_COMPLETE: 'Claude Code Package Managerの初期化が完了しました',
 } as const;
 
 // エラーメッセージ
@@ -63,9 +63,9 @@ export const PROMPT_MESSAGES = {
 
 // CLIヘルプメッセージ
 export const HELP_MESSAGES = {
-  USAGE: '使用法: cc-tools [command] [options]',
+  USAGE: '使用法: ccpm [command] [options]',
   COMMANDS_HEADER: '利用可能なコマンド:',
   OPTIONS_HEADER: 'オプション:',
   EXAMPLES_HEADER: '例:',
-  SEE_MORE: '詳細は cc-tools [command] --help を参照してください',
+  SEE_MORE: '詳細は ccpm [command] --help を参照してください',
 } as const;

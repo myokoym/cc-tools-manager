@@ -41,7 +41,7 @@ async function listRepositories(options: ListOptions): Promise<void> {
     
     if (repositories.length === 0) {
       console.log(chalk.yellow('No repositories registered.'));
-      console.log(chalk.gray('Use "cc-tools-manager register <url>" to add a repository.'));
+      console.log(chalk.gray('Use "ccpm register <url>" to add a repository.'));
       return;
     }
     

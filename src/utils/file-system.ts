@@ -137,7 +137,7 @@ export async function getFileHash(filePath: string, algorithm = 'sha256'): Promi
  * テンポラリファイルを作成
  */
 export async function createTempFile(prefix = 'temp', extension = ''): Promise<string> {
-  const tmpDir = path.join(os.tmpdir(), 'cc-tools-manager');
+  const tmpDir = path.join(os.tmpdir(), 'ccpm');
   await ensureDir(tmpDir);
   
   const fileName = `${prefix}-${Date.now()}-${Math.random().toString(36).substring(2)}${extension}`;

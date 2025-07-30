@@ -1,4 +1,4 @@
-# CC Tools Manager
+# Claude Code Package Manager
 
 [English](README.md) | [日本語](README.ja.md)
 
@@ -22,7 +22,7 @@ Claude Code関連ツール（コマンド、エージェント、その他の拡
 npmに公開されたら、インストール不要で直接実行できるようになります：
 
 ```bash
-npx cc-tools-manager --help
+npx ccpm --help
 ```
 
 ### 現在: クイックインストール（推奨）
@@ -30,18 +30,18 @@ npx cc-tools-manager --help
 インストールスクリプトを実行：
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/myokoym/cc-tools-manager/main/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/myokoym/claude-code-package-manager/main/install.sh | bash
 ```
 
-curl経由でインストールした場合、cc-tools-managerは以下にクローンされます：
-- デフォルト: `~/.cc-tools/src/cc-tools-manager`
-- カスタム: `$CC_TOOLS_HOME/src/cc-tools-manager` (CC_TOOLS_HOMEが設定されている場合)
+curl経由でインストールした場合、ccpmは以下にクローンされます：
+- デフォルト: `~/.ccpm/src/claude-code-package-manager`
+- カスタム: `$CCPM_HOME/src/claude-code-package-manager` (CCPM_HOMEが設定されている場合)
 
 またはクローンしてローカルで実行：
 
 ```bash
-git clone https://github.com/myokoym/cc-tools-manager.git
-cd cc-tools-manager
+git clone https://github.com/myokoym/claude-code-package-manager.git
+cd claude-code-package-manager
 ./install.sh
 ```
 
@@ -49,8 +49,8 @@ cd cc-tools-manager
 
 ```bash
 # リポジトリをクローン
-git clone https://github.com/myokoym/cc-tools-manager.git
-cd cc-tools-manager
+git clone https://github.com/myokoym/claude-code-package-manager.git
+cd claude-code-package-manager
 
 # 依存関係をインストール
 npm install
@@ -65,7 +65,7 @@ npm link
 インストール後、コマンドをグローバルに使用できます：
 
 ```bash
-cc-tools-manager --help
+ccpm --help
 ```
 
 ### 開発セットアップ
@@ -73,19 +73,19 @@ cc-tools-manager --help
 ホットリロード付きの開発環境：
 
 ```bash
-git clone https://github.com/myokoym/cc-tools-manager.git
-cd cc-tools-manager
+git clone https://github.com/myokoym/claude-code-package-manager.git
+cd claude-code-package-manager
 npm install
 npm run dev
 ```
 
 ### アンインストール
 
-cc-tools-managerをアンインストールするには：
+ccpmをアンインストールするには：
 
 ```bash
 # グローバルコマンドを削除
-npm unlink -g cc-tools-manager
+npm unlink -g claude-code-package-manager
 
 # インストールディレクトリはインストール時に表示されます
 # 必要に応じて手動で削除してください
@@ -100,10 +100,10 @@ npm unlink -g cc-tools-manager
 GitHubのClaude Codeツールリポジトリを登録します：
 
 ```bash
-cc-tools-manager register https://github.com/owner/repo
+ccpm register https://github.com/owner/repo
 
 # オプション付き
-cc-tools-manager register https://github.com/owner/repo \
+ccpm register https://github.com/owner/repo \
   --name "my-tools" \
   --tag "commands"
 ```
@@ -114,19 +114,19 @@ cc-tools-manager register https://github.com/owner/repo \
 
 ```bash
 # すべてのリポジトリを更新
-cc-tools-manager update
+ccpm update
 
 # 特定のリポジトリを名前で更新
-cc-tools-manager update owner/repo
+ccpm update owner/repo
 
 # 特定のリポジトリを番号で更新（list出力の番号）
-cc-tools-manager update 2
+ccpm update 2
 
 # 並列処理数を指定（デフォルト: 3）
-cc-tools-manager update --concurrent 5
+ccpm update --concurrent 5
 
 # デプロイメントをスキップ
-cc-tools-manager update --skip-deploy
+ccpm update --skip-deploy
 ```
 
 ### リポジトリ一覧の表示
@@ -135,10 +135,10 @@ cc-tools-manager update --skip-deploy
 
 ```bash
 # 基本表示
-cc-tools-manager list
+ccpm list
 
 # 詳細表示（デプロイファイルツリー付き）
-cc-tools-manager list --verbose
+ccpm list --verbose
 ```
 
 出力例：
@@ -164,13 +164,13 @@ Total: 3 repositories
 
 ```bash
 # 特定のリポジトリ
-cc-tools-manager status owner/repo
+ccpm status owner/repo
 
 # すべてのリポジトリ
-cc-tools-manager status
+ccpm status
 
 # JSON形式で出力
-cc-tools-manager status --json
+ccpm status --json
 ```
 
 ### リポジトリの削除
@@ -179,13 +179,13 @@ cc-tools-manager status --json
 
 ```bash
 # 確認付き削除
-cc-tools-manager remove owner/repo
+ccpm remove owner/repo
 
 # 番号で削除
-cc-tools-manager remove 2
+ccpm remove 2
 
 # 確認なしで削除
-cc-tools-manager remove owner/repo --force
+ccpm remove owner/repo --force
 ```
 
 ## ディレクトリ構造
@@ -195,7 +195,7 @@ CC Tools Managerは以下のディレクトリ構造を使用します：
 ```
 ~/.cc-tools/
 ├── src/                # ソースインストール
-│   └── cc-tools-manager/  # CC Tools Manager本体（curl経由でインストールした場合）
+│   └── claude-code-package-manager/  # CC Tools Manager本体（curl経由でインストールした場合）
 ├── repos/              # クローンされたリポジトリ
 │   ├── owner-repo1/
 │   └── owner-repo2/
@@ -239,25 +239,25 @@ CC Tools Managerは以下のディレクトリ構造を使用します：
 
 | 環境変数 | 説明 | デフォルト値 |
 |---------|------|------------|
-| `CC_TOOLS_HOME` | ツール保存用のベースディレクトリ | `~/.cc-tools` |
-| `CC_TOOLS_CLAUDE_DIR` | デプロイ先のclaudeディレクトリ | `~/.claude` |
-| `CC_TOOLS_LOG_LEVEL` | ログレベル（DEBUG, INFO, WARN, ERROR） | `ERROR` |
-| `CC_TOOLS_LOG_CONSOLE` | コンソールログを有効化（true/false） | `false` |
-| `CC_TOOLS_LOG_FILE` | ファイルログを有効化（true/false） | `true` |
-| `CC_TOOLS_NO_COLOR` | カラー出力を無効化 | - |
-| `CC_TOOLS_DRY_RUN` | 変更を適用せずプレビュー | - |
-| `CC_TOOLS_FORCE` | 確認プロンプトをスキップ | - |
+| `CCPM_HOME` | ツール保存用のベースディレクトリ | `~/.ccpm` |
+| `CCPM_CLAUDE_DIR` | デプロイ先のclaudeディレクトリ | `~/.claude` |
+| `CCPM_LOG_LEVEL` | ログレベル（DEBUG, INFO, WARN, ERROR） | `ERROR` |
+| `CCPM_LOG_CONSOLE` | コンソールログを有効化（true/false） | `false` |
+| `CCPM_LOG_FILE` | ファイルログを有効化（true/false） | `true` |
+| `CCPM_NO_COLOR` | カラー出力を無効化 | - |
+| `CCPM_DRY_RUN` | 変更を適用せずプレビュー | - |
+| `CCPM_FORCE` | 確認プロンプトをスキップ | - |
 
 使用例：
 ```bash
 # カスタムディレクトリを使用
-CC_TOOLS_HOME=/custom/path cc-tools-manager update
+CCPM_HOME=/custom/path ccpm update
 
 # デバッグログを有効化
-CC_TOOLS_LOG_LEVEL=DEBUG cc-tools-manager update
+CCPM_LOG_LEVEL=DEBUG ccpm update
 
 # ドライラン
-CC_TOOLS_DRY_RUN=1 cc-tools-manager update
+CCPM_DRY_RUN=1 ccpm update
 ```
 
 ## 競合解決
@@ -266,27 +266,27 @@ CC_TOOLS_DRY_RUN=1 cc-tools-manager update
 
 ```bash
 # デフォルト: プロンプトで確認
-cc-tools-manager update
+ccpm update
 
 # 既存ファイルをスキップ
-cc-tools-manager update --conflict-resolution skip
+ccpm update --conflict-resolution skip
 
 # 既存ファイルを上書き
-cc-tools-manager update --conflict-resolution overwrite
+ccpm update --conflict-resolution overwrite
 ```
 
 ## パフォーマンスに関する注意
 
 起動時間が遅い（1秒以上）場合は、以下を試してください：
 
-1. **直接node実行を使用**: グローバルコマンドの代わりに `node /path/to/cc-tools-manager/dist/index.js`
+1. **直接node実行を使用**: グローバルコマンドの代わりに `node /path/to/claude-code-package-manager/dist/index.js`
 2. **npxを使用**: `npx cc-tools-manager` はグローバルインストール版より高速な場合があります
 3. **環境を確認**: 一部の環境（WSL、nvm）はコマンド起動にオーバーヘッドを追加する可能性があります
 
 最高のパフォーマンスのために：
 ```bash
 # シェル設定にエイリアスを作成
-alias cctm='node /path/to/cc-tools-manager/dist/index.js'
+alias cctm='node /path/to/claude-code-package-manager/dist/index.js'
 ```
 
 ## トラブルシューティング
@@ -322,7 +322,7 @@ chmod -R u+w ~/.cc-tools
 tail -f ~/.cc-tools/logs/cc-tools.log
 
 # デバッグモードで実行
-CC_TOOLS_LOG_LEVEL=DEBUG cc-tools-manager update
+CCPM_LOG_LEVEL=DEBUG ccpm update
 ```
 
 ## 開発
@@ -337,8 +337,8 @@ CC_TOOLS_LOG_LEVEL=DEBUG cc-tools-manager update
 
 ```bash
 # リポジトリのクローン
-git clone https://github.com/myokoym/cc-tools-manager.git
-cd cc-tools-manager
+git clone https://github.com/myokoym/claude-code-package-manager.git
+cd claude-code-package-manager
 
 # 依存関係のインストール
 npm install
@@ -356,7 +356,7 @@ npm run build
 ### プロジェクト構造
 
 ```
-cc-tools-manager/
+claude-code-package-manager/
 ├── src/
 │   ├── commands/       # CLIコマンド
 │   ├── core/           # コアサービス

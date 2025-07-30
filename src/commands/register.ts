@@ -68,8 +68,8 @@ async function handleRegister(url: string, options: { dataDir: string }): Promis
     
     // 次のステップの案内
     console.log('\n' + chalk.blue('📋 Next Steps:'));
-    console.log(chalk.gray('1.'), `Run ${chalk.white('cc-tools-manager init ' + repository.name)} to initialize the repository`);
-    console.log(chalk.gray('2.'), `Run ${chalk.white('cc-tools-manager deploy ' + repository.name)} to deploy tools`);
+    console.log(chalk.gray('1.'), `Run ${chalk.white('ccpm init ' + repository.name)} to initialize the repository`);
+    console.log(chalk.gray('2.'), `Run ${chalk.white('ccpm deploy ' + repository.name)} to deploy tools`);
     
     // ログ記録
     logger.info('Repository registered', {
@@ -88,7 +88,7 @@ async function handleRegister(url: string, options: { dataDir: string }): Promis
     } else if (error instanceof ConflictError) {
       console.error(chalk.red('\n❌ Conflict:'), error.message);
       console.log(chalk.yellow('This repository is already registered.'));
-      console.log(chalk.gray(`Run ${chalk.white('cc-tools-manager list')} to see all registered repositories.`));
+      console.log(chalk.gray(`Run ${chalk.white('ccpm list')} to see all registered repositories.`));
       logger.warn('Duplicate registration attempt', { url });
     } else if (error instanceof Error) {
       console.error(chalk.red('\n❌ Error:'), error.message);

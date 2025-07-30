@@ -1,10 +1,10 @@
 #!/bin/bash
 
-# CC Tools Manager Local Installation Script
+# Claude Code Package Manager Local Installation Script
 
 set -e
 
-echo "🚀 Installing CC Tools Manager..."
+echo "🚀 Installing Claude Code Package Manager..."
 
 # Check if Node.js is installed
 if ! command -v node &> /dev/null; then
@@ -20,13 +20,13 @@ if [ "$NODE_VERSION" -lt 18 ]; then
 fi
 
 # Check if we're running from within the repository
-if [ -f "package.json" ] && grep -q '"name": "cc-tools-manager"' package.json 2>/dev/null; then
+if [ -f "package.json" ] && grep -q '"name": "claude-code-package-manager"' package.json 2>/dev/null; then
     echo "📂 Running from local repository..."
     INSTALL_DIR=$(pwd)
 else
     # Running from curl or different location, need to clone
-    CC_TOOLS_HOME="${CC_TOOLS_HOME:-$HOME/.cc-tools}"
-    INSTALL_DIR="$CC_TOOLS_HOME/src/cc-tools-manager"
+    CCPM_HOME="${CCPM_HOME:-$HOME/.ccpm}"
+    INSTALL_DIR="$CCPM_HOME/src/claude-code-package-manager"
     if [ -d "$INSTALL_DIR" ]; then
         echo "📁 Directory $INSTALL_DIR already exists. Updating..."
         cd "$INSTALL_DIR"
@@ -34,7 +34,7 @@ else
     else
         echo "📥 Cloning repository..."
         mkdir -p "$(dirname "$INSTALL_DIR")"
-        git clone https://github.com/myokoym/cc-tools-manager.git "$INSTALL_DIR"
+        git clone https://github.com/myokoym/claude-code-package-manager.git "$INSTALL_DIR"
         cd "$INSTALL_DIR"
     fi
 fi
@@ -53,11 +53,11 @@ npm link
 
 echo "✅ Installation complete!"
 echo ""
-echo "You can now use cc-tools-manager globally:"
-echo "  cc-tools-manager --help"
+echo "You can now use ccpm globally:"
+echo "  ccpm --help"
 echo ""
 echo "To uninstall, run:"
-echo "  npm unlink -g cc-tools-manager"
+echo "  npm unlink -g claude-code-package-manager"
 echo ""
 echo "Installation directory:"
 echo "  $INSTALL_DIR"

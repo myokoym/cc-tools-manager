@@ -124,11 +124,11 @@ describe('Register Command', () => {
       expect(mockConsoleLog).toHaveBeenCalledWith(expect.stringContaining('📋 Next Steps:'));
       expect(mockConsoleLog).toHaveBeenCalledWith(
         expect.anything(),
-        expect.stringContaining('cc-tools-manager init owner/repo')
+        expect.stringContaining('ccpm init owner/repo')
       );
       expect(mockConsoleLog).toHaveBeenCalledWith(
         expect.anything(),
-        expect.stringContaining('cc-tools-manager deploy owner/repo')
+        expect.stringContaining('ccpm deploy owner/repo')
       );
     });
 
@@ -205,7 +205,7 @@ describe('Register Command', () => {
         expect.stringContaining('This repository is already registered')
       );
       expect(mockConsoleLog).toHaveBeenCalledWith(
-        expect.stringContaining('cc-tools-manager list')
+        expect.stringContaining('ccpm list')
       );
     });
 

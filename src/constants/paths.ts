@@ -6,8 +6,8 @@ import * as os from 'os';
  */
 
 // 環境変数から読み込み、デフォルト値を設定
-export const CC_TOOLS_HOME = process.env.CC_TOOLS_HOME || path.join(os.homedir(), '.cc-tools');
-export const CLAUDE_DIR = process.env.CLAUDE_DIR || path.join(os.homedir(), '.claude');
+export const CC_TOOLS_HOME = process.env.CCPM_HOME || path.join(os.homedir(), '.ccpm');
+export const CLAUDE_DIR = process.env.CCPM_CLAUDE_DIR || path.join(os.homedir(), '.claude');
 
 // ツール関連のパス
 export const REPOS_DIR = path.join(CC_TOOLS_HOME, 'repos');

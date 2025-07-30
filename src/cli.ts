@@ -1,5 +1,5 @@
 /**
- * CLI implementation for cc-tools-manager
+ * CLI implementation for ccpm
  */
 
 import { Command } from 'commander';
@@ -7,8 +7,8 @@ import { Command } from 'commander';
 const program = new Command();
 
 program
-  .name('cc-tools-manager')
-  .description('Claude Code Tools Manager - Manage MCP servers and tools')
+  .name('ccpm')
+  .description('Claude Code Package Manager - Manage MCP servers and tools')
   .version('0.1.0');
 
 // 遅延インポートでコマンドを追加

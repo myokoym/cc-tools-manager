@@ -123,7 +123,7 @@ export class ConfigurationManager {
    * デフォルト設定をロード
    */
   private loadDefaults(): Configuration {
-    const home = path.join(homedir(), '.cc-tools');
+    const home = path.join(homedir(), '.ccpm');
     const claudeDir = path.join(homedir(), '.claude');
 
     return {
@@ -134,7 +134,7 @@ export class ConfigurationManager {
       },
       logging: {
         ...DEFAULT_CONFIGURATION.logging,
-        file: path.join(home, 'cc-tools.log')
+        file: path.join(home, 'ccpm.log')
       }
     };
   }
@@ -145,44 +145,44 @@ export class ConfigurationManager {
   private applyEnvironmentVariables(): void {
     const env = process.env as EnvironmentVariables;
 
-    if (env.CC_TOOLS_HOME) {
-      this.configuration.paths.home = env.CC_TOOLS_HOME;
-      this.configuration.logging.file = path.join(env.CC_TOOLS_HOME, 'cc-tools.log');
+    if (env.CCPM_HOME) {
+      this.configuration.paths.home = env.CCPM_HOME;
+      this.configuration.logging.file = path.join(env.CCPM_HOME, 'ccpm.log');
     }
 
-    if (env.CC_TOOLS_CLAUDE_DIR) {
-      this.configuration.paths.claudeDir = env.CC_TOOLS_CLAUDE_DIR;
+    if (env.CCPM_CLAUDE_DIR) {
+      this.configuration.paths.claudeDir = env.CCPM_CLAUDE_DIR;
     }
 
-    if (env.CC_TOOLS_PARALLEL === 'true') {
+    if (env.CCPM_PARALLEL === 'true') {
       this.configuration.behavior.parallelOperations = true;
-    } else if (env.CC_TOOLS_PARALLEL === 'false') {
+    } else if (env.CCPM_PARALLEL === 'false') {
       this.configuration.behavior.parallelOperations = false;
     }
 
-    if (env.CC_TOOLS_DRY_RUN === 'true') {
+    if (env.CCPM_DRY_RUN === 'true') {
       this.configuration.behavior.dryRun = true;
     }
 
-    if (env.CC_TOOLS_FORCE === 'true' || env.CC_TOOLS_FORCE === 'yes') {
+    if (env.CCPM_FORCE === 'true' || env.CCPM_FORCE === 'yes') {
       this.configuration.behavior.forceYes = true;
     }
 
-    if (env.CC_TOOLS_AUTO_UPDATE === 'true') {
+    if (env.CCPM_AUTO_UPDATE === 'true') {
       this.configuration.behavior.autoUpdate = true;
-    } else if (env.CC_TOOLS_AUTO_UPDATE === 'false') {
+    } else if (env.CCPM_AUTO_UPDATE === 'false') {
       this.configuration.behavior.autoUpdate = false;
     }
 
-    if (env.CC_TOOLS_CONFLICT) {
-      const strategy = env.CC_TOOLS_CONFLICT as ConflictStrategy;
+    if (env.CCPM_CONFLICT) {
+      const strategy = env.CCPM_CONFLICT as ConflictStrategy;
       if (['skip', 'overwrite', 'prompt'].includes(strategy)) {
         this.configuration.behavior.conflictResolution = strategy;
       }
     }
 
-    if (env.CC_TOOLS_LOG_LEVEL) {
-      const level = env.CC_TOOLS_LOG_LEVEL.toUpperCase() as LogLevel;
+    if (env.CCPM_LOG_LEVEL) {
+      const level = env.CCPM_LOG_LEVEL.toUpperCase() as LogLevel;
       if (['DEBUG', 'INFO', 'WARN', 'ERROR'].includes(level)) {
         this.configuration.logging.level = level;
       }

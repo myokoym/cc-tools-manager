@@ -41,14 +41,14 @@ let fileTransportsAdded = false;
 const getLogger = (): winston.Logger => {
   if (!logger) {
     logger = winston.createLogger({
-      level: process.env.CC_TOOLS_LOG_LEVEL || 'error', // デフォルトをerrorに変更
+      level: process.env.CCPM_LOG_LEVEL || 'error', // デフォルトをerrorに変更
       format: customFormat,
-      defaultMeta: { service: 'cc-tools-manager' },
+      defaultMeta: { service: 'ccpm' },
       transports: [],
     });
 
     // コンソール出力の制御
-    const enableConsoleLog = process.env.CC_TOOLS_LOG_CONSOLE === 'true' || 
+    const enableConsoleLog = process.env.CCPM_LOG_CONSOLE === 'true' || 
                            process.env.NODE_ENV === 'development';
     
     if (enableConsoleLog && process.env.NODE_ENV !== 'production') {
@@ -61,7 +61,7 @@ const getLogger = (): winston.Logger => {
   }
 
   // ファイルトランスポートの遅延追加
-  if (!fileTransportsAdded && process.env.CC_TOOLS_LOG_FILE !== 'false') {
+  if (!fileTransportsAdded && process.env.CCPM_LOG_FILE !== 'false') {
     const shouldAddFileTransports = logger.level !== 'silent' && logger.level !== 'none';
     if (shouldAddFileTransports) {
       const logDir = ensureLogDirectory();

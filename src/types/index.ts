@@ -1,5 +1,5 @@
 /**
- * CC Tools Manager 型定義ファイル
+ * Claude Code Package Manager 型定義ファイル
  * 
  * このファイルは主要な型定義をエクスポートします。
  * 詳細な型定義は各専用ファイルに分割されています。

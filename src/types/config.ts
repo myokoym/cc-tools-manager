@@ -1,7 +1,7 @@
 /**
  * 設定関連の型定義
  * 
- * CC Tools Managerの設定構造と
+ * Claude Code Package Managerの設定構造と
  * 環境変数、設定ファイルの型を定義します。
  */
 
@@ -9,8 +9,8 @@ import type { ConflictStrategy, LogLevel } from './index';
 
 // パス設定
 export interface ConfigurationPaths {
-  home: string;        // CC_TOOLS_HOME - ツールのホームディレクトリ
-  claudeDir: string;   // CC_TOOLS_CLAUDE_DIR - Claudeディレクトリ
+  home: string;        // CCPM_HOME - ツールのホームディレクトリ
+  claudeDir: string;   // CCPM_CLAUDE_DIR - Claudeディレクトリ
 }
 
 // 動作設定
@@ -46,14 +46,14 @@ export interface PartialConfiguration {
 
 // 環境変数の型定義
 export interface EnvironmentVariables {
-  CC_TOOLS_HOME?: string;
-  CC_TOOLS_CLAUDE_DIR?: string;
-  CC_TOOLS_PARALLEL?: string;
-  CC_TOOLS_DRY_RUN?: string;
-  CC_TOOLS_FORCE?: string;
-  CC_TOOLS_LOG_LEVEL?: string;
-  CC_TOOLS_AUTO_UPDATE?: string;
-  CC_TOOLS_CONFLICT?: string;
+  CCPM_HOME?: string;
+  CCPM_CLAUDE_DIR?: string;
+  CCPM_PARALLEL?: string;
+  CCPM_DRY_RUN?: string;
+  CCPM_FORCE?: string;
+  CCPM_LOG_LEVEL?: string;
+  CCPM_AUTO_UPDATE?: string;
+  CCPM_CONFLICT?: string;
   GITHUB_TOKEN?: string;
   NO_COLOR?: string;
 }

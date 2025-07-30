@@ -74,7 +74,7 @@ describe('List Command', () => {
       await listCommand.parseAsync(['node', 'test', 'list']);
 
       expect(consoleLogSpy).toHaveBeenCalledWith(chalk.yellow('No repositories registered.'));
-      expect(consoleLogSpy).toHaveBeenCalledWith(chalk.gray('Use "cc-tools-manager register <url>" to add a repository.'));
+      expect(consoleLogSpy).toHaveBeenCalledWith(chalk.gray('Use "ccpm register <url>" to add a repository.'));
     });
 
     it('should display repositories in table format', async () => {

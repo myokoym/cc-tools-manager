@@ -1,8 +1,8 @@
-# CC Tools Manager - Product Overview
+# Claude Code Package Manager - Product Overview
 
 ## Product Overview
 
-CC Tools Manager is a centralized system for managing Claude Code-related tools and repositories. It automatically syncs and deploys Claude Code commands, agents, and other extensions from GitHub repositories to the local `.claude/` directory.
+Claude Code Package Manager is a centralized system for managing Claude Code-related tools and repositories. It automatically syncs and deploys Claude Code commands, agents, and other extensions from GitHub repositories to the local `.claude/` directory.
 
 ## Core Features
 
