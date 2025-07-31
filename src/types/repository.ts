@@ -8,6 +8,12 @@
 // リポジトリのステータス
 export type RepositoryStatus = 'active' | 'error' | 'uninitialized';
 
+// リポジトリタイプ
+export type RepositoryType = 'agents' | 'commands' | 'hooks';
+
+// デプロイメントモード
+export type DeploymentMode = 'type-based' | 'auto-detect';
+
 // デプロイメント設定
 export interface RepositoryDeployments {
   commands?: string[];   // デプロイするコマンドパターン
@@ -29,6 +35,8 @@ export interface Repository {
   
   // デプロイメント設定
   deployments: RepositoryDeployments;
+  type?: RepositoryType;   // リポジトリタイプ
+  deploymentMode?: DeploymentMode; // デプロイメントモード
   
   // ステータス情報
   status: RepositoryStatus;

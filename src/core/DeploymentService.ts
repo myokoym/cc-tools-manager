@@ -52,6 +52,11 @@ export class DeploymentService implements IDeploymentService {
   async deploy(repo: Repository, options?: { interactive?: boolean }): Promise<DeploymentResult> {
     logger.info(`Deploying files from ${repo.name}...`);
     
+    // type-basedモードの場合は専用メソッドを使用
+    if (repo.type && repo.deploymentMode === 'type-based') {
+      return await this.deployTypeMode(repo, options);
+    }
+    
     const result: DeploymentResult = {
       deployed: [],
       skipped: [],
@@ -254,5 +259,111 @@ export class DeploymentService implements IDeploymentService {
     } catch {
       return false;
     }
+  }
+
+  /**
+   * type-basedモードでファイルをデプロイする
+   */
+  private async deployTypeMode(repo: Repository, options?: { interactive?: boolean }): Promise<DeploymentResult> {
+    logger.info(`Deploying in type-based mode for ${repo.type}...`);
+    
+    const result: DeploymentResult = {
+      deployed: [],
+      skipped: [],
+      failed: [],
+      conflicts: []
+    };
+
+    if (!repo.type) {
+      throw new Error('Repository type is not defined');
+    }
+
+    try {
+      // typeに基づいてパターンを取得
+      const patterns = await this.getTypeBasedPatterns(repo.localPath || '', repo.type);
+      
+      // 各ファイルをデプロイ
+      for (const match of patterns) {
+        const sourcePath = path.join(repo.localPath || '', match.file);
+        const targetPath = path.join(CLAUDE_DIR, repo.type, match.file);
+        
+        try {
+          // ファイルが既に存在するかチェック
+          if (await fileExists(targetPath)) {
+            // デフォルトは上書き、--interactiveオプションでプロンプト表示
+            const strategy: ConflictStrategy = options?.interactive ? 'prompt' : 'overwrite';
+            const shouldContinue = await this.handleConflict(
+              targetPath,
+              strategy
+            );
+            
+            if (!shouldContinue) {
+              result.skipped.push(match.file);
+              continue;
+            }
+          }
+          
+          // ファイルをコピー
+          await this.copyWithStructure(sourcePath, targetPath);
+          
+          // ファイルのハッシュを計算
+          const hash = await getFileHash(targetPath);
+          
+          // デプロイ情報を記録
+          const deployedFile: DeployedFile = {
+            source: match.file,
+            target: targetPath,
+            hash: hash,
+            deployedAt: new Date().toISOString()
+          };
+          
+          result.deployed.push(deployedFile);
+          logger.info(`✓ Deployed: ${match.file} -> ${targetPath}`);
+          
+        } catch (error) {
+          result.failed.push(match.file);
+          logger.error(`✗ Failed to deploy ${match.file}: ${error}`);
+        }
+      }
+      
+    } catch (error) {
+      logger.error(`Type-based deployment failed: ${error}`);
+      throw error;
+    }
+    
+    return result;
+  }
+
+  /**
+   * typeに基づいてリポジトリ直下のファイルパターンを取得
+   */
+  private async getTypeBasedPatterns(repoPath: string, type: string): Promise<PatternMatch[]> {
+    const matches: PatternMatch[] = [];
+    
+    logger.info(`Getting type-based patterns for ${type} in: ${repoPath}`);
+    
+    try {
+      // リポジトリ直下の全ファイル/ディレクトリを取得（README.mdは除外）
+      const files = await glob('**/*', {
+        cwd: repoPath,
+        nodir: false,
+        ignore: ['**/node_modules/**', '**/.git/**', '**/dist/**', '**/build/**', 'README.md', 'readme.md']
+      });
+      
+      logger.debug(`Found ${files.length} files/directories for type ${type}`);
+      
+      for (const file of files) {
+        matches.push({
+          file,
+          pattern: '**/*',
+          targetType: type as 'commands' | 'agents' | 'hooks'
+        });
+      }
+    } catch (error) {
+      logger.warn(`Type-based pattern matching failed: ${error}`);
+    }
+    
+    logger.info(`Found ${matches.length} files to deploy for type ${type}`);
+    return matches;
   }
 }

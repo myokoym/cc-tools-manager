@@ -7,19 +7,23 @@ import { promises as fs } from 'fs';
 import * as path from 'path';
 import { createHash } from 'crypto';
 import { IRegistryService } from './interfaces/IRegistryService';
-import { Repository, RepositoryDeployments } from '../types';
+import { Repository, RepositoryDeployments, RepositoryType, DeploymentMode } from '../types';
 import { CC_TOOLS_HOME } from '../constants/paths';
 import { ValidationError, ConflictError, NotFoundError } from '../utils/errors';
+import { RepositoryValidator } from './RepositoryValidator';
+import { ValidationError as TypeValidationError } from '../types/deployment';
 
 export class RegistryService implements IRegistryService {
   private registryPath: string;
   private repositories: Map<string, Repository> = new Map();
   private loaded: boolean = false;
+  private validator: RepositoryValidator;
 
   constructor(dataDir?: string) {
     // dataDir引数を受け付けるが、デフォルトはCC_TOOLS_HOME
     const dir = dataDir || CC_TOOLS_HOME;
     this.registryPath = path.join(dir, 'repositories.json');
+    this.validator = new RepositoryValidator();
   }
 
   /**
@@ -52,6 +56,62 @@ export class RegistryService implements IRegistryService {
         agents: [],
         hooks: []
       },
+      status: 'uninitialized'
+    };
+
+    // メモリに保存
+    this.repositories.set(repository.id, repository);
+
+    // ファイルに永続化
+    await this.save();
+
+    return repository;
+  }
+
+  /**
+   * タイプを指定してリポジトリを登録する
+   */
+  async registerWithType(url: string, types: RepositoryType[]): Promise<Repository> {
+    await this.ensureLoaded();
+
+    // URL検証
+    if (!this.validateUrl(url)) {
+      throw new ValidationError('Invalid GitHub repository URL format', 'url', url);
+    }
+
+    // 正規化されたURLを取得
+    const normalizedUrl = this.normalizeUrl(url);
+
+    // 重複チェック
+    if (await this.checkDuplicate(normalizedUrl)) {
+      throw new ConflictError(`Repository already registered: ${normalizedUrl}`, 'repository');
+    }
+
+    // リポジトリをクローンして構造を検証
+    // 注意: 実際のクローン処理はGitServiceで行われるため、ここではダミーパスを使用
+    // 実際の実装では、GitServiceと連携してクローンしてから検証する必要がある
+    const tempRepoPath = path.join(CC_TOOLS_HOME, 'temp', this.generateId(normalizedUrl));
+    
+    // 構造検証（タイプ指定がある場合のみ）
+    const validationResult = await this.validator.validateStructure(tempRepoPath, types.map(t => t));
+    if (!validationResult.isValid) {
+      const errorMessages = validationResult.errors.map((e: TypeValidationError) => e.message).join(', ');
+      throw new ValidationError(`Repository structure validation failed: ${errorMessages}`, 'structure', normalizedUrl);
+    }
+
+    // リポジトリ情報を作成
+    const repository: Repository = {
+      id: this.generateId(normalizedUrl),
+      name: this.extractRepoName(normalizedUrl),
+      url: normalizedUrl,
+      registeredAt: new Date().toISOString(),
+      deployments: {
+        commands: [],
+        agents: [],
+        hooks: []
+      },
+      type: types.length === 1 ? types[0] : undefined,
+      deploymentMode: 'type-based' as DeploymentMode,
       status: 'uninitialized'
     };
 
@@ -271,8 +331,8 @@ export class RegistryService implements IRegistryService {
       }
       
       this.loaded = true;
-    } catch (error: any) {
-      if (error.code === 'ENOENT') {
+    } catch (error: unknown) {
+      if ((error as any).code === 'ENOENT') {
         // ファイルが存在しない場合は空のデータで初期化
         this.repositories.clear();
         this.loaded = true;

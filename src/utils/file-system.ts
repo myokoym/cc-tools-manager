@@ -5,6 +5,9 @@ import { pipeline } from 'stream/promises';
 import crypto from 'crypto';
 import os from 'os';
 
+// fs.writeFileのエクスポート
+export const writeFile = fs.writeFile;
+
 /**
  * ディレクトリが存在しない場合は作成
  */

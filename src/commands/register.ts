@@ -10,6 +10,7 @@ import { RegistryService } from '../core/RegistryService';
 import { Logger } from '../utils/logger';
 import { ValidationError, ConflictError } from '../utils/errors';
 import { CC_TOOLS_HOME } from '../constants/paths';
+import { RepositoryType } from '../types';
 import * as path from 'path';
 
 const logger = new Logger();
@@ -23,7 +24,8 @@ export function createRegisterCommand(): Command {
     .description('Register a GitHub repository to the tools registry')
     .argument('<url>', 'GitHub repository URL')
     .option('-d, --data-dir <dir>', 'Data directory path', CC_TOOLS_HOME)
-    .action(async (url: string, options: { dataDir: string }) => {
+    .option('-t, --type <type>', 'Repository type (agents, commands, hooks)')
+    .action(async (url: string, options: { dataDir: string; type?: string }) => {
       await handleRegister(url, options);
     });
 
@@ -33,12 +35,15 @@ export function createRegisterCommand(): Command {
 /**
  * リポジトリ登録処理のハンドラー
  */
-async function handleRegister(url: string, options: { dataDir: string }): Promise<void> {
+async function handleRegister(url: string, options: { dataDir: string; type?: string }): Promise<void> {
   const spinner = ora();
   
   try {
     // URLの表示
     console.log(chalk.blue('🔗 Repository URL:'), url);
+    if (options.type) {
+      console.log(chalk.blue('📁 Repository Type:'), options.type);
+    }
     
     // レジストリサービスの初期化
     const registryService = new RegistryService(options.dataDir);
@@ -54,7 +59,9 @@ async function handleRegister(url: string, options: { dataDir: string }): Promis
     
     // 登録処理
     spinner.start('Registering repository...');
-    const repository = await registryService.register(url);
+    const repository = options.type 
+      ? await registryService.registerWithType(url, [options.type as RepositoryType])
+      : await registryService.register(url);
     spinner.succeed('Repository registered successfully');
     
     // 登録結果の表示
@@ -63,6 +70,9 @@ async function handleRegister(url: string, options: { dataDir: string }): Promis
     console.log(chalk.cyan('ID:'), repository.id);
     console.log(chalk.cyan('Name:'), repository.name);
     console.log(chalk.cyan('URL:'), repository.url);
+    if (repository.type) {
+      console.log(chalk.cyan('Type:'), repository.type);
+    }
     console.log(chalk.cyan('Status:'), chalk.yellow(repository.status));
     console.log(chalk.cyan('Registered:'), new Date(repository.registeredAt).toLocaleString());
     
@@ -83,7 +93,11 @@ async function handleRegister(url: string, options: { dataDir: string }): Promis
     
     if (error instanceof ValidationError) {
       console.error(chalk.red('\n❌ Validation Error:'), error.message);
-      console.log(chalk.yellow('Please check the URL format and try again.'));
+      if (error.message.includes('type')) {
+        console.log(chalk.yellow('Valid types are: agents, commands, hooks'));
+      } else {
+        console.log(chalk.yellow('Please check the URL format and try again.'));
+      }
       logger.error('Validation error during registration', error);
     } else if (error instanceof ConflictError) {
       console.error(chalk.red('\n❌ Conflict:'), error.message);

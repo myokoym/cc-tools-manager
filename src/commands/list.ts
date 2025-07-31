@@ -70,9 +70,14 @@ async function listRepositories(options: ListOptions): Promise<void> {
       const registeredDate = new Date(repo.registeredAt).toLocaleDateString();
       const statusColorFn = statusColors[repo.status];
       
+      // リポジトリ名の表示（typeがある場合は付加）
+      const nameDisplay = repo.type 
+        ? `${repo.name} (${chalk.cyan(repo.type)})`
+        : repo.name;
+      
       const row = [
         chalk.gray((index + 1).toString().padEnd(columnWidths[0])),
-        repo.name.padEnd(columnWidths[1]),
+        nameDisplay.padEnd(columnWidths[1] + (repo.type ? 10 : 0)), // カラーコードの分を調整
         statusColorFn(statusDisplay[repo.status]).padEnd(columnWidths[2] + 10), // カラーコードの分を追加
         deploymentCount.toString().padEnd(columnWidths[3]),
         registeredDate.padEnd(columnWidths[4])
@@ -94,6 +99,14 @@ async function listRepositories(options: ListOptions): Promise<void> {
         console.log(`  ID: ${chalk.gray(repo.id)}`);
         console.log(`  URL: ${chalk.gray(repo.url)}`);
         console.log(`  Status: ${statusColors[repo.status](repo.status)}`);
+        
+        // タイプとデプロイメントモードを表示
+        if (repo.type) {
+          console.log(`  Type: ${chalk.cyan(repo.type)}`);
+        }
+        if (repo.deploymentMode) {
+          console.log(`  Deployment Mode: ${chalk.cyan(repo.deploymentMode)}`);
+        }
         
         if (repo.localPath) {
           console.log(`  Local Path: ${chalk.gray(repo.localPath)}`);
