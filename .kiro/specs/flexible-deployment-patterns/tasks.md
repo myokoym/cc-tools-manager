@@ -2,59 +2,59 @@
 
 ## タスク一覧
 
-- [ ] 1. TypeScript型定義の拡張とテスト環境の準備
+- [x] 1. TypeScript型定義の拡張とテスト環境の準備
   - src/types/repository.tsにRepositoryType型を追加
   - src/types/deployment.tsに新規型定義を作成
   - テストフレームワークの設定確認とモックデータ準備
   - _要件: 1.1, 1.2_
 
 - [ ] 2. リポジトリ検証モジュールの実装
-- [ ] 2.1 RepositoryValidatorクラスの基本実装とテスト作成
+- [x] 2.1 RepositoryValidatorクラスの基本実装とテスト作成
   - tests/unit/core/repository-validator.test.tsでテストを作成
   - src/core/RepositoryValidator.tsでクラス実装
   - 構造検出メソッド（hasClaudeStructure、hasTypeDirectories）の実装
   - _要件: 3.1, 3.2, 3.3, 3.4_
 
-- [ ] 2.2 バリデーションロジックの実装
+- [x] 2.2 バリデーションロジックの実装
   - validateStructureメソッドのテスト作成
   - タイプ指定時の構造競合検出ロジック実装
   - エラーメッセージとサジェスチョンの実装
   - _要件: 3.3, 3.4, 3.5_
 
 - [ ] 3. RegistryServiceの拡張
-- [ ] 3.1 registerWithTypeメソッドの実装
+- [x] 3.1 registerWithTypeメソッドの実装
   - tests/unit/core/registry-service.test.tsにタイプ指定テストを追加
   - src/core/RegistryService.tsにregisterWithTypeメソッドを実装
   - タイプ検証とリポジトリ保存ロジックの統合
   - _要件: 1.1, 1.2, 1.3, 1.5_
 
-- [ ] 3.2 リポジトリデータの永続化更新
+- [x] 3.2 リポジトリデータの永続化更新
   - repositories.jsonへのtypeフィールド追加のテスト作成
   - 保存・読み込みロジックの更新
   - マイグレーション処理の実装（既存データの互換性維持）
   - _要件: 4.3, 5.1, 5.2_
 
 - [ ] 4. CLIコマンドの拡張
-- [ ] 4.1 registerコマンドへの--typeオプション追加
+- [x] 4.1 registerコマンドへの--typeオプション追加
   - tests/unit/commands/register.test.tsにタイプオプションテストを追加
   - src/commands/register.tsに--typeオプションを実装
   - オプション値の検証とエラーハンドリング
   - _要件: 1.1, 1.2, 1.3, 1.4, 1.5_
 
-- [ ] 4.2 listコマンドの拡張
+- [x] 4.2 listコマンドの拡張
   - tests/unit/commands/list.test.tsにタイプ表示テストを追加
   - src/commands/list.tsでタイプ情報の表示を実装
   - --verboseオプションでの詳細表示機能追加
   - _要件: 4.1, 4.2_
 
 - [ ] 5. DeploymentServiceのタイプベースデプロイメント実装
-- [ ] 5.1 タイプベースデプロイメントエンジンの基本実装
+- [x] 5.1 タイプベースデプロイメントエンジンの基本実装
   - tests/unit/core/deployment-service.test.tsにタイプモードテストを追加
   - src/core/DeploymentService.tsにdeployTypeModeメソッドを実装
   - getTypeBasedPatternsとmapRootToTypeメソッドの実装
   - _要件: 2.1, 2.2, 2.3_
 
-- [ ] 5.2 ファイルデプロイメントロジックの実装
+- [x] 5.2 ファイルデプロイメントロジックの実装
   - リポジトリ直下のファイル検出テストを作成
   - README.md除外ロジックの実装とテスト
   - ディレクトリ構造保持のテスト作成と実装
