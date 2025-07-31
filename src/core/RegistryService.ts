@@ -6,6 +6,7 @@
 import { promises as fs } from 'fs';
 import * as path from 'path';
 import { createHash } from 'crypto';
+import chalk from 'chalk';
 import { IRegistryService } from './interfaces/IRegistryService';
 import { Repository, RepositoryDeployments, RepositoryType, DeploymentMode } from '../types';
 import { CC_TOOLS_HOME } from '../constants/paths';
@@ -156,9 +157,35 @@ export class RegistryService implements IRegistryService {
   async find(nameOrId: string): Promise<Repository | null> {
     await this.ensureLoaded();
 
-    // IDで検索
+    // 数字の場合は通番（インデックス）として扱う
+    if (/^\d+$/.test(nameOrId)) {
+      const index = parseInt(nameOrId, 10) - 1; // 1-basedから0-basedへ
+      const repos = Array.from(this.repositories.values());
+      if (index >= 0 && index < repos.length) {
+        return repos[index];
+      }
+    }
+
+    // 完全なIDで検索
     if (this.repositories.has(nameOrId)) {
       return this.repositories.get(nameOrId)!;
+    }
+
+    // 部分的なIDで検索（最低4文字以上）
+    if (nameOrId.length >= 4) {
+      const matchingRepos = Array.from(this.repositories.entries())
+        .filter(([id]) => id.startsWith(nameOrId));
+      
+      if (matchingRepos.length === 1) {
+        return matchingRepos[0][1];
+      } else if (matchingRepos.length > 1) {
+        // 複数マッチした場合は null を返す（曖昧さを避けるため）
+        console.log(chalk.yellow(`Multiple repositories found starting with "${nameOrId}". Please be more specific.`));
+        matchingRepos.forEach(([id, repo]) => {
+          console.log(chalk.gray(`  - ${id.substring(0, 8)}... ${repo.name}`));
+        });
+        return null;
+      }
     }
 
     // 名前で検索

@@ -268,7 +268,7 @@ export function createShowCommand(
   
   return new Command('show')
     .description('Show detailed information about a specific repository')
-    .argument('<repository>', 'Repository name or ID to show')
+    .argument('<repository>', 'Repository number, name, or ID to show')
     .option('--files-only', 'Show only deployed files list')
     .option('--format <format>', 'Output format (table, json, yaml, tree)', 'table')
     .option('-v, --verbose', 'Show detailed status information')

@@ -253,7 +253,9 @@ export class OutputFormatter {
     
     lines.push(this.applyColor(`\nRepository: ${repository.name}`, 'bold', options));
     lines.push('');
-    lines.push(`  ID: ${this.applyColor(repository.id, 'gray', options)}`);
+    if (options.verbose) {
+      lines.push(`  ID: ${this.applyColor(repository.id, 'gray', options)}`);
+    }
     lines.push(`  URL: ${this.applyColor(repository.url, 'blue', options)}`);
     lines.push(`  Status: ${this.getStatusDisplay(repository.status, options)}`);
     lines.push(`  Registered: ${this.applyColor(this.formatDate(repository.registeredAt), 'gray', options)}`);

@@ -96,7 +96,6 @@ async function listRepositories(options: ListOptions): Promise<void> {
       
       for (const repo of repositories) {
         console.log(chalk.bold(`${repo.name}:`));
-        console.log(`  ID: ${chalk.gray(repo.id)}`);
         console.log(`  URL: ${chalk.gray(repo.url)}`);
         console.log(`  Status: ${statusColors[repo.status](repo.status)}`);
         
