@@ -312,7 +312,11 @@ export class OutputFormatter {
           const statusColor = this.getStatusColor(info.status);
           const statusText = this.applyColor(`[${info.status}]`, statusColor, options);
           
-          lines.push(`    ${this.truncatePath(sourcePath, 30)} ${arrow} ${this.truncatePath(targetPath, 30)} ${statusText}`);
+          // フルパスを表示（ホームディレクトリは~に置換）
+          const formattedSource = formatPathWithHome(sourcePath);
+          const formattedTarget = formatPathWithHome(targetPath);
+          
+          lines.push(`    ${formattedSource} ${arrow} ${formattedTarget} ${statusText}`);
         }
       }
       lines.push('');
@@ -346,7 +350,11 @@ export class OutputFormatter {
         const statusText = this.applyColor(`[${mapping.status}]`, statusColor, options);
         const typeText = this.applyColor(`(${mapping.type})`, 'cyan', options);
         
-        lines.push(`    ${this.truncatePath(mapping.sourcePath, 25)} ${arrow} ${this.truncatePath(mapping.targetPath, 25)} ${statusText} ${typeText}`);
+        // フルパスを表示（ホームディレクトリは~に置換）
+        const formattedSource = formatPathWithHome(mapping.sourcePath);
+        const formattedTarget = formatPathWithHome(mapping.targetPath);
+        
+        lines.push(`    ${formattedSource} ${arrow} ${formattedTarget} ${statusText} ${typeText}`);
         
         if (mapping.deployedAt && options.verbose) {
           lines.push(`      ${this.applyColor(`Deployed: ${this.formatDate(mapping.deployedAt)}`, 'gray', options)}`);
@@ -599,21 +607,24 @@ export class OutputFormatter {
    * ソースパスからターゲットパスを解決
    */
   private resolveTargetPath(sourcePath: string): string {
-    // .claude/ prefixed paths -> remove .claude/ prefix
+    const homeDir = process.env.HOME || process.env.USERPROFILE || '~';
+    const claudeDir = path.join(homeDir, '.claude');
+    
+    // .claude/ prefixed paths -> ~/.claude/ + path without .claude/
     if (sourcePath.startsWith('.claude/')) {
-      return sourcePath.substring('.claude/'.length);
+      return path.join(claudeDir, sourcePath.substring('.claude/'.length));
     }
 
-    // Single file patterns -> move to appropriate directory
+    // Single file patterns -> ~/.claude/type/type.ext
     const singleFilePattern = /^(commands|agents|hooks)\.(js|ts|mjs|md)$/;
     const match = sourcePath.match(singleFilePattern);
     if (match) {
       const [, type, ext] = match;
-      return `${type}/${type}.${ext}`;
+      return path.join(claudeDir, type, `${type}.${ext}`);
     }
 
-    // Root-level paths remain as is
-    return sourcePath;
+    // Directory patterns -> ~/.claude/ + path
+    return path.join(claudeDir, sourcePath);
   }
 
   /**
