@@ -1,5 +1,6 @@
 import { glob } from 'glob';
 import * as path from 'path';
+import * as fs from 'fs/promises';
 import { promptYesNo } from '../utils/prompt';
 import {
   IDeploymentService,
@@ -166,11 +167,24 @@ export class DeploymentService implements IDeploymentService {
    * ディレクトリ構造を保持してファイルをコピーする
    */
   async copyWithStructure(source: string, target: string): Promise<void> {
-    // ターゲットディレクトリを作成
-    await ensureDir(path.dirname(target));
+    const stats = await fs.stat(source);
     
-    // ファイルをコピー
-    await copyFile(source, target);
+    if (stats.isDirectory()) {
+      // ディレクトリの場合は、中のファイルを再帰的にコピー
+      await ensureDir(target);
+      const files = await fs.readdir(source);
+      
+      for (const file of files) {
+        const srcPath = path.join(source, file);
+        const destPath = path.join(target, file);
+        await this.copyWithStructure(srcPath, destPath);
+      }
+    } else if (stats.isFile()) {
+      // ファイルの場合は通常のコピー
+      await ensureDir(path.dirname(target));
+      await copyFile(source, target);
+    }
+    // それ以外（ソケット、シンボリックリンクなど）はスキップ
   }
 
   /**
@@ -288,37 +302,65 @@ export class DeploymentService implements IDeploymentService {
         const targetPath = path.join(CLAUDE_DIR, repo.type, match.file);
         
         try {
-          // ファイルが既に存在するかチェック
-          if (await fileExists(targetPath)) {
-            // デフォルトは上書き、--interactiveオプションでプロンプト表示
-            const strategy: ConflictStrategy = options?.interactive ? 'prompt' : 'overwrite';
-            const shouldContinue = await this.handleConflict(
-              targetPath,
-              strategy
-            );
+          const stats = await fs.stat(sourcePath);
+          
+          // ディレクトリの場合
+          if (stats.isDirectory()) {
+            // ディレクトリをコピー
+            await this.copyWithStructure(sourcePath, targetPath);
             
-            if (!shouldContinue) {
-              result.skipped.push(match.file);
-              continue;
+            // ディレクトリ内のファイル数をカウント
+            const files = await glob('**/*', {
+              cwd: sourcePath,
+              nodir: true,
+              absolute: false
+            });
+            
+            logger.info(`✓ Deployed directory: ${match.file} (${files.length} files)`);
+            
+            // 各ファイルをdeployedとして記録
+            for (const file of files) {
+              const deployedFile: DeployedFile = {
+                source: path.join(match.file, file),
+                target: path.join(targetPath, file),
+                hash: '', // ディレクトリ内のファイルは個別にハッシュを計算しない
+                deployedAt: new Date().toISOString()
+              };
+              result.deployed.push(deployedFile);
             }
+          } else if (stats.isFile()) {
+            // ファイルが既に存在するかチェック
+            if (await fileExists(targetPath)) {
+              // デフォルトは上書き、--interactiveオプションでプロンプト表示
+              const strategy: ConflictStrategy = options?.interactive ? 'prompt' : 'overwrite';
+              const shouldContinue = await this.handleConflict(
+                targetPath,
+                strategy
+              );
+              
+              if (!shouldContinue) {
+                result.skipped.push(match.file);
+                continue;
+              }
+            }
+            
+            // ファイルをコピー
+            await this.copyWithStructure(sourcePath, targetPath);
+            
+            // ファイルのハッシュを計算
+            const hash = await getFileHash(targetPath);
+            
+            // デプロイ情報を記録
+            const deployedFile: DeployedFile = {
+              source: match.file,
+              target: targetPath,
+              hash: hash,
+              deployedAt: new Date().toISOString()
+            };
+            
+            result.deployed.push(deployedFile);
+            logger.info(`✓ Deployed: ${match.file}`);
           }
-          
-          // ファイルをコピー
-          await this.copyWithStructure(sourcePath, targetPath);
-          
-          // ファイルのハッシュを計算
-          const hash = await getFileHash(targetPath);
-          
-          // デプロイ情報を記録
-          const deployedFile: DeployedFile = {
-            source: match.file,
-            target: targetPath,
-            hash: hash,
-            deployedAt: new Date().toISOString()
-          };
-          
-          result.deployed.push(deployedFile);
-          logger.info(`✓ Deployed: ${match.file} -> ${targetPath}`);
           
         } catch (error) {
           result.failed.push(match.file);
