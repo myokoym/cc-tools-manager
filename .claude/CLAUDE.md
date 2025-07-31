@@ -139,3 +139,10 @@ lang: ja
 
 ### Categories & Tags
 See `blogs/README.md` for standard categories and common tags.
+
+## Active Specifications
+
+### text-content-management
+- **Description**: テキストを登録できる仕組み - リポジトリになっていないコマンドなどを取り込む
+- **Status**: Initialized
+- **Next Step**: Run `/kiro:spec-requirements text-content-management`

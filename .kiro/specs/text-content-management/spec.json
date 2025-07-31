@@ -1,0 +1,23 @@
+{
+  "feature_name": "text-content-management",
+  "project_description": "テキストを登録できる仕組みの検討　リポジトリになっていないコマンドなどを取り込む",
+  "created_at": "2025-01-30T07:00:00Z",
+  "updated_at": "2025-01-30T07:00:00Z",
+  "language": "japanese",
+  "phase": "initialized",
+  "approvals": {
+    "requirements": {
+      "generated": false,
+      "approved": false
+    },
+    "design": {
+      "generated": false,
+      "approved": false
+    },
+    "tasks": {
+      "generated": false,
+      "approved": false
+    }
+  },
+  "ready_for_implementation": false
+}
