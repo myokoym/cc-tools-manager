@@ -40,6 +40,24 @@ cc-tools-managerプロジェクトをclaude-code-package-manager（コマンド�
 - registerコマンドの次のステップ案内を修正
   - 存在しない`init`/`deploy`コマンドの代わりに`update`を案内
 
+### 4. ドキュメント更新（2025-07-31）
+- docs/commands.md と docs/commands.ja.md の大幅更新
+  - list --verboseオプションの詳細説明追加
+  - デプロイファイルツリー表示機能の記載
+  - リポジトリ選択方法（名前、ID、インデックス番号）の明記
+  - 各コマンドの使用例を充実
+  - 古いバージョン情報の削除
+
+### 5. npmパッケージ名の検討
+- 検討内容: パッケージ名を`ccpm`に変更するか
+- 調査結果:
+  - `ccpm`はnpmで利用可能（未使用）
+  - npm生態系では名前とコマンドが異なるのは一般的
+- 決定: **現状維持**
+  - パッケージ名: `claude-code-package-manager`（明確性を重視）
+  - コマンド名: `ccpm`（短さと使いやすさを重視）
+  - 理由: 既存の慣例に従っており、機能が分かりやすい
+
 ## コミット履歴
 1. `fedb2fe`: spec: Add project rename specification
 2. `b878ac6`: spec: Update project-rename design for simplified implementation
