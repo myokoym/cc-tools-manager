@@ -131,11 +131,9 @@ async function updateRepository(repositoryName: string | undefined, options: Upd
         // デプロイメントの再検出と更新
         spinner.start('Checking for deployment changes...');
         
-        // パターンを再検出
-        const patterns = await deploymentService.detectPatterns(repo.localPath);
-        
-        if (patterns.length > 0) {
-          spinner.succeed(`Found ${patterns.length} deployable files`);
+        // タイプベースデプロイメントの場合は別処理
+        if (repo.type && repo.deploymentMode === 'type-based') {
+          spinner.succeed(`Type-based deployment mode (${repo.type})`);
           
           // デプロイメント確認（--forceでスキップ）
           if (!options.force) {
@@ -159,31 +157,64 @@ async function updateRepository(repositoryName: string | undefined, options: Upd
             spinner.succeed('No new files to deploy');
           }
           
-          // デプロイメント情報を更新
-          const updatedDeployments = {
-            commands: patterns.filter(p => p.targetType === 'commands').map(p => p.file),
-            agents: patterns.filter(p => p.targetType === 'agents').map(p => p.file),
-            hooks: patterns.filter(p => p.targetType === 'hooks').map(p => p.file)
-          };
-          
-          await registryService.update(repo.id, { 
-            deployments: updatedDeployments,
-            lastUpdatedAt: new Date().toISOString()
-          });
-          
           // StateManagerに状態を保存
           await stateManager.updateRepositoryState(repo, gitUpdateResult, deployResult);
         } else {
-          spinner.succeed('No deployment files found');
+          // 通常のパターンベースデプロイメント
+          // パターンを再検出
+          const patterns = await deploymentService.detectPatterns(repo.localPath);
           
-          // デプロイがない場合でも状態を更新
-          const emptyDeployResult = {
-            deployed: [],
-            skipped: [],
-            failed: [],
-            conflicts: []
-          };
-          await stateManager.updateRepositoryState(repo, gitUpdateResult, emptyDeployResult);
+          if (patterns.length > 0) {
+            spinner.succeed(`Found ${patterns.length} deployable files`);
+            
+            // デプロイメント確認（--forceでスキップ）
+            if (!options.force) {
+              const shouldDeploy = await promptYesNo(
+                chalk.yellow('\nDeploy files? (y/N): '),
+                false
+              );
+              
+              if (!shouldDeploy) {
+                console.log(chalk.gray('Skipping deployment'));
+                continue;
+              }
+            }
+            
+            spinner.start('Deploying files...');
+            const deployResult = await deploymentService.deploy(repo, { interactive: options.interactive });
+            
+            if (deployResult.deployed.length > 0) {
+              spinner.succeed(`Deployed ${deployResult.deployed.length} files`);
+            } else {
+              spinner.succeed('No new files to deploy');
+            }
+            
+            // デプロイメント情報を更新
+            const updatedDeployments = {
+              commands: patterns.filter(p => p.targetType === 'commands').map(p => p.file),
+              agents: patterns.filter(p => p.targetType === 'agents').map(p => p.file),
+              hooks: patterns.filter(p => p.targetType === 'hooks').map(p => p.file)
+            };
+            
+            await registryService.update(repo.id, { 
+              deployments: updatedDeployments,
+              lastUpdatedAt: new Date().toISOString()
+            });
+            
+            // StateManagerに状態を保存
+            await stateManager.updateRepositoryState(repo, gitUpdateResult, deployResult);
+          } else {
+            spinner.succeed('No deployment files found');
+            
+            // デプロイがない場合でも状態を更新
+            const emptyDeployResult = {
+              deployed: [],
+              skipped: [],
+              failed: [],
+              conflicts: []
+            };
+            await stateManager.updateRepositoryState(repo, gitUpdateResult, emptyDeployResult);
+          }
         }
         
         // ステータスを更新

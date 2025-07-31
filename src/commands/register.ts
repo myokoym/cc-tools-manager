@@ -57,6 +57,24 @@ async function handleRegister(url: string, options: { dataDir: string; type?: st
     }
     spinner.succeed('URL validation passed');
     
+    // タイプ検証
+    if (options.type) {
+      const validTypes: RepositoryType[] = ['agents', 'commands', 'hooks'];
+      if (!validTypes.includes(options.type as RepositoryType)) {
+        spinner.fail(chalk.red('Invalid repository type'));
+        console.error(chalk.red(`\n❌ Error: '${options.type}' is not a valid type`));
+        console.log(chalk.yellow(`Valid types are: ${validTypes.join(', ')}`));
+        if (options.type === 'agent') {
+          console.log(chalk.yellow(`Did you mean 'agents'?`));
+        } else if (options.type === 'command') {
+          console.log(chalk.yellow(`Did you mean 'commands'?`));
+        } else if (options.type === 'hook') {
+          console.log(chalk.yellow(`Did you mean 'hooks'?`));
+        }
+        process.exit(1);
+      }
+    }
+    
     // 登録処理
     spinner.start('Registering repository...');
     const repository = options.type 
