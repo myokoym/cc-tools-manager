@@ -385,21 +385,41 @@ export class DeploymentService implements IDeploymentService {
     logger.info(`Getting type-based patterns for ${type} in: ${repoPath}`);
     
     try {
-      // リポジトリ直下の全ファイル/ディレクトリを取得（README.mdは除外）
+      // リポジトリ直下の全ファイル/ディレクトリを取得
       const files = await glob('**/*', {
         cwd: repoPath,
         nodir: false,
-        ignore: ['**/node_modules/**', '**/.git/**', '**/dist/**', '**/build/**', 'README.md', 'readme.md']
+        ignore: [
+          '**/node_modules/**', 
+          '**/.git/**', 
+          '**/dist/**', 
+          '**/build/**',
+          '.*',           // ドットで始まるファイル・ディレクトリ
+          '**/.*',        // サブディレクトリ内のドットファイル
+          '**/.*/.**',    // ドットディレクトリ内のファイル
+        ]
       });
       
       logger.debug(`Found ${files.length} files/directories for type ${type}`);
       
       for (const file of files) {
-        matches.push({
-          file,
-          pattern: '**/*',
-          targetType: type as 'commands' | 'agents' | 'hooks'
-        });
+        const basename = path.basename(file);
+        const isDirectory = (await fs.stat(path.join(repoPath, file))).isDirectory();
+        
+        // ディレクトリまたは.mdファイルのみを対象にする
+        if (isDirectory || file.endsWith('.md')) {
+          // 大文字のファイル（README.md, LICENSE等）をスキップ
+          if (!isDirectory && basename[0] === basename[0].toUpperCase()) {
+            logger.debug(`Skipping uppercase file: ${file}`);
+            continue;
+          }
+          
+          matches.push({
+            file,
+            pattern: '**/*',
+            targetType: type as 'commands' | 'agents' | 'hooks'
+          });
+        }
       }
     } catch (error) {
       logger.warn(`Type-based pattern matching failed: ${error}`);

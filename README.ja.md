@@ -102,10 +102,10 @@ GitHubのClaude Codeツールリポジトリを登録します：
 ```bash
 ccpm register https://github.com/owner/repo
 
-# オプション付き
-ccpm register https://github.com/owner/repo \
-  --name "my-tools" \
-  --tag "commands"
+# タイプ指定（.claude構造を持たないリポジトリ用）
+ccpm register https://github.com/owner/agents-repo --type agents
+ccpm register https://github.com/owner/commands-repo --type commands
+ccpm register https://github.com/owner/hooks-repo --type hooks
 ```
 
 ### リポジトリの更新
@@ -216,7 +216,7 @@ CC Tools Managerは以下のディレクトリ構造を使用します：
 
 リポジトリ内のファイルは以下のパターンに従ってデプロイされます：
 
-### 1. .claude プレフィックスパターン
+### 1. 標準パターン（.claude構造）
 ```
 リポジトリ/.claude/commands/foo.md → ~/.claude/commands/foo.md
 リポジトリ/.claude/agents/bar.md → ~/.claude/agents/bar.md
@@ -227,6 +227,26 @@ CC Tools Managerは以下のディレクトリ構造を使用します：
 リポジトリ/commands/foo.md → ~/.claude/commands/foo.md
 リポジトリ/agents/bar.md → ~/.claude/agents/bar.md
 ```
+
+### 3. タイプベースパターン（--typeオプション）
+`--type`を指定して登録すると、リポジトリルートが直接マッピングされます：
+```bash
+# 登録
+ccpm register https://github.com/owner/agents-repo --type agents
+
+# デプロイメントマッピング
+リポジトリ/marketing.md → ~/.claude/agents/marketing.md
+リポジトリ/engineering/backend.md → ~/.claude/agents/engineering/backend.md
+リポジトリ/design/ → ~/.claude/agents/design/
+```
+
+**タイプベースデプロイメントのルール：**
+- ディレクトリと`.md`ファイルのみがデプロイされます
+- `.`で始まるファイルは無視されます（例：`.gitignore`、`.env`）
+- 大文字で始まるファイルは無視されます（例：`README.md`、`LICENSE`）
+- 一般的な開発ファイルは自動的に除外されます：
+  - `node_modules/`、`.git/`、`dist/`、`build/`
+  - 設定ファイル（`.gitignore`、`.github/`など）
 
 ディレクトリ構造は保持されます：
 ```

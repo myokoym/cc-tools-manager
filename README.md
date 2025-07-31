@@ -102,10 +102,10 @@ Register a GitHub Claude Code tools repository:
 ```bash
 ccpm register https://github.com/owner/repo
 
-# With options
-ccpm register https://github.com/owner/repo \
-  --name "my-tools" \
-  --tag "commands"
+# With type specification (for repositories without .claude structure)
+ccpm register https://github.com/owner/agents-repo --type agents
+ccpm register https://github.com/owner/commands-repo --type commands
+ccpm register https://github.com/owner/hooks-repo --type hooks
 ```
 
 ### Update Repository
@@ -216,7 +216,7 @@ CC Tools Manager uses the following directory structure:
 
 Files in repositories are deployed according to the following patterns:
 
-### 1. .claude Prefix Pattern
+### 1. Standard Pattern (.claude structure)
 ```
 repository/.claude/commands/foo.md → ~/.claude/commands/foo.md
 repository/.claude/agents/bar.md → ~/.claude/agents/bar.md
@@ -227,6 +227,26 @@ repository/.claude/agents/bar.md → ~/.claude/agents/bar.md
 repository/commands/foo.md → ~/.claude/commands/foo.md
 repository/agents/bar.md → ~/.claude/agents/bar.md
 ```
+
+### 3. Type-based Pattern (--type option)
+When registering with `--type`, the repository root is mapped directly:
+```bash
+# Registration
+ccpm register https://github.com/owner/agents-repo --type agents
+
+# Deployment mapping
+repository/marketing.md → ~/.claude/agents/marketing.md
+repository/engineering/backend.md → ~/.claude/agents/engineering/backend.md
+repository/design/ → ~/.claude/agents/design/
+```
+
+**Type-based deployment rules:**
+- Only directories and `.md` files are deployed
+- Files starting with `.` are ignored (e.g., `.gitignore`, `.env`)
+- Files starting with uppercase letters are ignored (e.g., `README.md`, `LICENSE`)
+- Common development files are automatically excluded:
+  - `node_modules/`, `.git/`, `dist/`, `build/`
+  - Configuration files (`.gitignore`, `.github/`, etc.)
 
 Directory structure is preserved:
 ```
