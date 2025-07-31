@@ -3,13 +3,14 @@
  */
 
 import { Command } from 'commander';
+import * as packageJson from '../package.json';
 
 const program = new Command();
 
 program
   .name('ccpm')
   .description('Claude Code Package Manager - Manage MCP servers and tools')
-  .version('0.1.0');
+  .version(packageJson.version);
 
 // 遅延インポートでコマンドを追加
 program
