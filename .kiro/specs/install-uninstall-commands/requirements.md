@@ -2,56 +2,56 @@
 
 ## Introduction
 
-The Claude Code Package Manager currently manages repositories through registration, update, and removal operations. However, it lacks dedicated commands for initial installation setup and selective uninstallation of deployed files. This feature introduces two new commands that mirror npm's familiar patterns:
+The Claude Code Package Manager currently manages repositories through registration, update, and removal operations. However, it lacks dedicated commands for initial installation setup and selective uninstallation of deployed files. This feature introduces two new commands that adopt familiar command patterns:
 
-1. **install** - Installs all dependencies listed in repositories.json (similar to `npm install`)
-2. **uninstall** - Removes deployed files while preserving configuration (similar to `npm uninstall`)
+1. **install** - Installs all dependencies listed in repositories.json
+2. **uninstall** - Removes deployed files with options to preserve configuration
 
-These commands will enhance the tool's usability by providing npm-like behavior that developers already understand, while maintaining the flexibility to keep repository configurations intact for future reinstallation.
+These commands will enhance the tool's usability by providing familiar command patterns that developers already understand, while maintaining ccpm's unique flexibility to keep repository configurations intact for future reinstallation.
 
 ## Requirements
 
-### Requirement 1: Install Command (npm-style dependency installation)
+### Requirement 1: Install Command (dependency installation)
 
-**User Story:** As a developer familiar with npm, I want to run `ccpm install` to install all dependencies from repositories.json, so that I can set up my environment using familiar patterns.
+**User Story:** As a developer, I want to run `ccpm install` to install all dependencies from repositories.json, so that I can set up my environment using familiar patterns.
 
 #### Acceptance Criteria
 
-1. WHEN the user runs `ccpm install` without arguments THEN the system SHALL read repositories.json and install all listed repositories (similar to npm install reading package.json).
+1. WHEN the user runs `ccpm install` without arguments THEN the system SHALL read repositories.json and install all listed repositories.
 
-2. WHEN the user runs `ccpm install <repository-url>` THEN the system SHALL register the repository AND immediately install it (similar to npm install <package>).
+2. WHEN the user runs `ccpm install <repository-url>` THEN the system SHALL register the repository AND immediately install it.
 
 3. WHEN the user runs `ccpm install` AND repositories.json exists THEN the system SHALL clone missing repositories and deploy their files to ~/.claude.
 
 4. IF the install command encounters an error during repository installation THEN the system SHALL continue with other repositories and display a summary of failures at the end.
 
-5. WHEN the user runs `ccpm install --save <repository-url>` THEN the system SHALL install the repository AND add it to repositories.json (mimicking npm install --save).
+5. WHEN the user runs `ccpm install --save <repository-url>` THEN the system SHALL install the repository AND add it to repositories.json.
 
-6. WHEN the install command completes successfully THEN the system SHALL display installation statistics similar to npm (added X packages in Ys).
+6. WHEN the install command completes successfully THEN the system SHALL display installation statistics (e.g., "added 3 packages in 1.337s").
 
-7. IF the user runs `ccpm install` AND all repositories are already up to date THEN the system SHALL display "up to date in Xs" (similar to npm).
+7. IF the user runs `ccpm install` AND all repositories are already up to date THEN the system SHALL display "up to date in Xs".
 
 8. WHILE the install command is running THE SYSTEM SHALL show a progress bar or spinner for each repository being processed.
 
-### Requirement 2: Uninstall Command (npm-style package removal)
+### Requirement 2: Uninstall Command (selective package removal)
 
-**User Story:** As a developer familiar with npm, I want to use `ccpm uninstall` to remove packages while optionally preserving configuration, so that I can manage my environment using familiar patterns.
+**User Story:** As a developer, I want to use `ccpm uninstall` to remove packages while optionally preserving configuration, so that I can manage my environment using familiar patterns.
 
 #### Acceptance Criteria
 
-1. WHEN the user runs `ccpm uninstall <repository-name>` THEN the system SHALL remove the deployed files AND the repository registration (similar to npm uninstall).
+1. WHEN the user runs `ccpm uninstall <repository-name>` THEN the system SHALL remove the deployed files AND the repository registration.
 
 2. WHEN the user runs `ccpm uninstall <repository-name> --no-save` THEN the system SHALL remove only deployed files while keeping the repository in repositories.json.
 
-3. WHEN the user runs `ccpm uninstall` without arguments THEN the system SHALL display an error message requesting a repository name (matching npm behavior).
+3. WHEN the user runs `ccpm uninstall` without arguments THEN the system SHALL display an error message requesting a repository name.
 
 4. IF a deployed file has been modified locally THEN the system SHALL skip removal and warn the user (preserving user modifications).
 
 5. WHEN the user runs `ccpm uninstall <repository-name> --force` THEN the system SHALL remove all files including modified ones.
 
-6. WHEN the uninstall command completes THEN the system SHALL display "removed X packages in Ys" (similar to npm output format).
+6. WHEN the uninstall command completes THEN the system SHALL display "removed X packages in Ys".
 
-7. IF the specified repository is not found THEN the system SHALL display "npm ERR! No such repository" style error message.
+7. IF the specified repository is not found THEN the system SHALL display "Error: No such repository" error message.
 
 8. WHEN the user runs `ccpm uninstall --save <repository-name>` THEN the system SHALL remove files AND update repositories.json (explicit save behavior).
 
@@ -89,22 +89,22 @@ These commands will enhance the tool's usability by providing npm-like behavior 
 
 5. IF the system detects inconsistencies between state.json and actual deployed files THEN the system SHALL offer to reconcile the differences.
 
-6. WHEN the user runs `ccpm install --force` THEN the system SHALL reinstall all packages, overwriting any local changes (similar to npm install --force).
+6. WHEN the user runs `ccpm install --force` THEN the system SHALL reinstall all packages, overwriting any local changes.
 
-### Requirement 5: User Experience and npm-compatible Output
+### Requirement 5: User Experience and Clear Output
 
-**User Story:** As a developer familiar with npm, I want ccpm to provide similar output patterns and command behaviors, so that I can use my existing knowledge and scripts.
+**User Story:** As a developer, I want ccpm to provide clear output patterns and command behaviors, so that I can easily understand what is happening and integrate with scripts.
 
 #### Acceptance Criteria
 
-1. WHILE install operations are in progress THE SYSTEM SHALL display npm-style progress indicators (e.g., "⸨⠂⠂⠂⠂⠂⠂⠂⠂⠂⠂⠂⠂⠂⠂⠂⠂⠂⠂⸩ ⠧ idealTree:ccpm: sill idealTree buildDeps").
+1. WHILE install operations are in progress THE SYSTEM SHALL display clear progress indicators (e.g., "Installing repositories... [2/5]").
 
-2. WHEN operations complete THE SYSTEM SHALL display npm-style summaries (e.g., "added 3 packages, removed 2 packages in 1.337s").
+2. WHEN operations complete THE SYSTEM SHALL display concise summaries (e.g., "added 3 packages, removed 2 packages in 1.337s").
 
-3. WHEN the user runs `ccpm install --silent` THEN the system SHALL suppress all non-error output (matching npm --silent).
+3. WHEN the user runs `ccpm install --silent` THEN the system SHALL suppress all non-error output.
 
-4. IF the user runs `ccpm install --verbose` THEN the system SHALL display detailed logs prefixed with "npm info" style markers.
+4. IF the user runs `ccpm install --verbose` THEN the system SHALL display detailed logs with clear prefixes.
 
-5. WHERE errors occur THE SYSTEM SHALL format error messages similar to npm (e.g., "npm ERR! code ENOENT").
+5. WHERE errors occur THE SYSTEM SHALL display clear error messages (e.g., "Error: File not found (ENOENT)").
 
 6. WHEN the user runs `ccpm install --json` THEN the system SHALL output installation results in JSON format for scripting.
