@@ -1,0 +1,37 @@
+{
+  "name": "install-uninstall-commands",
+  "title": "Install and Uninstall Commands Implementation",
+  "description": "初回インストールのinstallと、registerを消さずに.claudeから消すuninstallコマンドの2つを検討",
+  "status": "requirements-generated",
+  "phases": {
+    "requirements": "generated",
+    "design": "pending",
+    "tasks": "pending",
+    "implementation": "pending"
+  },
+  "approvals": {
+    "requirements": {
+      "generated": true,
+      "approved": false
+    },
+    "design": {
+      "generated": false,
+      "approved": false
+    },
+    "tasks": {
+      "generated": false,
+      "approved": false
+    }
+  },
+  "created_at": "2025-08-01",
+  "updated_at": "2025-08-02",
+  "language": "english",
+  "context": {
+    "project_type": "CLI Tool Enhancement",
+    "scope": "Adding new commands to cc-tools-manager",
+    "key_features": [
+      "npm-style install command (install from repositories.json or specific URL)",
+      "npm-style uninstall command (with --no-save option to preserve registration)"
+    ]
+  }
+}
