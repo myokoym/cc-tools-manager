@@ -155,13 +155,9 @@ async function handleTextRegister(options: { dataDir: string; type?: string; nam
       {
         type: 'input',
         name: 'name',
-        message: 'Enter the name for this text content (without .md extension):',
+        message: 'Enter the name for this text content (.md will be added):',
         default: options.name,
-        validate: (input) => {
-          if (input.trim().length === 0) return 'Name is required';
-          if (input.includes('.md')) return 'Please enter name without .md extension';
-          return true;
-        }
+        validate: (input) => input.trim().length > 0 || 'Name is required'
       },
       {
         type: 'list',
