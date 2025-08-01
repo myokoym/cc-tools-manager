@@ -61,12 +61,19 @@ export class GitManager implements IGitManager {
 
       // text://プロトコルの場合は特別な処理
       if (repo.url.startsWith('text://')) {
-        // テキストコンテンツ用のディレクトリを作成するだけ
+        // テキストコンテンツ用のディレクトリを作成
         await fs.mkdir(repoPath, { recursive: true });
         
-        // プレースホルダーファイルを作成
+        // git initを実行してダミーのGitリポジトリにする
+        const gitForInit = simpleGit(repoPath);
+        await gitForInit.init();
+        
+        // プレースホルダーファイルを作成してコミット
         const placeholderPath = path.join(repoPath, '.text-content');
         await fs.writeFile(placeholderPath, `This is a text content repository: ${repo.name}`);
+        
+        await gitForInit.add('.text-content');
+        await gitForInit.commit('Initial commit for text content');
         
         this.logger.info(`Created text content directory for ${repo.name}`);
         return;
@@ -114,19 +121,6 @@ export class GitManager implements IGitManager {
   async pull(repo: Repository): Promise<GitUpdateResult> {
     this.logger.info(`Updating ${repo.name}...`);
     const repoPath = this.getRepoPath(repo);
-
-    // text://プロトコルの場合は更新なし
-    if (repo.url.startsWith('text://')) {
-      this.logger.info(`Text content ${repo.name} is always up-to-date`);
-      return {
-        filesChanged: 0,
-        insertions: 0,
-        deletions: 0,
-        currentCommit: 'text-content',
-        previousCommit: 'text-content'
-      };
-    }
-
     const repoGit = simpleGit(repoPath);
 
     try {
@@ -136,8 +130,10 @@ export class GitManager implements IGitManager {
       // 現在のコミットハッシュを取得
       const previousCommit = await repoGit.revparse(['HEAD']);
 
-      // Pull実行
-      const pullResult = await repoGit.pull();
+      // Pull実行（text://の場合はスキップ）
+      const pullResult = repo.url.startsWith('text://') 
+        ? { files: [], insertions: {}, deletions: {} }
+        : await repoGit.pull();
 
       // 新しいコミットハッシュを取得
       const currentCommit = await repoGit.revparse(['HEAD']);
@@ -182,19 +178,6 @@ export class GitManager implements IGitManager {
    */
   async getStatus(repo: Repository): Promise<GitStatus> {
     const repoPath = this.getRepoPath(repo);
-
-    // text://プロトコルの場合は固定のステータスを返す
-    if (repo.url.startsWith('text://')) {
-      return {
-        isClean: true,
-        branch: 'main',
-        ahead: 0,
-        behind: 0,
-        modified: [],
-        untracked: [],
-      };
-    }
-
     const repoGit = simpleGit(repoPath);
 
     try {
@@ -308,34 +291,13 @@ export class GitManager implements IGitManager {
   private async verifyRepoExists(repoPath: string): Promise<void> {
     try {
       await fs.access(repoPath);
-      
-      // テキストコンテンツの場合は.text-contentファイルをチェック
-      if (repoPath.includes('text-contents') || await this.isTextContent(repoPath)) {
-        const textMarker = path.join(repoPath, '.text-content');
-        await fs.access(textMarker);
-      } else {
-        // 通常のGitリポジトリの場合は.gitディレクトリをチェック
-        const gitDir = path.join(repoPath, '.git');
-        await fs.access(gitDir);
-      }
+      const gitDir = path.join(repoPath, '.git');
+      await fs.access(gitDir);
     } catch {
       throw createError(
         'REPO_NOT_FOUND',
         `Repository not found at ${repoPath}. Please clone it first.`
       );
-    }
-  }
-  
-  /**
-   * ディレクトリがテキストコンテンツかどうかを判定する
-   */
-  private async isTextContent(repoPath: string): Promise<boolean> {
-    try {
-      const textMarker = path.join(repoPath, '.text-content');
-      await fs.access(textMarker);
-      return true;
-    } catch {
-      return false;
     }
   }
 
