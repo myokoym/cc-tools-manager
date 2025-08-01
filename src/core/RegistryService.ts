@@ -214,8 +214,8 @@ export class RegistryService implements IRegistryService {
       
       // text://プロトコルの場合は特別な処理
       if (urlObj.protocol === 'text:') {
-        // text://nameの形式をチェック
-        return /^text:\/\/[\w-]+$/.test(url);
+        // text://nameの形式をチェック（ドットも許可）
+        return /^text:\/\/[\w.-]+$/.test(url);
       }
       
       // GitHubのURLパターンをチェック
