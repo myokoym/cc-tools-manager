@@ -100,12 +100,17 @@ npm unlink -g claude-code-package-manager
 GitHubのClaude Codeツールリポジトリを登録します：
 
 ```bash
+# 標準登録（構造を自動検出）
 ccpm register https://github.com/owner/repo
 
-# タイプ指定（.claude構造を持たないリポジトリ用）
-ccpm register https://github.com/owner/agents-repo --type agents
-ccpm register https://github.com/owner/commands-repo --type commands
-ccpm register https://github.com/owner/hooks-repo --type hooks
+# 自動検出されるディレクトリ構造：
+# - .claude/agents/, .claude/commands/, .claude/hooks/
+# - agents/, commands/, hooks/
+
+# タイプ指定（非標準リポジトリのみ）
+# リポジトリ内のすべてのファイルを特定のタイプとして扱いたい場合に--typeを使用
+ccpm register https://github.com/owner/my-scripts --type commands
+ccpm register https://github.com/owner/ai-helpers --type agents
 ```
 
 ### リポジトリの更新

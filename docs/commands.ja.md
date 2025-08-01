@@ -4,6 +4,51 @@
 
 ## コマンド詳細
 
+### register
+
+Claudeツールを含む新しいGitHubリポジトリを登録します。
+
+#### 使用方法
+
+```bash
+# 標準登録
+ccpm register https://github.com/owner/repo
+
+# タイプ指定付き
+ccpm register https://github.com/owner/repo --type <type>
+```
+
+#### 自動検出
+
+コマンドは以下のディレクトリ構造を自動的に検出します：
+- `.claude/agents/`, `.claude/commands/`, `.claude/hooks/`
+- `agents/`, `commands/`, `hooks/`
+
+これらの構造が検出されると、ファイルは`~/.claude/`内の適切な場所にデプロイされます。
+
+#### タイプ指定
+
+`--type`を使用するのは以下の場合のみ：
+- リポジトリが標準的なディレクトリ構造に従っていない場合
+- リポジトリ内のすべてのファイルを特定のタイプとして扱いたい場合
+- 例：カスタムスクリプトをすべてコマンドとしてデプロイしたいリポジトリ
+
+有効なタイプ：`agents`、`commands`、`hooks`
+
+#### オプション
+- `-t, --type <type>`：リポジトリタイプを指定（agents、commands、hooks）
+- `-d, --data-dir <dir>`：カスタムデータディレクトリパス
+
+#### 例
+
+```bash
+# 標準リポジトリを登録
+ccpm register https://github.com/anthropics/claude-tools
+
+# 非標準リポジトリをコマンドとして登録
+ccpm register https://github.com/user/my-scripts --type commands
+```
+
 ### list
 
 登録済みリポジトリとその状態、デプロイメント情報を表示します。

@@ -100,12 +100,17 @@ Note: For safety reasons, the uninstall process does not automatically remove di
 Register a GitHub Claude Code tools repository:
 
 ```bash
+# Standard registration (auto-detects structure)
 ccpm register https://github.com/owner/repo
 
-# With type specification (for repositories without .claude structure)
-ccpm register https://github.com/owner/agents-repo --type agents
-ccpm register https://github.com/owner/commands-repo --type commands
-ccpm register https://github.com/owner/hooks-repo --type hooks
+# Auto-detected directory structures:
+# - .claude/agents/, .claude/commands/, .claude/hooks/
+# - agents/, commands/, hooks/
+
+# Type specification (only for non-standard repositories)
+# Use --type when ALL files in the repository should be treated as a specific type
+ccpm register https://github.com/owner/my-scripts --type commands
+ccpm register https://github.com/owner/ai-helpers --type agents
 ```
 
 ### Update Repository

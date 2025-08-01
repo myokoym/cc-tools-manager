@@ -4,6 +4,51 @@
 
 ## Command Details
 
+### register
+
+Register a new GitHub repository containing Claude tools.
+
+#### Usage
+
+```bash
+# Standard registration
+ccpm register https://github.com/owner/repo
+
+# With type specification
+ccpm register https://github.com/owner/repo --type <type>
+```
+
+#### Auto-detection
+
+The command automatically detects the following directory structures:
+- `.claude/agents/`, `.claude/commands/`, `.claude/hooks/`
+- `agents/`, `commands/`, `hooks/`
+
+When these structures are detected, files are deployed to the appropriate locations in `~/.claude/`.
+
+#### Type Specification
+
+Use `--type` only when:
+- Your repository doesn't follow the standard directory structure
+- You want ALL files in the repository to be treated as a specific type
+- Example: A repository with custom scripts that should all be deployed as commands
+
+Valid types: `agents`, `commands`, `hooks`
+
+#### Options
+- `-t, --type <type>`: Specify repository type (agents, commands, hooks)
+- `-d, --data-dir <dir>`: Custom data directory path
+
+#### Examples
+
+```bash
+# Register a standard repository
+ccpm register https://github.com/anthropics/claude-tools
+
+# Register a non-standard repository as commands
+ccpm register https://github.com/user/my-scripts --type commands
+```
+
 ### list
 
 Display registered repositories with their status and deployment information.
