@@ -2,24 +2,24 @@
   "name": "install-uninstall-commands",
   "title": "Install and Uninstall Commands Implementation",
   "description": "初回インストールのinstallと、registerを消さずに.claudeから消すuninstallコマンドの2つを検討",
-  "status": "requirements-generated",
+  "status": "tasks-generated",
   "phases": {
-    "requirements": "generated",
-    "design": "pending",
-    "tasks": "pending",
+    "requirements": "approved",
+    "design": "approved",
+    "tasks": "generated",
     "implementation": "pending"
   },
   "approvals": {
     "requirements": {
       "generated": true,
-      "approved": false
+      "approved": true
     },
     "design": {
-      "generated": false,
-      "approved": false
+      "generated": true,
+      "approved": true
     },
     "tasks": {
-      "generated": false,
+      "generated": true,
       "approved": false
     }
   },
