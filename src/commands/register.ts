@@ -155,9 +155,13 @@ async function handleTextRegister(options: { dataDir: string; type?: string; nam
       {
         type: 'input',
         name: 'name',
-        message: 'Enter the name for this text content:',
+        message: 'Enter the name for this text content (without .md extension):',
         default: options.name,
-        validate: (input) => input.trim().length > 0 || 'Name is required'
+        validate: (input) => {
+          if (input.trim().length === 0) return 'Name is required';
+          if (input.includes('.md')) return 'Please enter name without .md extension';
+          return true;
+        }
       },
       {
         type: 'list',
@@ -170,13 +174,16 @@ async function handleTextRegister(options: { dataDir: string; type?: string; nam
     
     const { name, type } = answers;
     
+    // .mdが含まれていたら除去（念のため）
+    const cleanName = name.replace(/\.md$/, '');
+    
     // テキストコンテンツ用のディレクトリを作成
     const textContentDir = path.join(options.dataDir, 'text-contents');
     await fs.mkdir(textContentDir, { recursive: true });
     
     // 一時ファイルを作成してエディタで開く
     const tempFile = path.join(os.tmpdir(), `ccpm-text-${Date.now()}.md`);
-    await fs.writeFile(tempFile, `# ${name}\n\n# Type: ${type}\n# Enter your content below:\n\n`);
+    await fs.writeFile(tempFile, `# ${cleanName}\n\n# Type: ${type}\n# Enter your content below:\n\n`);
     
     console.log(chalk.blue('📝 Opening editor...'));
     
@@ -199,13 +206,13 @@ async function handleTextRegister(options: { dataDir: string; type?: string; nam
     }
     
     // コンテンツを保存
-    const contentFile = path.join(textContentDir, `${name}.md`);
+    const contentFile = path.join(textContentDir, `${cleanName}.md`);
     await fs.writeFile(contentFile, content);
     
     // レジストリサービスを使って仮想リポジトリとして登録
     spinner.start('Registering text content...');
     const registryService = new RegistryService(options.dataDir);
-    const textUrl = `text://${name}`;
+    const textUrl = `text://${cleanName}`;
     
     // 仮想リポジトリとして登録
     const repository = await registryService.registerWithType(textUrl, [type as RepositoryType]);
@@ -215,15 +222,16 @@ async function handleTextRegister(options: { dataDir: string; type?: string; nam
     console.log('\n' + chalk.green('✅ Registration Complete'));
     console.log(chalk.gray('─'.repeat(50)));
     console.log(chalk.cyan('ID:'), repository.id);
-    console.log(chalk.cyan('Name:'), name);
+    console.log(chalk.cyan('Name:'), cleanName);
     console.log(chalk.cyan('Type:'), type);
+    console.log(chalk.cyan('File:'), `${cleanName}.md`);
     console.log(chalk.cyan('Status:'), chalk.yellow('text content'));
     console.log(chalk.cyan('Registered:'), new Date(repository.registeredAt).toLocaleString());
     
     // 次のステップの案内
     console.log('\n' + chalk.blue('📋 Next Steps:'));
-    console.log(chalk.gray('•'), `Run ${chalk.white('ccpm update ' + name)} to deploy the content`);
-    console.log(chalk.gray('•'), `Run ${chalk.white('ccpm edit ' + name)} to edit the content`);
+    console.log(chalk.gray('•'), `Run ${chalk.white('ccpm update ' + cleanName)} to deploy the content`);
+    console.log(chalk.gray('•'), `Run ${chalk.white('ccpm edit ' + cleanName)} to edit the content`);
     console.log(chalk.gray('•'), `Run ${chalk.white('ccpm list')} to see all registered items`);
     
   } catch (error) {
