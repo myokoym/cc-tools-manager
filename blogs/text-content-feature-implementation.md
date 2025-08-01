@@ -1,44 +1,44 @@
-# CCPMにテキストコンテンツ管理機能を実装した話
+# Implementing Text Content Management in CCPM
 
-## はじめに
+## Introduction
 
-Claude Code Package Manager (CCPM) は、Claude Code用のツール（コマンド、エージェント、フック）をGitHubリポジトリから管理するツールです。しかし、「ちょっとしたコマンドのためにわざわざGitHubリポジトリを作るのは面倒」という要望がありました。
+Claude Code Package Manager (CCPM) is a tool for managing Claude Code tools (commands, agents, hooks) from GitHub repositories. However, users found it cumbersome to create a GitHub repository for simple, single-file commands.
 
-そこで、リポジトリではない単一のテキストファイルを直接管理できる機能を追加することにしました。
+This led to implementing a feature to directly manage single text files without requiring a repository.
 
-## 最初のアプローチ：過度に複雑な設計
+## First Approach: Overly Complex Design
 
-最初は、Kiro仕様駆動開発のプロセスに従って、詳細な設計を行いました：
+Initially, I followed the Kiro specification-driven development process and created a detailed design:
 
 ```
-- TextContentManager（登録・インポート）
-- TextContentEditor（編集・削除）  
-- TextContentDeployer（デプロイ）
-- StorageService（confパッケージでのデータ永続化）
-- 他多数のクラス...
+- TextContentManager (registration/import)
+- TextContentEditor (edit/delete)  
+- TextContentDeployer (deployment)
+- StorageService (data persistence with conf package)
+- Many other classes...
 ```
 
-設計書は立派でしたが、実装を始める前にユーザーから重要なフィードバックをいただきました：
+The design looked impressive, but before implementation, I received crucial user feedback:
 
-> 「なんかすごく複雑に見えるんだけど、ビルドが肥大化したり他の機能に影響ない？あくまでメインはregister urlだけど」
+> "This looks very complex. Won't it bloat the build or affect other features? The main focus is still register url."
 
-この一言で、私は立ち止まって考え直しました。
+This single comment made me pause and reconsider.
 
-## 発想の転換：既存システムの活用
+## Paradigm Shift: Leveraging Existing Systems
 
-そこで、全く異なるアプローチを取ることにしました：
+I decided to take a completely different approach:
 
-**テキストコンテンツを「特殊なリポジトリ」として扱えばいいのでは？**
+**What if we treat text content as "special repositories"?**
 
-### 実装方針
+### Implementation Strategy
 
-1. テキストコンテンツを`text://`プロトコルの仮想リポジトリとして登録
-2. 既存のレジストリシステムをそのまま使用
-3. 新しい依存関係は追加しない
+1. Register text content as virtual repositories with `text://` protocol
+2. Use the existing registry system as-is
+3. Add no new dependencies
 
-### 実際のコード変更
+### Actual Code Changes
 
-#### 1. URL検証の拡張
+#### 1. Extending URL Validation
 
 ```typescript
 // RegistryService.ts
@@ -46,28 +46,28 @@ validateUrl(url: string): boolean {
   try {
     const urlObj = new URL(url);
     
-    // text://プロトコルの場合は特別な処理
+    // Special handling for text:// protocol
     if (urlObj.protocol === 'text:') {
       return /^text:\/\/[\w.-]+$/.test(url);
     }
     
-    // 既存のGitHub URL検証...
+    // Existing GitHub URL validation...
 ```
 
-#### 2. ダミーGitリポジトリの作成
+#### 2. Creating Dummy Git Repositories
 
-最初は特別な処理を多数追加していましたが、最終的にシンプルな解決策に辿り着きました：
+After trying various special handling approaches, I arrived at a simple solution:
 
 ```typescript
-// GitManager.ts - cloneメソッド内
+// GitManager.ts - in clone method
 if (repo.url.startsWith('text://')) {
   await fs.mkdir(repoPath, { recursive: true });
   
-  // git initを実行してダミーのGitリポジトリにする
+  // Initialize as dummy Git repository
   const gitForInit = simpleGit(repoPath);
   await gitForInit.init();
   
-  // プレースホルダーファイルを作成してコミット
+  // Create placeholder file and commit
   const placeholderPath = path.join(repoPath, '.text-content');
   await fs.writeFile(placeholderPath, `This is a text content repository: ${repo.name}`);
   
@@ -78,15 +78,14 @@ if (repo.url.startsWith('text://')) {
 }
 ```
 
-これにより、既存のGit操作がすべて正常に動作するようになりました。
+This allowed all existing Git operations to work normally.
 
-#### 3. テキストコンテンツのデプロイ
+#### 3. Text Content Deployment
 
 ```typescript
 // DeploymentService.ts
 private async deployTextContent(repo: Repository, options?: { interactive?: boolean }): Promise<DeploymentResult> {
-  // テキストコンテンツファイルを読み込んで
-  // ~/.claude/[type]/にコピーするだけ
+  // Simply read text content file and copy to ~/.claude/[type]/
   const contentFile = path.join(textContentDir, `${repo.name}.md`);
   const targetPath = path.join(CLAUDE_DIR, repo.type || 'commands', `${repo.name}.md`);
   
@@ -95,59 +94,59 @@ private async deployTextContent(repo: Repository, options?: { interactive?: bool
 }
 ```
 
-## 使い方
+## Usage
 
-実装後の使い方は非常にシンプルです：
+The final usage is very simple:
 
 ```bash
-# 1. テキストコンテンツを登録
+# 1. Register text content
 $ ccpm register text
 ? Enter the name for this text content (.md will be added): my-awesome-command
 ? Select the content type: commands
 📝 Opening editor...
 ✅ Registration Complete
 
-# 2. 編集したいとき
+# 2. Edit when needed
 $ ccpm edit my-awesome-command
 
-# 3. デプロイ
+# 3. Deploy
 $ ccpm update my-awesome-command
 
-# 4. 一覧表示（リポジトリと一緒に表示される）
+# 4. List (shown together with repositories)
 $ ccpm list
 
-# 5. 削除
+# 5. Remove
 $ ccpm remove my-awesome-command
 ```
 
-## 学んだ教訓
+## Lessons Learned
 
-### 1. シンプルさは正義
+### 1. Simplicity is Justice
 
-最初の設計では、完全に独立したサブシステムを作ろうとしていました。しかし、既存のシステムを少し拡張するだけで同じ目的を達成できました。
+The initial design attempted to create a completely independent subsystem. However, the same goal was achieved by slightly extending the existing system.
 
-### 2. ユーザーフィードバックの重要性
+### 2. Importance of User Feedback
 
-「複雑すぎる」という一言が、より良い設計への転換点となりました。実装前にフィードバックをもらえたのは幸運でした。
+The comment "too complex" became the turning point to better design. Getting feedback before implementation was fortunate.
 
-### 3. 制約を活かす
+### 3. Leveraging Constraints
 
-「リポジトリ管理システム」という既存の制約を、逆に活用することで、統一的なインターフェースを提供できました。
+By leveraging the existing constraint of a "repository management system," we could provide a unified interface.
 
-## おわりに
+## Conclusion
 
-この実装を通じて、「新機能 = 新しいコードをたくさん書く」という考えが必ずしも正しくないことを学びました。既存のコードを賢く再利用することで、より保守しやすく、一貫性のあるシステムを作ることができます。
+Through this implementation, I learned that "new feature = writing lots of new code" isn't always correct. By cleverly reusing existing code, we can create more maintainable and consistent systems.
 
-最終的な実装は、以下の特徴を持っています：
+The final implementation has these characteristics:
 
-- **追加コード**: 約400行
-- **新規依存関係**: 0
-- **既存機能への影響**: 最小限
-- **ユーザー体験**: 既存コマンドと統一的
+- **Added code**: ~400 lines
+- **New dependencies**: 0
+- **Impact on existing features**: Minimal
+- **User experience**: Unified with existing commands
 
-時には立ち止まって、「もっとシンプルな方法はないか？」と問いかけることの大切さを実感しました。
+Sometimes it's important to pause and ask, "Isn't there a simpler way?"
 
-## 関連リンク
+## Related Links
 
 - [Claude Code Package Manager (GitHub)](https://github.com/myokoym/claude-code-package-manager)
-- [実装のPR/コミット履歴]（※実際のリンクに置き換えてください）
+- [Implementation PR/Commit History] (Replace with actual links)
