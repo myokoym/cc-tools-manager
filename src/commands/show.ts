@@ -22,17 +22,20 @@ export class ShowCommand {
   private deploymentMapper: DeploymentMapper;
   private statusService: RepositoryStatusService;
   private formatter: OutputFormatter;
+  private stateManager: StateManager;
 
   constructor(
     registryService?: RegistryService,
     deploymentMapper?: DeploymentMapper,
     statusService?: RepositoryStatusService,
-    formatter?: OutputFormatter
+    formatter?: OutputFormatter,
+    stateManager?: StateManager
   ) {
     this.registryService = registryService || new RegistryService();
     this.deploymentMapper = deploymentMapper || new DeploymentMapper();
     this.statusService = statusService || new RepositoryStatusService();
     this.formatter = formatter || new OutputFormatter();
+    this.stateManager = stateManager || new StateManager();
   }
 
   /**
@@ -102,6 +105,10 @@ export class ShowCommand {
     
     try {
       const deploymentMapping = await this.deploymentMapper.mapDeployments(repository);
+      
+      // StateManagerから実際のデプロイ情報を取得
+      const repoState = await this.stateManager.getRepositoryState(repository.id);
+      
       spinner.succeed('Deployment information loaded');
       
       const formatterOptions: FormatterOptions = {
@@ -111,7 +118,13 @@ export class ShowCommand {
         terminalWidth: process.stdout.columns
       };
       
-      const output = await this.formatter.formatDeploymentMapping(deploymentMapping, formatterOptions);
+      // デプロイ情報にstate情報を含める
+      const mappingWithState = {
+        ...deploymentMapping,
+        deployedFiles: repoState?.deployedFiles || []
+      };
+      
+      const output = await this.formatter.formatDeploymentMapping(mappingWithState, formatterOptions);
       console.log(output);
     } catch (error) {
       spinner.warn('Unable to load deployment information');
@@ -262,9 +275,10 @@ export function createShowCommand(
   registryService?: RegistryService,
   deploymentMapper?: DeploymentMapper,
   statusService?: RepositoryStatusService,
-  formatter?: OutputFormatter
+  formatter?: OutputFormatter,
+  stateManager?: StateManager
 ): Command {
-  const showCommand = new ShowCommand(registryService, deploymentMapper, statusService, formatter);
+  const showCommand = new ShowCommand(registryService, deploymentMapper, statusService, formatter, stateManager);
   
   return new Command('show')
     .description('Show detailed information about a specific repository')

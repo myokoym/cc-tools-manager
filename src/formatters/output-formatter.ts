@@ -11,6 +11,15 @@ import { DeploymentMapping, DeploymentInfo } from '../services/deployment-mapper
 import { formatPathWithHome, generateDeployedFilesTree } from '../utils/tree';
 import * as path from 'path';
 
+export interface DeploymentMappingWithState extends DeploymentMapping {
+  deployedFiles?: {
+    source: string;
+    target: string;
+    hash: string;
+    deployedAt: string;
+  }[];
+}
+
 export type OutputFormat = 'table' | 'json' | 'yaml' | 'tree';
 
 export interface FormatterOptions {
@@ -101,7 +110,7 @@ export class OutputFormatter {
    * デプロイメントマッピング情報をフォーマット
    */
   async formatDeploymentMapping(
-    mapping: DeploymentMapping,
+    mapping: DeploymentMapping | DeploymentMappingWithState,
     options: FormatterOptions
   ): Promise<string> {
     return this.formatDeploymentDetails(mapping, options);
@@ -282,13 +291,17 @@ export class OutputFormatter {
   /**
    * デプロイメント詳細をフォーマット
    */
-  private formatDeploymentDetails(mapping: DeploymentMapping, options: FormatterOptions): string {
+  private formatDeploymentDetails(mapping: DeploymentMapping | DeploymentMappingWithState, options: FormatterOptions): string {
     const lines: string[] = [];
     
     lines.push(this.applyColor('\nDeployments:', 'bold', options));
     lines.push('');
 
-    if (mapping.deployments.length === 0) {
+    // deployedFilesまたはdeploymentsがあるかチェック
+    const hasDeployedFiles = 'deployedFiles' in mapping && mapping.deployedFiles && mapping.deployedFiles.length > 0;
+    const hasDeployments = mapping.deployments.length > 0;
+    
+    if (!hasDeployedFiles && !hasDeployments) {
       lines.push(this.applyColor('  No deployments configured.', 'gray', options));
       return lines.join('\n');
     }
@@ -298,28 +311,60 @@ export class OutputFormatter {
     lines.push(this.formatDeploymentStats(stats, options));
     lines.push('');
 
-    // ディレクトリごとにグループ化
-    const groupedFiles = this.groupFilesByDirectory(mapping.deployments);
-    
-    for (const [directory, deploymentInfos] of Object.entries(groupedFiles)) {
-      lines.push(this.applyColor(`  ${directory || 'Root'}:`, 'bold', options));
+    // deployedFilesがある場合はそれを使用（state.jsonからの実際のデプロイ情報）
+    if ('deployedFiles' in mapping && mapping.deployedFiles && mapping.deployedFiles.length > 0) {
+      // state.jsonからのデプロイ情報をディレクトリごとにグループ化
+      const groupedStateFiles: Record<string, typeof mapping.deployedFiles> = {};
       
-      for (const info of deploymentInfos) {
-        for (const file of info.files) {
-          const sourcePath = file;
-          const targetPath = this.resolveTargetPath(sourcePath);
+      for (const deployedFile of mapping.deployedFiles) {
+        const dir = path.dirname(deployedFile.source);
+        const normalizedDir = dir === '.' ? 'Root' : dir;
+        
+        if (!groupedStateFiles[normalizedDir]) {
+          groupedStateFiles[normalizedDir] = [];
+        }
+        groupedStateFiles[normalizedDir].push(deployedFile);
+      }
+      
+      for (const [directory, files] of Object.entries(groupedStateFiles)) {
+        lines.push(this.applyColor(`  ${directory}:`, 'bold', options));
+        
+        for (const file of files) {
           const arrow = this.applyColor('→', 'gray', options);
-          const statusColor = this.getStatusColor(info.status);
-          const statusText = this.applyColor(`[${info.status}]`, statusColor, options);
+          const statusText = this.applyColor('[deployed]', 'green', options);
           
           // フルパスを表示（ホームディレクトリは~に置換）
-          const formattedSource = formatPathWithHome(sourcePath);
-          const formattedTarget = formatPathWithHome(targetPath);
+          const formattedSource = formatPathWithHome(file.source);
+          const formattedTarget = formatPathWithHome(file.target);
           
           lines.push(`    ${formattedSource} ${arrow} ${formattedTarget} ${statusText}`);
         }
+        lines.push('');
       }
-      lines.push('');
+    } else {
+      // 従来のロジック（deploymentsフィールドのみを使用）
+      const groupedFiles = this.groupFilesByDirectory(mapping.deployments);
+      
+      for (const [directory, deploymentInfos] of Object.entries(groupedFiles)) {
+        lines.push(this.applyColor(`  ${directory || 'Root'}:`, 'bold', options));
+        
+        for (const info of deploymentInfos) {
+          for (const file of info.files) {
+            const sourcePath = file;
+            const targetPath = this.resolveTargetPath(sourcePath);
+            const arrow = this.applyColor('→', 'gray', options);
+            const statusColor = this.getStatusColor(info.status);
+            const statusText = this.applyColor(`[${info.status}]`, statusColor, options);
+            
+            // フルパスを表示（ホームディレクトリは~に置換）
+            const formattedSource = formatPathWithHome(sourcePath);
+            const formattedTarget = formatPathWithHome(targetPath);
+            
+            lines.push(`    ${formattedSource} ${arrow} ${formattedTarget} ${statusText}`);
+          }
+        }
+        lines.push('');
+      }
     }
 
     return lines.join('\n');
