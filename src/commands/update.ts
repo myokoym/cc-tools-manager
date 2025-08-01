@@ -153,6 +153,20 @@ async function updateRepository(repositoryName: string | undefined, options: Upd
           
           if (deployResult.deployed.length > 0) {
             spinner.succeed(`Deployed ${deployResult.deployed.length} files`);
+            
+            // デプロイメント情報を更新
+            const deployedFiles = deployResult.deployed.map(d => d.source);
+            const updatedDeployments = {
+              commands: repo.type === 'commands' ? deployedFiles : [],
+              agents: repo.type === 'agents' ? deployedFiles : [],
+              hooks: repo.type === 'hooks' ? deployedFiles : []
+            };
+            
+            
+            await registryService.update(repo.id, { 
+              deployments: updatedDeployments,
+              lastUpdatedAt: new Date().toISOString()
+            });
           } else {
             spinner.succeed('No new files to deploy');
           }
