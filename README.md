@@ -154,7 +154,28 @@ Registered Repositories:
 Total: 3 repositories
 ```
 
-**Note**: You can use the numbers from the list output with other commands (update, remove, status).
+**Note**: You can use the numbers from the list output with other commands (update, remove, show, status).
+
+### Show Repository Details
+
+Display detailed information about a specific repository:
+
+```bash
+# Show by repository name
+ccpm show owner/repo
+
+# Show by number (from list output)
+ccpm show 1
+
+# Show deployment mappings
+ccpm show owner/repo --verbose
+```
+
+The show command displays:
+- Repository information (URL, status, type)
+- Deployment mappings (source → target paths)
+- File deployment status
+- Summary statistics
 
 📖 **See [Command Reference](docs/commands.md) for detailed information about the enhanced list command and other recent improvements.**
 

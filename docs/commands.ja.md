@@ -122,6 +122,66 @@ Removing repository owner/repo...
 ✓ Repository removed successfully
 ```
 
+### show
+
+特定のリポジトリの詳細情報をデプロイメントマッピングとファイルステータスを含めて表示します。
+
+#### 使用方法
+```bash
+# リポジトリ名で表示
+ccpm show owner/repo
+
+# インデックス番号で表示（listコマンドから）
+ccpm show 1
+
+# リポジトリIDで表示（部分一致サポート）
+ccpm show abc123def
+```
+
+#### 機能
+- 名前、インデックス番号（#）、またはID（部分IDは最低4文字）でリポジトリを選択
+- state.jsonから実際のデプロイパスを表示
+- ソース → ターゲットのマッピングをフルパスで表示
+- より良い整理のためにファイルをディレクトリごとにグループ化
+- ホームディレクトリは自動的に~として表示
+
+#### オプション
+- `-v, --verbose`：内部IDやリポジトリステータスを含む追加詳細を表示
+- `--format <format>`：出力形式（table、json、yaml、tree）
+- `--files-only`：デプロイされたファイルリストのみを表示
+- `--tree`：ファイルをツリー形式で表示（--files-onlyと併用）
+- `--skip-deployments`：デプロイメント情報セクションをスキップ
+
+#### 出力例
+```bash
+ccpm show 1
+
+# 出力:
+✓ Found repository: owner/agents-repo
+
+Repository: owner/agents-repo
+
+  URL: https://github.com/owner/agents-repo
+  Status: active
+  Registered: 2025/1/15 10:30:45
+  Type: agents
+  Deployment Mode: type-based
+
+Deployments:
+
+  Summary:
+    Total Files: 3
+    Deployed: 3
+    Last Deployment: 2025/1/15 10:31:00
+
+  agents/core:
+    agents/core/code-archaeologist.md → ~/.claude/agents/core/code-archaeologist.md [deployed]
+    agents/core/performance-optimizer.md → ~/.claude/agents/core/performance-optimizer.md [deployed]
+
+  agents/frontend:
+    agents/frontend/react-specialist.md → ~/.claude/agents/frontend/react-specialist.md [deployed]
+```
+
 ### status
 
 デプロイメント詳細を含むリポジトリステータスの確認。特定のリポジトリをクエリしたり、すべてを表示できます。
@@ -158,7 +218,8 @@ statusコマンドは以下を表示：
 - `register <url>` - Claudeツールを含むGitHubリポジトリを登録
 - `update [repository]` - リポジトリをクローン/更新してツールを~/.claude/にデプロイ
 - `list` - 登録されたすべてのリポジトリとその状態を一覧表示
-- `status [repository]` - 詳細なリポジトリステータスを表示
+- `show <repository>` - デプロイメントマッピングを含むリポジトリの詳細情報を表示
+- `status [repository]` - リポジトリの同期状態とヘルスを表示
 - `remove <repository>` - リポジトリとそのデプロイされたファイルをすべて削除
 
 ### コマンドフロー

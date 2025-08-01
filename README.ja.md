@@ -154,7 +154,28 @@ Registered Repositories:
 Total: 3 repositories
 ```
 
-**注意**: list出力の番号は他のコマンド（update、remove、status）でも使用できます。
+**注意**: list出力の番号は他のコマンド（update、remove、show、status）でも使用できます。
+
+### リポジトリの詳細表示
+
+特定のリポジトリの詳細情報を表示します：
+
+```bash
+# リポジトリ名で表示
+ccpm show owner/repo
+
+# 番号で表示（list出力から）
+ccpm show 1
+
+# デプロイメントマッピングを表示
+ccpm show owner/repo --verbose
+```
+
+showコマンドは以下を表示します：
+- リポジトリ情報（URL、ステータス、タイプ）
+- デプロイメントマッピング（ソース → ターゲットパス）
+- ファイルデプロイメント状態
+- サマリー統計
 
 📖 **拡張されたlistコマンドやその他の最近の改善については[コマンドリファレンス](docs/commands.ja.md)を参照してください。**
 

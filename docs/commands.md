@@ -122,6 +122,66 @@ Removing repository owner/repo...
 ✓ Repository removed successfully
 ```
 
+### show
+
+Display detailed information about a specific repository, including deployment mappings and file status.
+
+#### Usage
+```bash
+# Show by repository name
+ccpm show owner/repo
+
+# Show by index number (from list command)
+ccpm show 1
+
+# Show by repository ID (partial match supported)
+ccpm show abc123def
+```
+
+#### Features
+- Repository selection by name, index (#), or ID (minimum 4 characters for partial ID)
+- Displays actual deployment paths from state.json
+- Shows source → target mappings with full paths
+- Groups files by directory for better organization
+- Home directory automatically displayed as ~
+
+#### Options
+- `-v, --verbose`: Show additional details including internal IDs and repository status
+- `--format <format>`: Output format (table, json, yaml, tree)
+- `--files-only`: Show only deployed files list
+- `--tree`: Display files in tree format (with --files-only)
+- `--skip-deployments`: Skip deployment information section
+
+#### Example Output
+```bash
+ccpm show 1
+
+# Output:
+✓ Found repository: owner/agents-repo
+
+Repository: owner/agents-repo
+
+  URL: https://github.com/owner/agents-repo
+  Status: active
+  Registered: 2025/1/15 10:30:45
+  Type: agents
+  Deployment Mode: type-based
+
+Deployments:
+
+  Summary:
+    Total Files: 3
+    Deployed: 3
+    Last Deployment: 2025/1/15 10:31:00
+
+  agents/core:
+    agents/core/code-archaeologist.md → ~/.claude/agents/core/code-archaeologist.md [deployed]
+    agents/core/performance-optimizer.md → ~/.claude/agents/core/performance-optimizer.md [deployed]
+
+  agents/frontend:
+    agents/frontend/react-specialist.md → ~/.claude/agents/frontend/react-specialist.md [deployed]
+```
+
 ### status
 
 Check repository status with deployment details. Can query specific repositories or show all.
@@ -158,7 +218,8 @@ The status command shows:
 - `register <url>` - Register a new GitHub repository containing Claude tools
 - `update [repository]` - Clone/update repositories and deploy tools to ~/.claude/
 - `list` - List all registered repositories with their status
-- `status [repository]` - Show detailed repository status
+- `show <repository>` - Show detailed repository information with deployment mappings
+- `status [repository]` - Show repository sync status and health
 - `remove <repository>` - Remove a repository and all its deployed files
 
 ### Command Flow
