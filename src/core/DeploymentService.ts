@@ -46,12 +46,77 @@ export class DeploymentService implements IDeploymentService {
       'hooks.{js,ts,mjs,md}'
     ]
   };
+  
+  /**
+   * テキストコンテンツをデプロイする
+   */
+  private async deployTextContent(repo: Repository, options?: { interactive?: boolean }): Promise<DeploymentResult> {
+    const result: DeploymentResult = {
+      deployed: [],
+      skipped: [],
+      failed: [],
+      conflicts: []
+    };
+    
+    try {
+      // CC_TOOLS_HOMEディレクトリを取得
+      const CC_TOOLS_HOME = process.env.CC_TOOLS_HOME || path.join(process.env.HOME || '', '.ccpm');
+      const textContentDir = path.join(CC_TOOLS_HOME, 'text-contents');
+      const contentFile = path.join(textContentDir, `${repo.name}.md`);
+      
+      // ファイルが存在するか確認
+      if (!await fileExists(contentFile)) {
+        logger.warn(`Text content file not found: ${contentFile}`);
+        return result;
+      }
+      
+      // デプロイ先のパスを決定
+      const targetDir = path.join(CLAUDE_DIR, repo.type || 'commands');
+      await ensureDir(targetDir);
+      const targetPath = path.join(targetDir, `${repo.name}.md`);
+      
+      // 競合チェック
+      if (await fileExists(targetPath)) {
+        const strategy: ConflictStrategy = options?.interactive ? 'prompt' : 'overwrite';
+        const shouldContinue = await this.handleConflict(targetPath, strategy);
+        
+        if (!shouldContinue) {
+          result.skipped.push(contentFile);
+          return result;
+        }
+      }
+      
+      // ファイルをコピー
+      await copyFile(contentFile, targetPath);
+      const hash = await getFileHash(targetPath);
+      
+      result.deployed.push({
+        source: contentFile,
+        target: targetPath,
+        hash: hash,
+        deployedAt: new Date().toISOString()
+      });
+      
+      logger.info(`Deployed text content: ${repo.name}`);
+      
+    } catch (error) {
+      logger.error(`Failed to deploy text content ${repo.name}`, error);
+      result.failed.push(repo.name);
+    }
+    
+    return result;
+  }
 
   /**
    * リポジトリのファイルをデプロイする
    */
   async deploy(repo: Repository, options?: { interactive?: boolean }): Promise<DeploymentResult> {
     logger.info(`Deploying files from ${repo.name}...`);
+    
+    // text://プロトコルの場合は専用処理
+    if (repo.url.startsWith('text://')) {
+      return await this.deployTextContent(repo, options);
+    }
     
     // type-basedモードの場合は専用メソッドを使用
     if (repo.type && repo.deploymentMode === 'type-based') {

@@ -35,7 +35,7 @@ export class RegistryService implements IRegistryService {
 
     // URL検証
     if (!this.validateUrl(url)) {
-      throw new ValidationError('Invalid GitHub repository URL format', 'url', url);
+      throw new ValidationError('Invalid repository URL format', 'url', url);
     }
 
     // 正規化されたURLを取得
@@ -77,7 +77,7 @@ export class RegistryService implements IRegistryService {
 
     // URL検証
     if (!this.validateUrl(url)) {
-      throw new ValidationError('Invalid GitHub repository URL format', 'url', url);
+      throw new ValidationError('Invalid repository URL format', 'url', url);
     }
 
     // 正規化されたURLを取得
@@ -212,6 +212,12 @@ export class RegistryService implements IRegistryService {
     try {
       const urlObj = new URL(url);
       
+      // text://プロトコルの場合は特別な処理
+      if (urlObj.protocol === 'text:') {
+        // text://nameの形式をチェック
+        return /^text:\/\/[\w-]+$/.test(url);
+      }
+      
       // GitHubのURLパターンをチェック
       const githubPattern = /^https?:\/\/(www\.)?github\.com\/[\w-]+\/[\w.-]+/;
       if (!githubPattern.test(url)) {
@@ -290,6 +296,11 @@ export class RegistryService implements IRegistryService {
     try {
       const urlObj = new URL(url);
       
+      // text://プロトコルの場合はそのまま返す
+      if (urlObj.protocol === 'text:') {
+        return url;
+      }
+      
       // HTTPSに統一
       urlObj.protocol = 'https:';
       
@@ -319,6 +330,13 @@ export class RegistryService implements IRegistryService {
   private extractRepoName(url: string): string {
     try {
       const urlObj = new URL(url);
+      
+      // text://プロトコルの場合
+      if (urlObj.protocol === 'text:') {
+        // text://nameからnameを抽出
+        return urlObj.hostname || 'unknown';
+      }
+      
       const pathParts = urlObj.pathname.split('/').filter(part => part.length > 0);
       
       if (pathParts.length >= 2) {

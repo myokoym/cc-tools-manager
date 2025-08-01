@@ -12,6 +12,10 @@ import { ValidationError, ConflictError } from '../utils/errors';
 import { CC_TOOLS_HOME } from '../constants/paths';
 import { RepositoryType } from '../types';
 import * as path from 'path';
+import * as fs from 'fs/promises';
+import { spawn } from 'child_process';
+import * as os from 'os';
+import inquirer from 'inquirer';
 
 const logger = new Logger();
 
@@ -21,12 +25,17 @@ const logger = new Logger();
 export function createRegisterCommand(): Command {
   const command = new Command('register')
     .alias('reg')
-    .description('Register a GitHub repository to the tools registry')
-    .argument('<url>', 'GitHub repository URL')
+    .description('Register a GitHub repository or text content to the tools registry')
+    .argument('<url>', 'GitHub repository URL or "text" for text content')
     .option('-d, --data-dir <dir>', 'Data directory path', CC_TOOLS_HOME)
     .option('-t, --type <type>', 'Repository type (agents, commands, hooks)')
-    .action(async (url: string, options: { dataDir: string; type?: string }) => {
-      await handleRegister(url, options);
+    .option('-n, --name <name>', 'Name for text content')
+    .action(async (url: string, options: { dataDir: string; type?: string; name?: string }) => {
+      if (url === 'text') {
+        await handleTextRegister(options);
+      } else {
+        await handleRegister(url, options);
+      }
     });
 
   return command;
@@ -128,6 +137,101 @@ async function handleRegister(url: string, options: { dataDir: string; type?: st
     } else {
       console.error(chalk.red('\n❌ Unknown error occurred'));
       logger.error('Unknown error during registration', error);
+    }
+    
+    process.exit(1);
+  }
+}
+
+/**
+ * テキストコンテンツ登録処理のハンドラー
+ */
+async function handleTextRegister(options: { dataDir: string; type?: string; name?: string }): Promise<void> {
+  const spinner = ora();
+  
+  try {
+    // インタラクティブな情報収集
+    const answers = await inquirer.prompt([
+      {
+        type: 'input',
+        name: 'name',
+        message: 'Enter the name for this text content:',
+        default: options.name,
+        validate: (input) => input.trim().length > 0 || 'Name is required'
+      },
+      {
+        type: 'list',
+        name: 'type',
+        message: 'Select the content type:',
+        choices: ['commands', 'agents', 'hooks'],
+        default: options.type || 'commands'
+      }
+    ]);
+    
+    const { name, type } = answers;
+    
+    // テキストコンテンツ用のディレクトリを作成
+    const textContentDir = path.join(options.dataDir, 'text-contents');
+    await fs.mkdir(textContentDir, { recursive: true });
+    
+    // 一時ファイルを作成してエディタで開く
+    const tempFile = path.join(os.tmpdir(), `ccpm-text-${Date.now()}.md`);
+    await fs.writeFile(tempFile, `# ${name}\n\n# Type: ${type}\n# Enter your content below:\n\n`);
+    
+    console.log(chalk.blue('📝 Opening editor...'));
+    
+    // エディタを開く
+    const editor = process.env.EDITOR || 'vi';
+    await new Promise<void>((resolve, reject) => {
+      const editorProcess = spawn(editor, [tempFile], { stdio: 'inherit' });
+      editorProcess.on('exit', (code) => {
+        if (code === 0) resolve();
+        else reject(new Error('Editor exited with error'));
+      });
+    });
+    
+    // ファイル内容を読み込む
+    const content = await fs.readFile(tempFile, 'utf-8');
+    await fs.unlink(tempFile); // 一時ファイルを削除
+    
+    if (content.trim().length === 0) {
+      throw new Error('No content was provided');
+    }
+    
+    // コンテンツを保存
+    const contentFile = path.join(textContentDir, `${name}.md`);
+    await fs.writeFile(contentFile, content);
+    
+    // レジストリサービスを使って仮想リポジトリとして登録
+    spinner.start('Registering text content...');
+    const registryService = new RegistryService(options.dataDir);
+    const textUrl = `text://${name}`;
+    
+    // 仮想リポジトリとして登録
+    const repository = await registryService.registerWithType(textUrl, [type as RepositoryType]);
+    spinner.succeed('Text content registered successfully');
+    
+    // 登録結果の表示
+    console.log('\n' + chalk.green('✅ Registration Complete'));
+    console.log(chalk.gray('─'.repeat(50)));
+    console.log(chalk.cyan('ID:'), repository.id);
+    console.log(chalk.cyan('Name:'), name);
+    console.log(chalk.cyan('Type:'), type);
+    console.log(chalk.cyan('Status:'), chalk.yellow('text content'));
+    console.log(chalk.cyan('Registered:'), new Date(repository.registeredAt).toLocaleString());
+    
+    // 次のステップの案内
+    console.log('\n' + chalk.blue('📋 Next Steps:'));
+    console.log(chalk.gray('•'), `Run ${chalk.white('ccpm update ' + name)} to deploy the content`);
+    console.log(chalk.gray('•'), `Run ${chalk.white('ccpm edit ' + name)} to edit the content`);
+    console.log(chalk.gray('•'), `Run ${chalk.white('ccpm list')} to see all registered items`);
+    
+  } catch (error) {
+    spinner.fail('Registration failed');
+    
+    if (error instanceof Error) {
+      console.error(chalk.red('\n❌ Error:'), error.message);
+      logger.error('Text content registration failed', error);
     }
     
     process.exit(1);

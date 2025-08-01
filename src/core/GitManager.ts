@@ -59,7 +59,20 @@ export class GitManager implements IGitManager {
       // 親ディレクトリを作成
       await fs.mkdir(path.dirname(repoPath), { recursive: true });
 
-      // クローン実行
+      // text://プロトコルの場合は特別な処理
+      if (repo.url.startsWith('text://')) {
+        // テキストコンテンツ用のディレクトリを作成するだけ
+        await fs.mkdir(repoPath, { recursive: true });
+        
+        // プレースホルダーファイルを作成
+        const placeholderPath = path.join(repoPath, '.text-content');
+        await fs.writeFile(placeholderPath, `This is a text content repository: ${repo.name}`);
+        
+        this.logger.info(`Created text content directory for ${repo.name}`);
+        return;
+      }
+
+      // 通常のGitクローン実行
       // simple-gitのクローンには親ディレクトリを指定
       const parentDir = path.dirname(repoPath);
       const repoName = path.basename(repoPath);
@@ -101,6 +114,19 @@ export class GitManager implements IGitManager {
   async pull(repo: Repository): Promise<GitUpdateResult> {
     this.logger.info(`Updating ${repo.name}...`);
     const repoPath = this.getRepoPath(repo);
+
+    // text://プロトコルの場合は更新なし
+    if (repo.url.startsWith('text://')) {
+      this.logger.info(`Text content ${repo.name} is always up-to-date`);
+      return {
+        filesChanged: 0,
+        insertions: 0,
+        deletions: 0,
+        currentCommit: 'text-content',
+        previousCommit: 'text-content'
+      };
+    }
+
     const repoGit = simpleGit(repoPath);
 
     try {
@@ -156,6 +182,19 @@ export class GitManager implements IGitManager {
    */
   async getStatus(repo: Repository): Promise<GitStatus> {
     const repoPath = this.getRepoPath(repo);
+
+    // text://プロトコルの場合は固定のステータスを返す
+    if (repo.url.startsWith('text://')) {
+      return {
+        isClean: true,
+        branch: 'main',
+        ahead: 0,
+        behind: 0,
+        modified: [],
+        untracked: [],
+      };
+    }
+
     const repoGit = simpleGit(repoPath);
 
     try {

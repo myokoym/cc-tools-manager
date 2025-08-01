@@ -24,6 +24,7 @@ import { OutputFormatter } from './formatters/output-formatter';
 import createRegisterCommand from './commands/register';
 import { updateCommand, listCommand, statusCommand, createShowCommand } from './commands';
 import { createRemoveCommand } from './commands/remove';
+import createEditCommand from './commands/edit';
 
 // Initialize core services
 const registryService = new RegistryService();
@@ -40,6 +41,7 @@ program.addCommand(listCommand);
 program.addCommand(createShowCommand(registryService, deploymentMapper, repositoryStatusService, outputFormatter));
 program.addCommand(statusCommand);
 program.addCommand(createRemoveCommand());
+program.addCommand(createEditCommand());
 
 // Error handling for unknown commands
 program.on('command:*', () => {
