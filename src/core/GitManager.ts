@@ -284,6 +284,11 @@ export class GitManager implements IGitManager {
    * URLからリポジトリ名を抽出する
    */
   private extractRepoName(url: string): string {
+    // text://プロトコルの場合
+    if (url.startsWith('text://')) {
+      return url.substring(7); // "text://"を除去
+    }
+    
     // GitHub URLパターン: https://github.com/user/repo.git
     const match = url.match(/(?:git@github\.com:|https:\/\/github\.com\/)([^\/]+)\/([^\.]+)(?:\.git)?$/);
     
@@ -303,13 +308,34 @@ export class GitManager implements IGitManager {
   private async verifyRepoExists(repoPath: string): Promise<void> {
     try {
       await fs.access(repoPath);
-      const gitDir = path.join(repoPath, '.git');
-      await fs.access(gitDir);
+      
+      // テキストコンテンツの場合は.text-contentファイルをチェック
+      if (repoPath.includes('text-contents') || await this.isTextContent(repoPath)) {
+        const textMarker = path.join(repoPath, '.text-content');
+        await fs.access(textMarker);
+      } else {
+        // 通常のGitリポジトリの場合は.gitディレクトリをチェック
+        const gitDir = path.join(repoPath, '.git');
+        await fs.access(gitDir);
+      }
     } catch {
       throw createError(
         'REPO_NOT_FOUND',
         `Repository not found at ${repoPath}. Please clone it first.`
       );
+    }
+  }
+  
+  /**
+   * ディレクトリがテキストコンテンツかどうかを判定する
+   */
+  private async isTextContent(repoPath: string): Promise<boolean> {
+    try {
+      const textMarker = path.join(repoPath, '.text-content');
+      await fs.access(textMarker);
+      return true;
+    } catch {
+      return false;
     }
   }
 
