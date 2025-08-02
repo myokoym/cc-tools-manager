@@ -57,6 +57,24 @@ Always use `bash` explicitly when running bash scripts to avoid compatibility is
 
 In WSL2, never assume `sh` is `bash`. Always use the appropriate shell for your scripts.
 
+### Recommended execution methods:
+
+1. **Direct execution with shebang** (requires execute permission):
+   ```bash
+   chmod +x install.sh
+   ./install.sh
+   ```
+
+2. **Explicit bash execution** (no permission change needed):
+   ```bash
+   bash install.sh
+   ```
+
+3. **Never use sh**:
+   ```bash
+   sh install.sh  # ❌ This will fail with dash-incompatible scripts
+   ```
+
 ## References
 
 - [Dash Shell Documentation](https://wiki.ubuntu.com/DashAsBinSh)

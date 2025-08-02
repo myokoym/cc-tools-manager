@@ -42,7 +42,7 @@ curl経由でインストールした場合、ccpmは以下にクローンされ
 ```bash
 git clone https://github.com/myokoym/claude-code-package-manager.git
 cd claude-code-package-manager
-./install.sh
+./install.sh  # または: bash install.sh
 ```
 
 ### 手動インストール

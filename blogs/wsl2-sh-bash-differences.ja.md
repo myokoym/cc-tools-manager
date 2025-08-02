@@ -58,6 +58,24 @@ fi
 
 WSL2では、`sh`が`bash`であると仮定してはいけません。スクリプトには常に適切なシェルを使用してください。
 
+### 推奨される実行方法:
+
+1. **シェバンを使った直接実行**（実行権限が必要）:
+   ```bash
+   chmod +x install.sh
+   ./install.sh
+   ```
+
+2. **明示的なbash実行**（権限変更不要）:
+   ```bash
+   bash install.sh
+   ```
+
+3. **shは絶対に使わない**:
+   ```bash
+   sh install.sh  # ❌ dash非互換スクリプトで失敗します
+   ```
+
 ## 参考資料
 
 - [Dashシェルドキュメント](https://wiki.ubuntu.com/DashAsBinSh)
