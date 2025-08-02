@@ -22,7 +22,7 @@ import { OutputFormatter } from './formatters/output-formatter';
 
 // 同期的にコマンドを登録
 import createRegisterCommand from './commands/register';
-import { updateCommand, listCommand, statusCommand, createShowCommand, installCommand, uninstallCommand } from './commands';
+import { updateCommand, listCommand, statusCommand, createShowCommand, installCommand, uninstallCommand, unregisterCommand } from './commands';
 import { createRemoveCommand } from './commands/remove';
 import createEditCommand from './commands/edit';
 
@@ -44,6 +44,7 @@ program.addCommand(createRemoveCommand());
 program.addCommand(createEditCommand());
 program.addCommand(installCommand);
 program.addCommand(uninstallCommand);
+program.addCommand(unregisterCommand);
 
 // Error handling for unknown commands
 program.on('command:*', () => {

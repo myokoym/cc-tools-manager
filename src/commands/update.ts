@@ -37,6 +37,7 @@ interface UpdateOptions {
   force?: boolean;
   all?: boolean;
   interactive?: boolean;
+  install?: boolean;
 }
 
 /**
@@ -135,8 +136,8 @@ async function updateRepository(repositoryName: string | undefined, options: Upd
         if (repo.type && repo.deploymentMode === 'type-based') {
           spinner.succeed(`Type-based deployment mode (${repo.type})`);
           
-          // デプロイメント確認（--forceでスキップ）
-          if (!options.force) {
+          // デプロイメント確認（--force または --install でスキップ）
+          if (!options.force && !options.install) {
             const shouldDeploy = await promptYesNo(
               chalk.yellow('\nDeploy files? (y/N): '),
               false
@@ -181,8 +182,8 @@ async function updateRepository(repositoryName: string | undefined, options: Upd
           if (patterns.length > 0) {
             spinner.succeed(`Found ${patterns.length} deployable files`);
             
-            // デプロイメント確認（--forceでスキップ）
-            if (!options.force) {
+            // デプロイメント確認（--force または --install でスキップ）
+            if (!options.force && !options.install) {
               const shouldDeploy = await promptYesNo(
                 chalk.yellow('\nDeploy files? (y/N): '),
                 false
@@ -270,4 +271,5 @@ export const updateCommand = new Command('update')
   .option('-f, --force', 'Skip deployment confirmation prompt')
   .option('-a, --all', 'Update all repositories')
   .option('-i, --interactive', 'Prompt before overwriting each file')
+  .option('--install', 'Automatically deploy files after update (same as answering "y" to deploy prompt)')
   .action(updateRepository);

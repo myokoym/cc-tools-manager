@@ -127,12 +127,81 @@ ccpm update owner/repo
 # Update specific repository by number (from list output)
 ccpm update 2
 
-# Specify concurrent processing (default: 3)
-ccpm update --concurrent 5
+# Automatically deploy files after update (skips deployment prompt)
+ccpm update --install
 
-# Skip deployment
+# Force deployment without prompting
+ccpm update --force
+
+# Skip deployment entirely
 ccpm update --skip-deploy
 ```
+
+### Install Command
+
+Deploy files from registered repositories without updating the git repository:
+
+```bash
+# Install specific repository
+ccpm install owner/repo
+
+# Install by number (from list output)
+ccpm install 1
+
+# Install all registered repositories
+ccpm install --all
+
+# Force install without confirmation prompts
+ccpm install --force
+
+# Interactive mode (prompt before overwriting each file)
+ccpm install --interactive
+```
+
+The `install` command deploys files to `.claude/` directory without performing a git pull. This is useful when you want to deploy files from an already-updated repository or restore previously deployed files.
+
+### Uninstall Command
+
+Remove deployed files from `.claude` directory:
+
+```bash
+# Uninstall specific repository files
+ccpm uninstall owner/repo
+
+# Uninstall by number
+ccpm uninstall 1
+
+# Uninstall all repositories
+ccpm uninstall --all
+
+# Force uninstall without confirmation
+ccpm uninstall --force
+
+# Dry run (show what would be removed)
+ccpm uninstall --dry-run
+```
+
+The `uninstall` command removes all deployed files from the `.claude/` directory but keeps the repository registered and the local git repository intact.
+
+### Unregister Command
+
+Remove repository from registry (keeps deployed files):
+
+```bash
+# Unregister specific repository
+ccpm unregister owner/repo
+
+# Unregister by number
+ccpm unregister 1
+
+# Unregister all repositories
+ccpm unregister --all
+
+# Force unregister without confirmation
+ccpm unregister --force
+```
+
+The `unregister` command removes the repository from the registry but leaves deployed files in `.claude/` directory intact. This is useful when you want to stop tracking a repository but keep using its deployed tools.
 
 ### List Repositories
 
@@ -159,7 +228,7 @@ Registered Repositories:
 Total: 3 repositories
 ```
 
-**Note**: You can use the numbers from the list output with other commands (update, remove, show, status).
+**Note**: You can use the numbers from the list output with other commands (update, install, uninstall, unregister, show, status).
 
 ### Show Repository Details
 
@@ -201,7 +270,7 @@ ccpm status --json
 
 ### Remove Repository
 
-Remove a registered repository:
+Remove a registered repository and all its deployed files:
 
 ```bash
 # Remove with confirmation
@@ -213,6 +282,28 @@ ccpm remove 2
 # Remove without confirmation
 ccpm remove owner/repo --force
 ```
+
+## Command Comparison
+
+Understanding the differences between similar commands:
+
+| Command | Repository Registry | Git Repository | Deployed Files |
+|---------|-------------------|----------------|----------------|
+| `update` | Keeps | Updates (git pull) | Redeploys (with prompt) |
+| `update --install` | Keeps | Updates (git pull) | Deploys automatically |
+| `install` | Keeps | No change | Deploys (with prompt) |
+| `uninstall` | Keeps | No change | Removes |
+| `unregister` | Removes | No change | Keeps |
+| `remove` | Removes | Removes | Removes |
+
+### When to use each command:
+
+- **`update`**: Get latest changes from repository and optionally deploy
+- **`update --install`**: Get latest changes and automatically deploy files
+- **`install`**: Deploy files from current repository state without updating
+- **`uninstall`**: Remove deployed files but keep repository registered
+- **`unregister`**: Stop tracking repository but keep deployed files
+- **`remove`**: Completely remove repository and all associated files
 
 ## Directory Structure
 

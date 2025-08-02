@@ -49,6 +49,175 @@ ccpm register https://github.com/anthropics/claude-tools
 ccpm register https://github.com/user/my-scripts --type commands
 ```
 
+### update
+
+Update repositories with enhanced deployment tracking and automatic deployment options.
+
+#### Usage
+```bash
+# Update all repositories
+ccpm update
+
+# Update by repository name
+ccpm update owner/repo
+
+# Update by index number (from list command)
+ccpm update 1
+
+# Update by repository ID
+ccpm update abc123def
+
+# Update and automatically deploy files (skips deployment prompt)
+ccpm update --install
+
+# Update with force deployment
+ccpm update --force
+```
+
+#### Enhanced Features
+- Repository selection by name, index (#), or ID
+- Parallel processing for faster updates
+- Detailed deployment tracking with file-level granularity
+- Automatic cleanup of orphaned files
+- Progress indication for each operation
+- **New**: `--install` flag for automatic deployment after update
+
+#### Options
+- `--install`: Automatically deploy files after update (same as answering "y" to deploy prompt)
+- `--concurrent <number>`: Set number of parallel operations (default: 3)
+- `--skip-deploy`: Update repository without deploying files
+- `--conflict-resolution <strategy>`: Handle conflicts (skip/overwrite/prompt)
+- `-f, --force`: Skip deployment confirmation prompt
+- `-a, --all`: Update all repositories
+- `-i, --interactive`: Prompt before overwriting each file
+
+### install
+
+Deploy files from registered repositories without updating the git repository. This command is useful when you want to deploy files from an already-updated repository or restore previously deployed files.
+
+#### Usage
+```bash
+# Install specific repository
+ccpm install owner/repo
+
+# Install by index number (from list command)
+ccpm install 1
+
+# Install by repository ID
+ccpm install abc123def
+
+# Install all registered repositories
+ccpm install --all
+```
+
+#### Features
+- Repository selection by name, index (#), or ID
+- Deploys files to `.claude/` directory without performing git pull
+- Supports both pattern-based and type-based deployments
+- Interactive confirmation prompts (can be skipped with --force)
+- Progress indication and detailed feedback
+
+#### Options
+- `-f, --force`: Skip deployment confirmation prompt
+- `-a, --all`: Install all repositories
+- `-i, --interactive`: Prompt before overwriting each file
+
+#### When to use install vs update
+
+| Scenario | Command to use |
+|----------|----------------|
+| Get latest changes and deploy | `ccpm update` or `ccpm update --install` |
+| Deploy files from current repository state | `ccpm install` |
+| Restore previously deployed files | `ccpm install` |
+| Deploy after manual git operations | `ccpm install` |
+
+### uninstall
+
+Remove deployed files from `.claude` directory while keeping the repository registered and the local git repository intact.
+
+#### Usage
+```bash
+# Uninstall specific repository files
+ccpm uninstall owner/repo
+
+# Uninstall by index number
+ccpm uninstall 1
+
+# Uninstall by repository ID
+ccpm uninstall abc123def
+
+# Uninstall all repositories
+ccpm uninstall --all
+```
+
+#### Features
+- Repository selection by name, index (#), or ID
+- Removes all deployed files tracked in state.json
+- Shows detailed progress of file removal
+- Dry run mode to preview changes
+- Updates state tracking after removal
+
+#### Options
+- `-f, --force`: Skip removal confirmation prompt
+- `-a, --all`: Uninstall all repositories
+- `--dry-run`: Show what would be removed without making changes
+
+#### Example Output
+```bash
+ccpm uninstall 1
+
+# Output:
+Uninstalling owner/repo...
+✓ Found 3 deployed files
+Remove 3 deployed files? (y/N): y
+Removing files...
+✓ Removed 3 files
+✓ owner/repo uninstalled successfully
+```
+
+### unregister
+
+Remove repository from registry while keeping deployed files intact. This is useful when you want to stop tracking a repository but continue using its deployed tools.
+
+#### Usage
+```bash
+# Unregister specific repository
+ccpm unregister owner/repo
+
+# Unregister by index number
+ccpm unregister 1
+
+# Unregister by repository ID
+ccpm unregister abc123def
+
+# Unregister all repositories
+ccpm unregister --all
+```
+
+#### Features
+- Repository selection by name, index (#), or ID
+- Removes repository from registry only
+- Deployed files remain in `.claude/` directory
+- Provides guidance on how to remove files if needed
+
+#### Options
+- `-f, --force`: Skip removal confirmation prompt
+- `-a, --all`: Unregister all repositories
+
+#### Example Output
+```bash
+ccpm unregister 1
+
+# Output:
+Unregistering owner/repo...
+Remove "owner/repo" from registry? This will NOT remove deployed files. (y/N): y
+Removing from registry...
+✓ Removed from registry
+✓ owner/repo unregistered successfully
+  Note: Deployed files remain in .claude directory
+  Run 'ccpm uninstall owner/repo' to remove deployed files
+```
+
 ### list
 
 Display registered repositories with their status and deployment information.
@@ -100,37 +269,6 @@ owner/repo2         ✗ Error                       0    2025/1/10
 
 Total: 2 repositories
 ```
-
-### update
-
-Update repositories with enhanced deployment tracking. Can target specific repositories using various identifiers.
-
-#### Usage
-```bash
-# Update all repositories
-ccpm update
-
-# Update by repository name
-ccpm update owner/repo
-
-# Update by index number (from list command)
-ccpm update 1
-
-# Update by repository ID
-ccpm update abc123def
-```
-
-#### Features
-- Repository selection by name, index (#), or ID
-- Parallel processing for faster updates
-- Detailed deployment tracking with file-level granularity
-- Automatic cleanup of orphaned files
-- Progress indication for each operation
-
-#### Options
-- `--concurrent <number>`: Set number of parallel operations (default: 3)
-- `--skip-deploy`: Update repository without deploying files
-- `--conflict-resolution <strategy>`: Handle conflicts (skip/overwrite/prompt)
 
 ### remove
 
@@ -262,6 +400,9 @@ The status command shows:
 
 - `register <url>` - Register a new GitHub repository containing Claude tools
 - `update [repository]` - Clone/update repositories and deploy tools to ~/.claude/
+- `install [repository]` - Deploy files from registered repositories without git pull
+- `uninstall [repository]` - Remove deployed files from .claude directory
+- `unregister [repository]` - Remove repository from registry (keeps deployed files)
 - `list` - List all registered repositories with their status
 - `show <repository>` - Show detailed repository information with deployment mappings
 - `status [repository]` - Show repository sync status and health
@@ -271,8 +412,33 @@ The status command shows:
 
 1. **Register**: Add a repository URL to track
 2. **Update**: Clone the repository and deploy tools
-3. **List/Status**: Monitor your repositories
-4. **Remove**: Clean up when no longer needed
+3. **Install**: Deploy tools without updating repository
+4. **List/Status**: Monitor your repositories
+5. **Uninstall**: Remove deployed files while keeping repository
+6. **Unregister**: Remove repository tracking while keeping files
+7. **Remove**: Clean up when no longer needed
+
+### Command Comparison
+
+Understanding the differences between commands:
+
+| Command | Repository Registry | Git Repository | Deployed Files |
+|---------|-------------------|----------------|----------------|
+| `update` | Keeps | Updates (git pull) | Redeploys (with prompt) |
+| `update --install` | Keeps | Updates (git pull) | Deploys automatically |
+| `install` | Keeps | No change | Deploys (with prompt) |
+| `uninstall` | Keeps | No change | Removes |
+| `unregister` | Removes | No change | Keeps |
+| `remove` | Removes | Removes | Removes |
+
+### When to use each command:
+
+- **`update`**: Get latest changes from repository and optionally deploy
+- **`update --install`**: Get latest changes and automatically deploy files
+- **`install`**: Deploy files from current repository state without updating
+- **`uninstall`**: Remove deployed files but keep repository registered
+- **`unregister`**: Stop tracking repository but keep deployed files
+- **`remove`**: Completely remove repository and all associated files
 
 ## Key Features
 
@@ -291,6 +457,12 @@ The status command shows:
 - Parallel processing for faster updates
 - Progress indicators for all operations
 - Configurable concurrency levels
+
+### Flexible Deployment Options
+- **Install without update**: Deploy files from current repository state
+- **Automatic deployment**: Use `--install` flag with update command
+- **Selective removal**: Uninstall files while keeping repository tracked
+- **Clean separation**: Unregister repositories while keeping deployed files
 
 ## Environment Variables
 

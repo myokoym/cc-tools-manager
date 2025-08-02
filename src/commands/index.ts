@@ -11,3 +11,4 @@ export { statusCommand } from './status';
 export { updateCommand } from './update';
 export { installCommand } from './install';
 export { uninstallCommand } from './uninstall';
+export { unregisterCommand } from './unregister';

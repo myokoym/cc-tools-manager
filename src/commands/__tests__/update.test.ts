@@ -84,6 +84,10 @@ describe('Update Command', () => {
       const allOption = options.find(opt => opt.long === '--all');
       expect(allOption).toBeDefined();
       expect(allOption?.short).toBe('-a');
+      
+      const installOption = options.find(opt => opt.long === '--install');
+      expect(installOption).toBeDefined();
+      expect(installOption?.description).toBe('Automatically deploy files after update (same as answering "y" to deploy prompt)');
     });
   });
 
@@ -252,6 +256,26 @@ describe('Update Command', () => {
       }).rejects.toThrow('Process exited with code undefined');
 
       expect(mockDeploymentService.deploy).toHaveBeenCalledWith(mockRepositories[0]);
+    });
+
+    it('should automatically deploy with --install flag', async () => {
+      const command = updateCommand;
+      
+      await expect(async () => {
+        await command.parseAsync(['node', 'test', 'update', 'test-repo-1', '--install']);
+      }).rejects.toThrow('Process exited with code undefined');
+
+      expect(mockDeploymentService.deploy).toHaveBeenCalledWith(mockRepositories[0], { interactive: undefined });
+    });
+
+    it('should work with --install and --interactive flags together', async () => {
+      const command = updateCommand;
+      
+      await expect(async () => {
+        await command.parseAsync(['node', 'test', 'update', 'test-repo-1', '--install', '--interactive']);
+      }).rejects.toThrow('Process exited with code undefined');
+
+      expect(mockDeploymentService.deploy).toHaveBeenCalledWith(mockRepositories[0], { interactive: true });
     });
   });
 

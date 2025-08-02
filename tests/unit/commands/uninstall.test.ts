@@ -2,18 +2,19 @@
  * Uninstall Command Tests
  */
 
-import { createUninstallCommand } from '../../../src/commands/uninstall';
+import { uninstallCommand } from '../../../src/commands/uninstall';
+import { Option } from 'commander';
 
 describe('Uninstall Command', () => {
   it('should create uninstall command with correct name and description', () => {
-    const command = createUninstallCommand();
+    const command = uninstallCommand;
     
     expect(command.name()).toBe('uninstall');
-    expect(command.description()).toContain('Uninstall files from .claude directory');
+    expect(command.description()).toContain('Remove deployed files from .claude directory');
   });
 
   it('should accept optional repository argument', () => {
-    const command = createUninstallCommand();
+    const command = uninstallCommand;
     
     // Check if command accepts the right arguments
     const helpText = command.helpInformation();
@@ -21,24 +22,21 @@ describe('Uninstall Command', () => {
   });
 
   it('should have all required options', () => {
-    const command = createUninstallCommand();
+    const command = uninstallCommand;
     const options = command.options;
     
-    const optionNames = options.map(opt => opt.long);
+    const optionNames = options.map((opt: Option) => opt.long);
     expect(optionNames).toContain('--force');
-    expect(optionNames).toContain('--yes');
+    expect(optionNames).toContain('--all');
     expect(optionNames).toContain('--dry-run');
-    expect(optionNames).toContain('--keep-backup');
-    expect(optionNames).toContain('--silent');
-    expect(optionNames).toContain('--verbose');
   });
 
   it('should have correct option descriptions', () => {
-    const command = createUninstallCommand();
-    const forceOption = command.options.find(opt => opt.long === '--force');
-    const keepBackupOption = command.options.find(opt => opt.long === '--keep-backup');
+    const command = uninstallCommand;
+    const forceOption = command.options.find((opt: Option) => opt.long === '--force');
+    const dryRunOption = command.options.find((opt: Option) => opt.long === '--dry-run');
     
-    expect(forceOption?.description).toContain('Force uninstall');
-    expect(keepBackupOption?.description).toContain('Keep backup');
+    expect(forceOption?.description).toContain('Skip removal confirmation prompt');
+    expect(dryRunOption?.description).toContain('Show what would be removed without making changes');
   });
 });
