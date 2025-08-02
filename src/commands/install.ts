@@ -1,381 +1,158 @@
 /**
- * Install Command
- * 
- * Deploys files from registered repositories to the .claude directory
- * without re-registering the repository.
+ * Install command implementation
+ * リポジトリのファイルを.claudeディレクトリにデプロイ
  */
 
 import { Command } from 'commander';
-import ora from 'ora';
 import chalk from 'chalk';
-import inquirer from 'inquirer';
 import { RegistryService } from '../core/RegistryService';
-import { StateManager } from '../core/StateManager';
 import { DeploymentService } from '../core/DeploymentService';
-import { EnhancedStateManager } from '../core/EnhancedStateManager';
-import { CommandOutputFormatter } from '../utils/command-output-formatter';
-import { ErrorRecoveryService } from '../core/ErrorRecoveryService';
-import { InstallationError, NotFoundError } from '../utils/errors';
-import { Repository } from '../types';
-import { DeployedFile } from '../types/state';
-import { DeploymentResult } from '../core/interfaces/IDeploymentService';
+import { StateManager } from '../core/StateManager';
+import { Repository } from '../types/repository';
+import { promptYesNo } from '../utils/prompt';
+import ora from 'ora';
 import { selectRepository, displayNumberedRepositories } from '../utils/repository-selector';
-import { CC_TOOLS_HOME } from '../constants/paths';
-import * as path from 'path';
-import { logger } from '../utils/logger';
 
+/**
+ * インストールオプション
+ */
 interface InstallOptions {
   force?: boolean;
-  yes?: boolean;
-  dryRun?: boolean;
-  silent?: boolean;
-  verbose?: boolean;
-  pattern?: string;
-  skipConflicts?: boolean;
-}
-
-interface InstallResult {
-  repository: Repository;
-  deployed: DeployedFile[];
-  skipped: string[];
-  failed: string[];
-  conflicts: string[];
-  status: 'success' | 'partial' | 'failed' | 'skipped';
+  all?: boolean;
+  interactive?: boolean;
 }
 
 /**
- * Create install command
+ * リポジトリをインストール
  */
-export function createInstallCommand(): Command {
-  const command = new Command('install');
-
-  command
-    .description('Install files from registered repositories to .claude directory')
-    .argument('[repository]', 'Repository name or ID to install (optional)')
-    .option('-f, --force', 'Force installation even if already installed')
-    .option('-y, --yes', 'Skip confirmation prompts')
-    .option('--dry-run', 'Show what would be installed without making changes')
-    .option('--pattern <pattern>', 'Install only files matching pattern')
-    .option('--skip-conflicts', 'Skip files that would cause conflicts')
-    .option('-s, --silent', 'Suppress output')
-    .option('-v, --verbose', 'Show detailed output')
-    .action(async (repository: string | undefined, options: InstallOptions) => {
-      await handleInstall(repository, options);
-    });
-
-  return command;
-}
-
-/**
- * Handle install command
- */
-async function handleInstall(
-  nameOrId: string | undefined, 
-  options: InstallOptions
-): Promise<void> {
+async function installRepository(repositoryName: string | undefined, options: InstallOptions): Promise<void> {
   const registryService = new RegistryService();
-  const stateManager = new StateManager();
-  const enhancedStateManager = new EnhancedStateManager(stateManager.getStatePath());
   const deploymentService = new DeploymentService();
-  const outputFormatter = new CommandOutputFormatter({
-    silent: options.silent,
-    verbose: options.verbose
-  });
-  const errorRecovery = new ErrorRecoveryService();
-  const spinner = ora();
-
+  const stateManager = new StateManager();
+  
   try {
-    // Get repositories to install
-    const repositories = await getTargetRepositories(
-      registryService, 
-      nameOrId,
-      options
-    );
-
+    const repositories = await registryService.list();
+    
     if (repositories.length === 0) {
-      outputFormatter.warning('No repositories found to install');
+      console.log(chalk.yellow('No repositories registered.'));
       return;
     }
-
-    // Show what will be installed
-    if (!options.yes && !options.silent) {
-      outputFormatter.info(`\nRepositories to install:`);
-      repositories.forEach((repo, index) => {
-        console.log(`  ${index + 1}. ${chalk.cyan(repo.name)} (${repo.url})`);
-      });
-
-      if (!options.dryRun) {
-        const { confirm } = await inquirer.prompt([{
-          type: 'confirm',
-          name: 'confirm',
-          message: `Install ${repositories.length} repository(ies)?`,
-          default: true
-        }]);
-
-        if (!confirm) {
-          outputFormatter.info('Installation cancelled');
-          return;
+    
+    // インストール対象のリポジトリを特定
+    let targetRepos: Repository[];
+    
+    if (repositoryName) {
+      // 番号またはID/名前で検索
+      const repo = await selectRepository(repositoryName);
+      if (!repo) {
+        console.error(chalk.red(`Repository "${repositoryName}" not found.`));
+        // 利用可能なリポジトリを表示
+        if (repositories.length > 0) {
+          displayNumberedRepositories(repositories);
         }
+        process.exit(1);
       }
+      targetRepos = [repo];
+    } else {
+      // リポジトリ名が指定されていない場合は全リポジトリをインストール
+      targetRepos = repositories;
     }
-
-    // Dry run mode
-    if (options.dryRun) {
-      outputFormatter.info('\n🔍 DRY RUN MODE - No files will be installed\n');
-    }
-
-    // Install each repository
-    const results: InstallResult[] = [];
-    let totalDeployed = 0;
-    let totalFailed = 0;
-
-    for (const repository of repositories) {
-      if (!options.silent) {
-        spinner.start(`Installing ${repository.name}...`);
-      }
-
+    
+    // 各リポジトリをインストール
+    for (const repo of targetRepos) {
+      console.log(chalk.bold(`\nInstalling ${repo.name}...`));
+      
+      const spinner = ora();
+      
       try {
-        const result = await installRepository(
-          repository,
-          {
-            stateManager,
-            enhancedStateManager,
-            deploymentService,
-            errorRecovery
-          },
-          options
-        );
-
-        results.push(result);
-        totalDeployed += result.deployed.length;
-        totalFailed += result.failed.length;
-
-        // Show result
-        if (!options.silent) {
-          if (result.status === 'success') {
-            spinner.succeed(chalk.green(`✓ Installed ${repository.name} (${result.deployed.length} files)`));
-          } else if (result.status === 'partial') {
-            spinner.warn(chalk.yellow(`⚠ Partially installed ${repository.name} (${result.deployed.length}/${result.deployed.length + result.failed.length} files)`));
-          } else if (result.status === 'skipped') {
-            spinner.info(chalk.blue(`- Skipped ${repository.name} (already installed)`));
-          } else {
-            spinner.fail(chalk.red(`✗ Failed to install ${repository.name}`));
+        // パターンを検出
+        spinner.start('Detecting deployment patterns...');
+        const patterns = await deploymentService.detectPatterns(repo.localPath!);
+        
+        if (patterns.length === 0) {
+          spinner.succeed('No deployment files found');
+          continue;
+        }
+        
+        spinner.succeed(`Found ${patterns.length} deployable files`);
+        
+        // デプロイメント確認（--forceでスキップ）
+        if (!options.force) {
+          const shouldDeploy = await promptYesNo(
+            chalk.yellow('\nDeploy files? (y/N): '),
+            false
+          );
+          
+          if (!shouldDeploy) {
+            console.log(chalk.gray('Skipping deployment'));
+            continue;
           }
         }
-
-        // Show details in verbose mode
-        if (options.verbose && !options.silent) {
-          if (result.deployed.length > 0) {
-            console.log(chalk.gray('  Deployed files:'));
-            result.deployed.forEach(file => 
-              console.log(chalk.gray(`    - ${file.source}`))
-            );
-          }
-          if (result.conflicts.length > 0) {
-            console.log(chalk.yellow('  Conflicts:'));
-            result.conflicts.forEach(file => 
-              console.log(chalk.yellow(`    - ${file}`))
-            );
-          }
-          if (result.failed.length > 0) {
-            console.log(chalk.red('  Failed:'));
-            result.failed.forEach(file => 
-              console.log(chalk.red(`    - ${file}`))
-            );
-          }
+        
+        // ファイルをデプロイ
+        spinner.start('Deploying files...');
+        const deployResult = await deploymentService.deploy(repo, { interactive: options.interactive });
+        
+        if (deployResult.deployed.length > 0) {
+          spinner.succeed(`Deployed ${deployResult.deployed.length} files`);
+          
+          // デプロイメント情報を更新
+          const deployedFiles = deployResult.deployed.map(d => d.source);
+          const updatedDeployments = {
+            commands: patterns.filter(p => p.targetType === 'commands').map(p => p.file),
+            agents: patterns.filter(p => p.targetType === 'agents').map(p => p.file),
+            hooks: patterns.filter(p => p.targetType === 'hooks').map(p => p.file)
+          };
+          
+          await registryService.update(repo.id, { 
+            deployments: updatedDeployments,
+            lastUpdatedAt: new Date().toISOString()
+          });
+          
+          // StateManagerに状態を保存
+          const gitUpdateResult = {
+            filesChanged: 0,
+            insertions: 0,
+            deletions: 0,
+            currentCommit: '',
+            previousCommit: ''
+          };
+          await stateManager.updateRepositoryState(repo, gitUpdateResult, deployResult);
+          
+        } else {
+          spinner.succeed('No new files to deploy');
         }
+        
+        console.log(chalk.green(`✓ ${repo.name} installed successfully`));
+        
       } catch (error) {
-        if (!options.silent) {
-          spinner.fail(chalk.red(`Failed to install ${repository.name}: ${error}`));
+        spinner.fail('Install failed');
+        const errorMessage = error instanceof Error ? error.message : String(error);
+        console.error(chalk.red(`  Error: ${errorMessage}`));
+        
+        if (!options.all) {
+          process.exit(1);
         }
-        totalFailed++;
       }
     }
-
-    // Show summary
-    if (!options.silent && repositories.length > 1) {
-      console.log();
-      const endTime = new Date();
-      outputFormatter.summary({
-        command: 'install',
-        startTime: new Date(endTime.getTime() - 5000), // Approximate
-        endTime,
-        stats: {
-          processed: repositories.length,
-          succeeded: results.filter(r => r.status === 'success').length,
-          failed: totalFailed,
-          skipped: results.filter(r => r.status === 'skipped').length
-        },
-        success: totalFailed === 0,
-        duration: endTime.getTime() - (endTime.getTime() - 5000),
-        details: totalFailed > 0 ? {
-          errors: [`${totalFailed} files failed to install`]
-        } : undefined
-      });
+    
+    if (options.all) {
+      console.log(chalk.bold(`\n✓ Installed ${targetRepos.length} repositories`));
     }
-
-    // Exit with error if any failures
-    if (totalFailed > 0 && !options.dryRun) {
-      process.exit(1);
-    }
-
+    
   } catch (error) {
-    if (!options.silent) {
-      spinner.fail(chalk.red(`Installation failed: ${error}`));
-    }
+    console.error(chalk.red('Error installing repository:'), error);
     process.exit(1);
   }
 }
 
 /**
- * Get target repositories
+ * Install command definition
  */
-async function getTargetRepositories(
-  registryService: RegistryService,
-  nameOrId: string | undefined,
-  options: InstallOptions
-): Promise<Repository[]> {
-  if (nameOrId) {
-    // Install specific repository
-    const repository = await registryService.getRepository(nameOrId);
-    if (!repository) {
-      throw new NotFoundError(`Repository not found: ${nameOrId}`);
-    }
-    return [repository];
-  }
-
-  // Install all repositories
-  const allRepositories = Array.from((await registryService.list()).values());
-  
-  if (!options.yes && !options.silent && allRepositories.length > 1) {
-    // Allow user to select repositories
-    const { repositories } = await inquirer.prompt([{
-      type: 'checkbox',
-      name: 'repositories',
-      message: 'Select repositories to install:',
-      choices: allRepositories.map((repo: Repository) => ({
-        name: `${repo.name} (${repo.url})`,
-        value: repo,
-        checked: true
-      }))
-    }]);
-    
-    return repositories;
-  }
-
-  return allRepositories;
-}
-
-/**
- * Install a single repository
- */
-async function installRepository(
-  repository: Repository,
-  services: {
-    stateManager: StateManager;
-    enhancedStateManager: EnhancedStateManager;
-    deploymentService: DeploymentService;
-    errorRecovery: ErrorRecoveryService;
-  },
-  options: InstallOptions
-): Promise<InstallResult> {
-  const { enhancedStateManager, deploymentService } = services;
-
-  // Check if already installed
-  if (!options.force) {
-    const deploymentState = await enhancedStateManager.getDeploymentState(repository.id);
-    if (deploymentState?.installationStatus === 'installed') {
-      return {
-        repository,
-        deployed: [],
-        skipped: [],
-        failed: [],
-        conflicts: [],
-        status: 'skipped'
-      };
-    }
-  }
-
-  try {
-    // Deploy files using existing DeploymentService
-    const deploymentResult = await deploymentService.deploy(
-      repository,
-      { interactive: !options.yes && !options.skipConflicts }
-    );
-
-    // Convert deployment result - map DeployedFile types
-    const deployedFiles: DeployedFile[] = deploymentResult.deployed.map(file => ({
-      path: file.target,
-      hash: file.hash,
-      deployedAt: file.deployedAt,
-      source: file.source,
-      target: file.target
-    }));
-
-    const result: InstallResult = {
-      repository,
-      deployed: deployedFiles,
-      skipped: deploymentResult.skipped,
-      failed: deploymentResult.failed,
-      conflicts: deploymentResult.conflicts,
-      status: 'success'
-    };
-
-    // Determine status
-    if (result.deployed.length === 0) {
-      result.status = 'failed';
-    } else if (result.failed.length > 0 || result.conflicts.length > 0) {
-      result.status = 'partial';
-    }
-
-    // Track installation in enhanced state (unless dry-run)
-    if (!options.dryRun && result.deployed.length > 0) {
-      await enhancedStateManager.trackInstallation(
-        repository.id,
-        result.deployed,
-        {
-          force: options.force,
-          partial: result.status === 'partial'
-        }
-      );
-    }
-
-    return result;
-
-  } catch (error) {
-    // Try recovery if possible
-    if (error instanceof InstallationError && services.errorRecovery.canRecover(error)) {
-      const recovery = await services.errorRecovery.recover(error, { 
-        repository, 
-        options 
-      });
-
-      if (recovery.success && recovery.data) {
-        const deploymentResult = recovery.data as DeploymentResult;
-        // Convert deployment result - map DeployedFile types
-        const deployedFiles: DeployedFile[] = deploymentResult.deployed.map(file => ({
-          path: file.target,
-          hash: file.hash,
-          deployedAt: file.deployedAt,
-          source: file.source,
-          target: file.target
-        }));
-        
-        return {
-          repository,
-          deployed: deployedFiles,
-          skipped: deploymentResult.skipped,
-          failed: deploymentResult.failed,
-          conflicts: deploymentResult.conflicts,
-          status: deploymentResult.deployed.length > 0 ? 'partial' : 'failed'
-        };
-      }
-    }
-
-    throw error;
-  }
-}
-
-
-// Export for use in index
-export const installCommand = createInstallCommand();
+export const installCommand = new Command('install')
+  .description('Install files from a registered repository')
+  .argument('[repository]', 'Repository name to install')
+  .option('-f, --force', 'Skip deployment confirmation prompt')
+  .option('-a, --all', 'Install all repositories')
+  .option('-i, --interactive', 'Prompt before overwriting each file')
+  .action(installRepository);

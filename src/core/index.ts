@@ -10,4 +10,3 @@ export * from './interfaces/IDeploymentService';
 export * from './interfaces/IGitManager';
 export * from './interfaces/IRegistryService';
 export * from './interfaces/IStateManager';
-export * from './interfaces/IEnhancedStateManager';
