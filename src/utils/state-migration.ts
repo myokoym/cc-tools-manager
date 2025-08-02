@@ -166,23 +166,15 @@ export async function migrateV1ToV2(
     // V1状態を読み込み
     const v1State = await readJsonFile<V1AppState>(stateFilePath);
     
-    // V2状態に変換
-    const v2State: EnhancedAppState = {
-      version: {
-        version: '2.0.0',
-        format: 'v2',
-        migrationRequired: false
-      },
-      repositories: {},
+    // V2状態に変換 - StateFileV2 format
+    const v2State: any = {
+      version: 2,
+      repositories: v1State.repositories || [],
+      deploymentStates: {},
+      installationHistory: [],
       metadata: {
-        ...v1State.metadata,
-        totalDeployments: 0,
-        totalRemovals: 0
-      },
-      audit: {
-        enabled: true,
-        maxRecords: 1000,
-        retentionDays: 90
+        lastUpdated: new Date().toISOString(),
+        lastMigration: new Date().toISOString()
       }
     };
 
@@ -230,7 +222,8 @@ export async function migrateV1ToV2(
         }
       };
 
-      v2State.repositories[repoId] = deploymentState;
+      v2State.deploymentStates[repoId] = deploymentState;
+      v2State.installationHistory.push(installationRecord);
       
       repositoriesMigrated++;
       filesMigrated += v1RepoState.deployedFiles.length;
@@ -238,8 +231,7 @@ export async function migrateV1ToV2(
     }
 
     // メタデータを更新
-    v2State.metadata.totalDeployments = filesMigrated;
-    v2State.metadata.updatedAt = new Date().toISOString();
+    v2State.metadata.lastUpdated = new Date().toISOString();
 
     // アトミックに保存
     const tempFile = await createTempFile('state-migration', '.json');
@@ -293,13 +285,39 @@ export async function migrateV1ToV2(
  */
 async function validateMigratedState(stateFilePath: string): Promise<void> {
   try {
-    const state = await readJsonFile<EnhancedAppState>(stateFilePath);
+    const state = await readJsonFile<any>(stateFilePath);
     
-    // 基本構造の検証
-    if (!state.version || state.version.format !== 'v2') {
+    // 基本構造の検証 - Accept both v2 formats
+    const isSimpleV2 = state.version === 2;
+    const isComplexV2 = state.version && typeof state.version === 'object' && state.version.format === 'v2';
+    
+    if (!isSimpleV2 && !isComplexV2) {
       throw new Error('Invalid V2 state format');
     }
     
+    // For StateFileV2 format
+    if (isSimpleV2) {
+      if (!Array.isArray(state.repositories)) {
+        throw new Error('Invalid repositories structure - expected array');
+      }
+      
+      if (!state.deploymentStates || typeof state.deploymentStates !== 'object') {
+        throw new Error('Invalid deploymentStates structure');
+      }
+      
+      if (!Array.isArray(state.installationHistory)) {
+        throw new Error('Invalid installationHistory structure - expected array');
+      }
+      
+      if (!state.metadata || typeof state.metadata !== 'object') {
+        throw new Error('Invalid metadata structure');
+      }
+      
+      // Skip repository validation for simple v2 format
+      return;
+    }
+    
+    // For EnhancedAppState format (complex v2)
     if (!state.repositories || typeof state.repositories !== 'object') {
       throw new Error('Invalid repositories structure');
     }
@@ -310,15 +328,16 @@ async function validateMigratedState(stateFilePath: string): Promise<void> {
     
     // リポジトリごとの検証
     for (const [repoId, deploymentState] of Object.entries(state.repositories)) {
-      if (!deploymentState.repositoryId) {
+      const deployment = deploymentState as any;
+      if (!deployment.repositoryId) {
         throw new Error(`Repository ${repoId} missing repositoryId`);
       }
       
-      if (!deploymentState.installationStatus) {
+      if (!deployment.installationStatus) {
         throw new Error(`Repository ${repoId} missing installationStatus`);
       }
       
-      if (!Array.isArray(deploymentState.deployedFiles)) {
+      if (!Array.isArray(deployment.deployedFiles)) {
         throw new Error(`Repository ${repoId} has invalid deployedFiles`);
       }
       
@@ -407,6 +426,25 @@ export const stateMigration = {
     const version = await detectStateVersion(stateFilePath);
     
     if (!version.migrationRequired) {
+      // Check if file exists before reading
+      if (!await fileExists(stateFilePath)) {
+        // Return empty v2 state structure
+        return {
+          migrated: false,
+          state: {
+            version: 2,
+            repositories: [],
+            deploymentStates: {},
+            installationHistory: [],
+            metadata: {
+              lastUpdated: new Date().toISOString(),
+              lastMigration: null
+            }
+          },
+          backupPath: null
+        };
+      }
+      
       const state = await readJsonFile(stateFilePath);
       return {
         migrated: false,

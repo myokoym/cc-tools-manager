@@ -108,7 +108,19 @@ export class EnhancedStateManager {
       }
       
       this.invalidateCache();
-      return migrationResult.state;
+      
+      // Ensure the state has the correct v2 structure
+      const state = migrationResult.state;
+      if (!state.deploymentStates) {
+        console.log('Creating missing deploymentStates property');
+        state.deploymentStates = {};
+      }
+      if (!state.installationHistory) {
+        console.log('Creating missing installationHistory property');
+        state.installationHistory = [];
+      }
+      
+      return state as StateFileV2;
     } catch (error) {
       if (error instanceof StateCorruptionError && this.errorRecovery.canRecover(error)) {
         const recovery = await this.errorRecovery.recover(error, { statePath: this.statePath });
@@ -132,7 +144,8 @@ export class EnhancedStateManager {
       return this.stateCache;
     }
     
-    const state = await this.stateManager.getState();
+    // Use loadState() to ensure we get v2 format with migration
+    const state = await this.loadState();
     this.stateCache = state;
     this.cacheTimestamp = now;
     
@@ -161,6 +174,11 @@ export class EnhancedStateManager {
    */
   async getDeploymentState(repositoryId: string): Promise<DeploymentState | undefined> {
     const state = await this.getState();
+    // Ensure deploymentStates exists
+    if (!state.deploymentStates) {
+      console.error('Warning: state.deploymentStates is undefined');
+      return undefined;
+    }
     return state.deploymentStates[repositoryId];
   }
 
