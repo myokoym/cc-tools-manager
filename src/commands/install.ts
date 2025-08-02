@@ -65,8 +65,63 @@ async function installRepository(repositoryName: string | undefined, options: In
       const spinner = ora();
       
       try {
-        // パターンを検出
-        spinner.start('Detecting deployment patterns...');
+        // デプロイメントの検出
+        spinner.start('Checking for deployment files...');
+        
+        // タイプベースデプロイメントの場合は別処理
+        if (repo.type && repo.deploymentMode === 'type-based') {
+          spinner.succeed(`Type-based deployment mode (${repo.type})`);
+          
+          // デプロイメント確認（--forceでスキップ）
+          if (!options.force) {
+            const shouldDeploy = await promptYesNo(
+              chalk.yellow('\nDeploy files? (y/N): '),
+              false
+            );
+            
+            if (!shouldDeploy) {
+              console.log(chalk.gray('Skipping deployment'));
+              continue;
+            }
+          }
+          
+          spinner.start('Deploying files...');
+          const deployResult = await deploymentService.deploy(repo, { interactive: options.interactive });
+          
+          if (deployResult.deployed.length > 0) {
+            spinner.succeed(`Deployed ${deployResult.deployed.length} files`);
+            
+            // デプロイメント情報を更新
+            const deployedFiles = deployResult.deployed.map(d => d.source);
+            const updatedDeployments = {
+              commands: repo.type === 'commands' ? deployedFiles : [],
+              agents: repo.type === 'agents' ? deployedFiles : [],
+              hooks: repo.type === 'hooks' ? deployedFiles : []
+            };
+            
+            await registryService.update(repo.id, { 
+              deployments: updatedDeployments,
+              lastUpdatedAt: new Date().toISOString()
+            });
+          } else {
+            spinner.succeed('No new files to deploy');
+          }
+          
+          // StateManagerに状態を保存
+          const gitUpdateResult = {
+            filesChanged: 0,
+            insertions: 0,
+            deletions: 0,
+            currentCommit: '',
+            previousCommit: ''
+          };
+          await stateManager.updateRepositoryState(repo, gitUpdateResult, deployResult);
+          
+          console.log(chalk.green(`✓ ${repo.name} installed successfully`));
+          continue;
+        }
+        
+        // 通常のパターンベースデプロイメント
         const patterns = await deploymentService.detectPatterns(repo.localPath!);
         
         if (patterns.length === 0) {
