@@ -42,6 +42,7 @@ export interface Repository {
   status: RepositoryStatus;
   localPath?: string;      // ローカルクローンパス
   version?: string;        // バージョン情報
+  installationStatus?: 'installed' | 'uninstalled' | 'partial' | 'error'; // インストール状態
 }
 
 // リポジトリ作成時の入力型

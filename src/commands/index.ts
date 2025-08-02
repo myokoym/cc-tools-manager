@@ -9,3 +9,4 @@ export { createRemoveCommand } from './remove';
 export { showCommand, createShowCommand } from './show';
 export { statusCommand } from './status';
 export { updateCommand } from './update';
+export { createInstallCommand, installCommand } from './install';
