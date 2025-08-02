@@ -9,21 +9,35 @@ Save the current working session history to `.claude/session-history/`.
 ## Usage
 
 ```
-/save-session [filename]
+/save-session feature-name [--ja]
 ```
 
-If no filename is provided, it will use the current timestamp.
+- `feature-name`: Required. The name of the feature or work being documented
+- `--ja` or `-j`: Optional. Create Japanese version
 
 ## Implementation
 
 ```bash
 #!/bin/bash
 
-# Get the filename from arguments or use timestamp
-FILENAME="${1:-$(date +%Y%m%d_%H%M%S)}"
+# Get the feature name from arguments
+FEATURE="$1"
 
-# Ensure the filename has .md extension
-if [[ ! "$FILENAME" =~ \.md$ ]]; then
+# Check if feature name is provided
+if [ -z "$FEATURE" ]; then
+    echo "Error: Please provide a feature name"
+    echo "Usage: /save-session feature-name"
+    exit 1
+fi
+
+# Create filename with date prefix
+DATE_PREFIX=$(date +%Y-%m-%d)
+FILENAME="${DATE_PREFIX}-${FEATURE}"
+
+# Handle language option
+if [ "$2" = "--ja" ] || [ "$2" = "-j" ]; then
+    FILENAME="${FILENAME}.ja.md"
+else
     FILENAME="${FILENAME}.md"
 fi
 
@@ -35,7 +49,9 @@ OUTPUT_PATH=".claude/session-history/${FILENAME}"
 
 # Create session history content
 cat << EOF > "$OUTPUT_PATH"
-# Session History - $(date)
+# Session History: $(echo "$FEATURE" | tr '-' ' ' | awk '{for(i=1;i<=NF;i++)sub(/./,toupper(substr($i,1,1)),$i)}1')
+
+Date: $(date +%Y-%m-%d)
 
 ## Working Directory
 $(pwd)
@@ -60,16 +76,27 @@ $(git diff --name-only 2>/dev/null || echo "No tracked changes")
 $(git branch --show-current 2>/dev/null || echo "Not in a git repository")
 \`\`\`
 
-## Session Summary
-This session was saved on $(date).
+## Overview
+[Brief overview of what was accomplished in this session]
 
-### Key Activities
-- Working directory: $(pwd)
-- Branch: $(git branch --show-current 2>/dev/null || echo "N/A")
-- Modified files: $(git diff --name-only 2>/dev/null | wc -l | tr -d ' ') files
+## Changes Made
 
-### Next Steps
-[To be filled by user]
+### 1. [First Major Change]
+[Description of the change]
+
+### 2. [Second Major Change]
+[Description of the change]
+
+## Technical Details
+[Any important technical decisions or implementation details]
+
+## Next Steps
+- [ ] [Task 1]
+- [ ] [Task 2]
+- [ ] [Task 3]
+
+## References
+- [Related documentation or issues]
 
 EOF
 
@@ -89,7 +116,13 @@ The command will create a markdown file with:
 
 Example usage:
 ```
-/save-session project-rename-session
+# English version
+/save-session project-rename
 ```
+Creates `.claude/session-history/2025-08-02-project-rename.md`
 
-This will create `.claude/session-history/project-rename-session.md`
+```
+# Japanese version
+/save-session text-content-feature --ja
+```
+Creates `.claude/session-history/2025-08-02-text-content-feature.ja.md`

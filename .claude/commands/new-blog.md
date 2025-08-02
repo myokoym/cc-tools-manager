@@ -9,30 +9,40 @@ Create a new blog article in the `blogs/` directory with proper formatting and m
 ## Usage
 
 ```
-/new-blog [filename] [title]
+/new-blog filename "English Title" "Japanese Title"
 ```
 
 - `filename`: The filename for the blog post (without .md extension)
-- `title`: The title of the blog post (optional, will be derived from filename if not provided)
+- `English Title`: The title in English (required)
+- `Japanese Title`: The title in Japanese (required)
 
 ## Implementation
 
 ```bash
 #!/bin/bash
 
-# Get the filename and title from arguments
+# Get the filename and titles from arguments
 FILENAME="$1"
-TITLE="${2:-$1}"
+TITLE_EN="$2"
+TITLE_JA="$3"
 
 # Check if filename is provided
 if [ -z "$FILENAME" ]; then
     echo "Error: Please provide a filename"
-    echo "Usage: /new-blog [filename] [title]"
+    echo "Usage: /new-blog filename 'English Title' 'Japanese Title'"
+    exit 1
+fi
+
+# Check if both titles are provided
+if [ -z "$TITLE_EN" ] || [ -z "$TITLE_JA" ]; then
+    echo "Error: Please provide both English and Japanese titles"
+    echo "Usage: /new-blog filename 'English Title' 'Japanese Title'"
     exit 1
 fi
 
 # Ensure the filename doesn't have .md extension (we'll add it)
 FILENAME="${FILENAME%.md}"
+FILENAME="${FILENAME%.ja}"
 
 # Convert filename to a URL-friendly format
 FILENAME=$(echo "$FILENAME" | tr '[:upper:]' '[:lower:]' | tr ' ' '-' | sed 's/[^a-z0-9-]//g')
@@ -44,101 +54,171 @@ mkdir -p blogs
 DATE=$(date +%Y-%m-%d)
 DATETIME=$(date +"%Y-%m-%d %H:%M:%S")
 
-# Output path
-OUTPUT_PATH="blogs/${FILENAME}.md"
+# Output paths
+OUTPUT_PATH_EN="blogs/${FILENAME}.md"
+OUTPUT_PATH_JA="blogs/${FILENAME}.ja.md"
 
-# Check if file already exists
-if [ -f "$OUTPUT_PATH" ]; then
-    echo "Error: File already exists at $OUTPUT_PATH"
+# Check if files already exist
+if [ -f "$OUTPUT_PATH_EN" ] || [ -f "$OUTPUT_PATH_JA" ]; then
+    echo "Error: Files already exist"
+    [ -f "$OUTPUT_PATH_EN" ] && echo "  - $OUTPUT_PATH_EN"
+    [ -f "$OUTPUT_PATH_JA" ] && echo "  - $OUTPUT_PATH_JA"
     exit 1
 fi
 
-# Create blog post content
-cat << EOF > "$OUTPUT_PATH"
+# Create English blog post
+cat << EOF > "$OUTPUT_PATH_EN"
 ---
-title: "$TITLE"
+title: "$TITLE_EN"
 date: $DATE
-author: $(git config user.name 2>/dev/null || echo "Author Name")
-tags: []
-draft: true
+author: $(git config user.name 2>/dev/null || echo "your-username")
+tags: [tag1, tag2, tag3]
+category: choose-one
+description: "Brief description of your blog post (optional)"
 ---
 
-# $TITLE
+# $TITLE_EN
+
+## TL;DR
+
+A brief summary of the main points for readers in a hurry.
 
 ## Introduction
 
-[Write your introduction here]
+Set the context and explain what problem you're addressing or what topic you're covering.
 
 ## Main Content
 
-[Write your main content here]
+### Section 1
 
-### Subsection 1
+Your content here...
 
-[Content for subsection 1]
-
-### Subsection 2
-
-[Content for subsection 2]
-
-## Code Examples
-
-\`\`\`javascript
-// Example code block
-function example() {
-    console.log("Hello, World!");
-}
+\`\`\`bash
+# Example code block
+command example
 \`\`\`
+
+### Section 2
+
+More content...
+
+\`\`\`typescript
+// Example code
+const example = "code";
+\`\`\`
+
+## Results/Findings
+
+Describe what you discovered or achieved.
 
 ## Conclusion
 
-[Write your conclusion here]
+Summarize the key takeaways and next steps.
 
 ## References
 
 - [Reference 1](https://example.com)
 - [Reference 2](https://example.com)
-
----
-
-*Created: $DATETIME*
 EOF
 
-echo "Blog post created at: $OUTPUT_PATH"
+# Create Japanese blog post
+cat << EOF > "$OUTPUT_PATH_JA"
+---
+title: "$TITLE_JA"
+date: $DATE
+author: $(git config user.name 2>/dev/null || echo "your-username")
+tags: [tag1, tag2, tag3]
+category: choose-one
+lang: ja
+description: "ブログ記事の簡潔な説明（オプション）"
+---
+
+# $TITLE_JA
+
+## TL;DR
+
+忙しい読者のための要点のまとめ。
+
+## はじめに
+
+コンテキストを設定し、取り組んでいる問題や扱うトピックを説明します。
+
+## 本文
+
+### セクション1
+
+ここに内容を記述...
+
+\`\`\`bash
+# コードブロックの例
+command example
+\`\`\`
+
+### セクション2
+
+さらに内容を記述...
+
+\`\`\`typescript
+// コード例
+const example = "code";
+\`\`\`
+
+## 結果/発見
+
+発見したことや達成したことを説明します。
+
+## まとめ
+
+主要なポイントと次のステップをまとめます。
+
+## 参考資料
+
+- [参考資料1](https://example.com)
+- [参考資料2](https://example.com)
+EOF
+
+echo "Blog posts created:"
+echo "  - English: $OUTPUT_PATH_EN"
+echo "  - Japanese: $OUTPUT_PATH_JA"
 echo ""
 echo "Next steps:"
-echo "1. Edit the blog post at $OUTPUT_PATH"
-echo "2. Update the metadata (tags, author, etc.)"
-echo "3. Remove 'draft: true' when ready to publish"
-echo "4. Add content to each section"
+echo "1. Edit both blog posts to add your content"
+echo "2. Update the metadata (tags, category, description)"
+echo "3. Keep both versions synchronized"
+echo "4. Add language switcher links at the top of each file:"
+echo "   [English]($FILENAME.md) | [日本語]($FILENAME.ja.md)"
 ```
 
 ## Example Usage
 
 ### Basic usage
 ```
-/new-blog my-first-post
+/new-blog my-first-post "My First Post" "初めての投稿"
 ```
-Creates `blogs/my-first-post.md` with title "my-first-post"
+Creates:
+- `blogs/my-first-post.md` (English)
+- `blogs/my-first-post.ja.md` (Japanese)
 
-### With custom title
+### Complex title example
 ```
-/new-blog react-hooks "Understanding React Hooks: A Complete Guide"
+/new-blog react-hooks "Understanding React Hooks: A Complete Guide" "React Hooksを理解する：完全ガイド"
 ```
-Creates `blogs/react-hooks.md` with title "Understanding React Hooks: A Complete Guide"
+Creates both English and Japanese versions with proper titles
 
-### With spaces in filename
+### Feature implementation blog
 ```
-/new-blog "best practices" "JavaScript Best Practices in 2024"
+/new-blog text-content-implementation "Text Content Feature Implementation" "テキストコンテンツ機能の実装"
 ```
-Creates `blogs/best-practices.md` with the specified title
+Creates bilingual blog posts for documenting features
 
 ## Features
 
+- Creates both English and Japanese versions
 - Automatically creates the `blogs/` directory if it doesn't exist
-- Generates proper frontmatter with metadata
-- Includes a basic blog post structure
-- Adds current date and author information
+- Generates proper YAML frontmatter with all required fields
+- Uses templates matching existing blog structure
+- Adds current date and author from git config
 - Sanitizes filenames to be URL-friendly
 - Prevents overwriting existing files
-- Sets posts as draft by default
+- Includes language switcher reminder
+- Sets proper language tags (lang: ja for Japanese)
