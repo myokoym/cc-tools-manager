@@ -11,6 +11,8 @@ import {
   ConfigurationError,
   ExternalServiceError,
   AggregateError,
+  InstallationError,
+  StateCorruptionError,
   isOperationalError,
   toBaseError,
 } from '../../../src/utils/errors';
@@ -221,6 +223,126 @@ describe('Custom Errors', () => {
         const baseError = toBaseError(123);
         expect(baseError).toBeInstanceOf(BaseError);
         expect(baseError.message).toBe('123');
+      });
+    });
+  });
+
+  describe('InstallationError', () => {
+    it('should create installation error with code and repository', () => {
+      const error = new InstallationError(
+        'INSTALL_FAILED',
+        'Failed to install package',
+        'test-repo',
+        true
+      );
+      
+      expect(error.message).toBe('Failed to install package');
+      expect(error.code).toBe('INSTALL_FAILED');
+      expect(error.repository).toBe('test-repo');
+      expect(error.recoverable).toBe(true);
+      expect(error.statusCode).toBe(500);
+      expect(error.isOperational).toBe(true);
+      expect(error.name).toBe('InstallationError');
+    });
+
+    it('should create installation error with defaults', () => {
+      const error = new InstallationError('UNKNOWN_ERROR', 'Unknown installation error');
+      
+      expect(error.code).toBe('UNKNOWN_ERROR');
+      expect(error.repository).toBeUndefined();
+      expect(error.recoverable).toBe(false);
+    });
+
+    it('should format error message with code', () => {
+      const error = new InstallationError('CLONE_FAILED', 'Git clone failed', 'my-repo');
+      
+      expect(error.message).toBe('Git clone failed');
+      expect(error.toString()).toContain('CLONE_FAILED');
+      expect(error.toString()).toContain('Git clone failed');
+    });
+
+    it('should handle different error codes', () => {
+      const codes = ['CLONE_FAILED', 'PERMISSION_DENIED', 'NETWORK_ERROR', 'VALIDATION_FAILED'];
+      
+      codes.forEach(code => {
+        const error = new InstallationError(code, `Error: ${code}`);
+        expect(error.code).toBe(code);
+        expect(error.message).toBe(`Error: ${code}`);
+      });
+    });
+
+    it('should have proper stack trace', () => {
+      const error = new InstallationError('TEST_ERROR', 'Test message');
+      expect(error.stack).toBeDefined();
+      expect(error.stack).toContain('InstallationError');
+      expect(error.stack).toContain('Test message');
+    });
+  });
+
+  describe('StateCorruptionError', () => {
+    it('should create state corruption error with state file and backup', () => {
+      const error = new StateCorruptionError(
+        'State file is corrupted',
+        '/path/to/state.json',
+        '/path/to/backup.json'
+      );
+      
+      expect(error.message).toBe('State file is corrupted');
+      expect(error.stateFile).toBe('/path/to/state.json');
+      expect(error.backup).toBe('/path/to/backup.json');
+      expect(error.statusCode).toBe(500);
+      expect(error.isOperational).toBe(true);
+      expect(error.name).toBe('StateCorruptionError');
+    });
+
+    it('should create state corruption error without backup', () => {
+      const error = new StateCorruptionError(
+        'JSON parse error',
+        '/path/to/state.json'
+      );
+      
+      expect(error.stateFile).toBe('/path/to/state.json');
+      expect(error.backup).toBeUndefined();
+    });
+
+    it('should create state corruption error with minimal info', () => {
+      const error = new StateCorruptionError('State corrupted');
+      
+      expect(error.message).toBe('State corrupted');
+      expect(error.stateFile).toBeUndefined();
+      expect(error.backup).toBeUndefined();
+    });
+
+    it('should format error message with file information', () => {
+      const error = new StateCorruptionError(
+        'Invalid JSON format',
+        '/app/state.json',
+        '/app/state.backup.json'
+      );
+      
+      expect(error.message).toBe('Invalid JSON format');
+      expect(error.toString()).toContain('StateCorruptionError');
+      expect(error.toString()).toContain('Invalid JSON format');
+    });
+
+    it('should have proper stack trace', () => {
+      const error = new StateCorruptionError('Test corruption', '/test/path');
+      expect(error.stack).toBeDefined();
+      expect(error.stack).toContain('StateCorruptionError');
+      expect(error.stack).toContain('Test corruption');
+    });
+
+    it('should handle different state file scenarios', () => {
+      const scenarios = [
+        { file: '/state.json', backup: '/backup.json' },
+        { file: '/state.json', backup: undefined },
+        { file: undefined, backup: undefined },
+      ];
+      
+      scenarios.forEach(({ file, backup }) => {
+        const error = new StateCorruptionError('Test message', file, backup);
+        expect(error.stateFile).toBe(file);
+        expect(error.backup).toBe(backup);
       });
     });
   });

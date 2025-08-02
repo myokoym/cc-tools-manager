@@ -242,9 +242,53 @@ export class RepoNotFoundError extends BaseError {
 }
 
 /**
+ * インストールエラー
+ */
+export class InstallationError extends BaseError {
+  public readonly code: string;
+  public readonly repository?: string;
+  public readonly recoverable: boolean;
+
+  constructor(
+    code: string,
+    message: string,
+    repository?: string,
+    recoverable: boolean = false
+  ) {
+    super(message, 500, true);
+    this.code = code;
+    this.repository = repository;
+    this.recoverable = recoverable;
+  }
+
+  toString(): string {
+    return `${this.name} [${this.code}]: ${this.message}`;
+  }
+}
+
+/**
+ * 状態破損エラー
+ */
+export class StateCorruptionError extends BaseError {
+  public readonly code: string = 'STATE_CORRUPTION';
+  public readonly stateFile?: string;
+  public readonly backup?: string;
+
+  constructor(
+    message: string,
+    stateFile?: string,
+    backup?: string
+  ) {
+    super(message, 500, true);
+    this.stateFile = stateFile;
+    this.backup = backup;
+  }
+}
+
+/**
  * エラーファクトリー関数
  */
-export function createError(type: string, message: string): BaseError {
+export function createError(type: string, message: string, options?: any): BaseError {
   switch (type) {
     case 'GIT_CLONE_ERROR':
       return new GitCloneError(message);
@@ -258,6 +302,19 @@ export function createError(type: string, message: string): BaseError {
       return new GitCommitError(message);
     case 'REPO_NOT_FOUND':
       return new RepoNotFoundError(message);
+    case 'INSTALLATION_ERROR':
+      return new InstallationError(
+        options?.code || 'UNKNOWN_ERROR',
+        message,
+        options?.repository,
+        options?.recoverable
+      );
+    case 'STATE_CORRUPTION_ERROR':
+      return new StateCorruptionError(
+        message,
+        options?.stateFile,
+        options?.backup
+      );
     default:
       return new BaseError(message);
   }

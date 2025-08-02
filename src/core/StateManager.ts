@@ -26,6 +26,24 @@ interface AppState {
 }
 
 export class StateManager implements IStateManager {
+  // Expose for testing and enhanced state manager
+  public async getState(): Promise<any> {
+    return this.loadState();
+  }
+  
+  // Expose for testing and enhanced state manager - overloaded for both internal and external use
+  public async saveState(state?: any): Promise<void> {
+    if (state !== undefined) {
+      this.state = state;
+    }
+    await this.saveStateInternal();
+  }
+  
+  // Get state file path
+  public getStatePath(): string {
+    return this.stateFilePath;
+  }
+
   private readonly stateFilePath: string;
   private state: AppState | null = null;
   private readonly lockFilePath: string;
@@ -67,14 +85,14 @@ export class StateManager implements IStateManager {
         // 破損している場合は初期化
         console.error('State file is corrupted, initializing new state');
         this.state = await this.initializeState();
-        await this.saveState();
+        await this.saveStateInternal();
         return this.state;
       }
     } else {
       // ファイルが存在しない場合は初期化
       await ensureDir(path.dirname(this.stateFilePath));
       this.state = await this.initializeState();
-      await this.saveState();
+      await this.saveStateInternal();
       return this.state;
     }
   }
@@ -82,7 +100,7 @@ export class StateManager implements IStateManager {
   /**
    * 状態ファイルをアトミックに保存
    */
-  private async saveState(): Promise<void> {
+  private async saveStateInternal(): Promise<void> {
     if (!this.state) {
       throw new Error('State is not loaded');
     }

@@ -8,6 +8,11 @@
 export * from './repository';
 export * from './config';
 export * from './repository-details';
+export * from './state';
+export * from './deployment';
+
+// Import DeployedFile from state to use in RepositoryState
+import { DeployedFile } from './state';
 
 // State関連の型定義
 export interface State {
@@ -25,12 +30,13 @@ export interface RepositoryState {
   errors?: string[];          // 最新のエラー
 }
 
-export interface DeployedFile {
-  source: string;             // ソースファイルパス
-  target: string;             // デプロイ先パス
-  hash: string;               // ファイルハッシュ
-  deployedAt: string;         // ISO 8601
-}
+// DeployedFile is now exported from ./state to avoid conflicts
+// export interface DeployedFile {
+//   source: string;             // ソースファイルパス
+//   target: string;             // デプロイ先パス
+//   hash: string;               // ファイルハッシュ
+//   deployedAt: string;         // ISO 8601
+// }
 
 export interface StateMetadata {
   lastCleanup: string;        // ISO 8601
