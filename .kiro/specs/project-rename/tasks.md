@@ -22,7 +22,7 @@
   - _要件: 3.2_
 
 - [ ] 3. CLIとアプリケーション名の更新
-- [ ] 3.1 src/cli.tsのプログラム名変更
+- [x] 3.1 src/cli.tsのプログラム名変更 (completed: 2025-08-02 13:57:28)
   - program.name()を'ccpm'に変更
   - program.description()に"Claude Code Package Manager"を設定
   - バージョン表示時のアプリケーション名を更新
@@ -41,7 +41,7 @@
   - _要件: 3.1_
 
 - [ ] 4. ドキュメントの全面更新
-- [ ] 4.1 README.mdの更新
+- [x] 4.1 README.mdの更新 (completed: 2025-08-02 17:16:24)
   - タイトルを"# Claude Code Package Manager"に変更
   - インストールコマンドをnpx ccpmやnpm install -g claude-code-package-managerに更新
   - 使用例のコマンドをすべてccpmに変更
@@ -92,4 +92,3 @@
   - structure.mdのプロジェクト名とパス参照を更新
   - tech.mdの環境変数説明とコマンド例を更新
   - product.mdの製品名と説明を更新
-  - _要件: 4.2_
