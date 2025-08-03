@@ -177,7 +177,7 @@ Removing files...
 
 ### unregister
 
-Remove repository from registry while keeping deployed files intact. This is useful when you want to stop tracking a repository but continue using its deployed tools.
+Remove repository from registry with optional removal of deployed files. When unregistering, you'll be prompted whether to keep or remove the deployed files.
 
 #### Usage
 ```bash
@@ -196,12 +196,12 @@ ccpm unregister --all
 
 #### Features
 - Repository selection by name, index (#), or ID
-- Removes repository from registry only
-- Deployed files remain in `.claude/` directory
-- Provides guidance on how to remove files if needed
+- Removes repository from registry
+- Interactive prompt to optionally remove deployed files
+- With `--force`: Skips prompts and keeps deployed files
 
 #### Options
-- `-f, --force`: Skip removal confirmation prompt
+- `-f, --force`: Skip prompts (keeps deployed files)
 - `-a, --all`: Unregister all repositories
 
 #### Example Output
@@ -210,7 +210,18 @@ ccpm unregister 1
 
 # Output:
 Unregistering owner/repo...
-Remove "owner/repo" from registry? This will NOT remove deployed files. (y/N): y
+Remove "owner/repo" from registry? (y/N): y
+Also remove 5 deployed files? (y/N): y
+Removing deployed files...
+✓ Removed 5 files
+Removing from registry...
+✓ Removed from registry
+✓ owner/repo unregistered successfully
+  All deployed files have been removed
+
+# Or if choosing not to remove files:
+Remove "owner/repo" from registry? (y/N): y
+Also remove 5 deployed files? (y/N): n
 Removing from registry...
 ✓ Removed from registry
 ✓ owner/repo unregistered successfully
@@ -268,41 +279,6 @@ owner/repo2         ✗ Error                       0    2025/1/10
   Last error: Authentication failed
 
 Total: 2 repositories
-```
-
-### remove
-
-Remove a repository and clean up all associated files. Supports the same selection methods as other commands.
-
-#### Usage
-```bash
-# Remove by repository name
-ccpm remove owner/repo
-
-# Remove by index number
-ccpm remove 2
-
-# Remove by repository ID
-ccpm remove abc123def
-```
-
-#### Enhanced Features
-- Repository selection by name, index (#), or ID
-- Tracks and removes all deployed files
-- Cleans up empty directories
-- Shows detailed removal progress
-- Confirms successful cleanup
-
-Example:
-```bash
-ccpm remove 1
-
-# Output:
-Removing repository owner/repo...
-✓ Removed deployed file: ~/.claude/commands/build.md
-✓ Removed deployed file: ~/.claude/commands/test.md
-✓ Cleaned up empty directory: ~/.claude/commands
-✓ Repository removed successfully
 ```
 
 ### show

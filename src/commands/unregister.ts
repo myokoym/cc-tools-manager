@@ -5,11 +5,14 @@
 
 import { Command } from 'commander';
 import chalk from 'chalk';
+import * as fs from 'fs/promises';
 import { RegistryService } from '../core/RegistryService';
+import { StateManager } from '../core/StateManager';
 import { Repository } from '../types/repository';
 import { promptYesNo } from '../utils/prompt';
 import ora from 'ora';
 import { selectRepository, displayNumberedRepositories } from '../utils/repository-selector';
+import { fileExists } from '../utils/file-system';
 
 /**
  * アンレジスターオプション
@@ -24,6 +27,7 @@ interface UnregisterOptions {
  */
 async function unregisterRepository(repositoryName: string | undefined, options: UnregisterOptions): Promise<void> {
   const registryService = new RegistryService();
+  const stateManager = new StateManager();
   
   try {
     const repositories = await registryService.list();
@@ -63,7 +67,7 @@ async function unregisterRepository(repositoryName: string | undefined, options:
         // 登録解除確認（--forceでスキップ）
         if (!options.force) {
           const shouldUnregister = await promptYesNo(
-            chalk.yellow(`\nRemove "${repo.name}" from registry? This will NOT remove deployed files. (y/N): `),
+            chalk.yellow(`\nRemove "${repo.name}" from registry? (y/N): `),
             false
           );
           
@@ -73,14 +77,69 @@ async function unregisterRepository(repositoryName: string | undefined, options:
           }
         }
         
+        // デプロイされたファイルの確認
+        const state = await stateManager.getState();
+        const repoState = state.repositories[repo.id];
+        const hasDeployedFiles = repoState && repoState.deployedFiles && repoState.deployedFiles.length > 0;
+        
+        let filesRemoved = false;
+        
+        // デプロイされたファイルがある場合、削除するか確認（--forceでもこの確認は行う）
+        if (hasDeployedFiles && !options.force) {
+          const shouldRemoveFiles = await promptYesNo(
+            chalk.yellow(`\nAlso remove ${repoState.deployedFiles.length} deployed files? (y/N): `),
+            false
+          );
+          
+          if (shouldRemoveFiles) {
+            // ファイルを削除
+            spinner.start('Removing deployed files...');
+            let removedCount = 0;
+            let failedCount = 0;
+            
+            for (const file of repoState.deployedFiles) {
+              try {
+                if (await fileExists(file.target)) {
+                  await fs.unlink(file.target);
+                  removedCount++;
+                }
+              } catch (error) {
+                console.error(chalk.red(`Failed to remove ${file.target}: ${error}`));
+                failedCount++;
+              }
+            }
+            
+            if (removedCount > 0) {
+              spinner.succeed(`Removed ${removedCount} files`);
+              filesRemoved = true;
+              
+              // 状態を更新（deployedFilesをクリア）
+              repoState.deployedFiles = [];
+              repoState.lastSync = new Date().toISOString();
+              await stateManager.saveState(state);
+            } else {
+              spinner.warn('No files were removed');
+            }
+            
+            if (failedCount > 0) {
+              console.error(chalk.red(`  Failed to remove ${failedCount} files`));
+            }
+          }
+        }
+        
         // レジストリから削除
         spinner.start('Removing from registry...');
         await registryService.remove(repo.id);
         spinner.succeed('Removed from registry');
         
         console.log(chalk.green(`✓ ${repo.name} unregistered successfully`));
-        console.log(chalk.gray('  Note: Deployed files remain in .claude directory'));
-        console.log(chalk.gray(`  Run 'ccpm uninstall ${repo.name}' to remove deployed files`));
+        
+        if (hasDeployedFiles && !filesRemoved) {
+          console.log(chalk.gray('  Note: Deployed files remain in .claude directory'));
+          console.log(chalk.gray(`  Run 'ccpm uninstall ${repo.name}' to remove deployed files`));
+        } else if (filesRemoved) {
+          console.log(chalk.gray('  All deployed files have been removed'));
+        }
         
       } catch (error) {
         spinner.fail('Unregister failed');
@@ -107,8 +166,8 @@ async function unregisterRepository(repositoryName: string | undefined, options:
  * Unregister command definition
  */
 export const unregisterCommand = new Command('unregister')
-  .description('Remove repository from registry (keeps deployed files)')
+  .description('Remove repository from registry (optionally remove deployed files)')
   .argument('[repository]', 'Repository name to unregister')
-  .option('-f, --force', 'Skip removal confirmation prompt')
+  .option('-f, --force', 'Skip prompts (keeps deployed files)')
   .option('-a, --all', 'Unregister all repositories')
   .action(unregisterRepository);

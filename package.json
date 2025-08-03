@@ -1,6 +1,6 @@
 {
   "name": "claude-code-package-manager",
-  "version": "0.3.3",
+  "version": "0.3.4",
   "description": "Centralized management system for Claude Code related tools",
   "main": "dist/index.js",
   "bin": {
