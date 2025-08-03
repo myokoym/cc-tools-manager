@@ -307,10 +307,13 @@ Removing repository owner/repo...
 
 ### show
 
-Display detailed information about a specific repository, including deployment mappings and file status.
+Display repository information. Without arguments, shows a summary of all repositories. With a repository argument, shows detailed information about that specific repository.
 
 #### Usage
 ```bash
+# Show summary of all repositories
+ccpm show
+
 # Show by repository name
 ccpm show owner/repo
 
@@ -322,6 +325,8 @@ ccpm show abc123def
 ```
 
 #### Features
+- Without arguments: Shows status summary of all repositories
+- With repository argument: Shows detailed deployment information
 - Repository selection by name, index (#), or ID (minimum 4 characters for partial ID)
 - Displays actual deployment paths from state.json
 - Shows source → target mappings with full paths
@@ -334,6 +339,7 @@ ccpm show abc123def
 - `--files-only`: Show only deployed files list
 - `--tree`: Display files in tree format (with --files-only)
 - `--skip-deployments`: Skip deployment information section
+- `--summary`: Force summary view even when showing specific repository
 
 #### Example Output
 ```bash
@@ -365,34 +371,6 @@ Deployments:
     agents/frontend/react-specialist.md → ~/.claude/agents/frontend/react-specialist.md [deployed]
 ```
 
-### status
-
-Check repository status with deployment details. Can query specific repositories or show all.
-
-#### Usage
-```bash
-# Show status of all repositories
-ccpm status
-
-# Show status by repository name
-ccpm status owner/repo
-
-# Show status by index number
-ccpm status 1
-
-# Show status by repository ID
-ccpm status abc123def
-```
-
-#### Options
-- `--json`: Output in JSON format for programmatic use
-
-The status command shows:
-- Repository ID and name
-- Last update timestamp
-- Current sync status
-- Number of deployed files
-- Any errors or warnings
 
 ## Command Overview
 
@@ -404,9 +382,7 @@ The status command shows:
 - `uninstall [repository]` - Remove deployed files from .claude directory
 - `unregister [repository]` - Remove repository from registry (keeps deployed files)
 - `list` - List all registered repositories with their status
-- `show <repository>` - Show detailed repository information with deployment mappings
-- `status [repository]` - Show repository sync status and health
-- `remove <repository>` - Remove a repository and all its deployed files
+- `show [repository]` - Show repository information and status
 
 ### Command Flow
 

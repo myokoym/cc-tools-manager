@@ -6,7 +6,6 @@
 export { listCommand } from './list';
 export { default as createRegisterCommand } from './register';
 export { showCommand, createShowCommand } from './show';
-export { statusCommand } from './status';
 export { updateCommand } from './update';
 export { installCommand } from './install';
 export { uninstallCommand } from './uninstall';

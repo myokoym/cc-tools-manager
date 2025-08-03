@@ -228,7 +228,7 @@ Registered Repositories:
 Total: 3 repositories
 ```
 
-**Note**: You can use the numbers from the list output with other commands (update, install, uninstall, unregister, show, status).
+**Note**: You can use the numbers from the list output with other commands (update, install, uninstall, unregister, show).
 
 ### Show Repository Details
 
@@ -253,34 +253,34 @@ The show command displays:
 
 📖 **See [Command Reference](docs/commands.md) for detailed information about the enhanced list command and other recent improvements.**
 
-### Check Repository Status
+### Show Repository Information
 
-Check detailed status of a specific repository:
+Display repository information and status:
 
 ```bash
-# Specific repository
-ccpm status owner/repo
+# Show all repositories summary
+ccpm show
 
-# All repositories
-ccpm status
+# Show specific repository details
+ccpm show owner/repo
 
-# Output in JSON format
-ccpm status --json
+# Output in different formats
+ccpm show --format json
+ccpm show owner/repo --format yaml
 ```
 
 ### Remove Repository
 
-Remove a registered repository and all its deployed files:
+To remove a repository, you have two options:
 
+**Uninstall** - Remove deployed files but keep the repository registered:
 ```bash
-# Remove with confirmation
-ccpm remove owner/repo
+ccpm uninstall owner/repo
+```
 
-# Remove by number
-ccpm remove 2
-
-# Remove without confirmation
-ccpm remove owner/repo --force
+**Unregister** - Remove from registry but keep deployed files:
+```bash
+ccpm unregister owner/repo
 ```
 
 ## Command Comparison

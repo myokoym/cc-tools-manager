@@ -9,10 +9,29 @@ import ora from 'ora';
 import { RegistryService } from '../core/RegistryService';
 import { GitManager } from '../core/GitManager';
 import { StateManager } from '../core/StateManager';
-import { Repository } from '../types/repository';
+import { Repository, RepositoryStatus } from '../types/repository';
 import { DeploymentMapper } from '../services/deployment-mapper';
 import { RepositoryStatusService } from '../services/repository-status';
 import { OutputFormatter, FormatterOptions } from '../formatters/output-formatter';
+import { selectRepository, displayNumberedRepositories } from '../utils/repository-selector';
+
+/**
+ * Status color definitions
+ */
+const statusColors: Record<RepositoryStatus, (text: string) => string> = {
+  active: chalk.green,
+  error: chalk.red,
+  uninitialized: chalk.gray
+};
+
+/**
+ * Status display strings
+ */
+const statusDisplay: Record<RepositoryStatus, string> = {
+  active: '✓ Active',
+  error: '✗ Error',
+  uninitialized: '○ Not Initialized'
+};
 
 /**
  * Show command class
@@ -41,7 +60,13 @@ export class ShowCommand {
   /**
    * Execute the show command
    */
-  async execute(repositoryName: string, options: ShowOptions): Promise<void> {
+  async execute(repositoryName?: string, options: ShowOptions = {}): Promise<void> {
+    // If no repository specified, show all repositories summary
+    if (!repositoryName) {
+      await this.showAllRepositoriesSummary(options);
+      return;
+    }
+
     const spinner = ora('Loading repository information...').start();
     
     try {
@@ -254,6 +279,76 @@ export class ShowCommand {
       }
     }
   }
+
+  /**
+   * Show summary of all repositories
+   */
+  private async showAllRepositoriesSummary(options: ShowOptions): Promise<void> {
+    const repositories = await this.registryService.list();
+    
+    if (repositories.length === 0) {
+      console.log(chalk.yellow('No repositories registered.'));
+      return;
+    }
+    
+    // If --summary flag or no special format requested, show compact summary
+    if (options.summary || !options.format || options.format === 'table') {
+      console.log(chalk.bold('\nRepository Status Summary:\n'));
+      
+      // Count by status
+      const statusCounts = repositories.reduce((acc, repo) => {
+        acc[repo.status] = (acc[repo.status] || 0) + 1;
+        return acc;
+      }, {} as Record<RepositoryStatus, number>);
+      
+      // Display summary
+      Object.entries(statusCounts).forEach(([status, count]) => {
+        const colorFn = statusColors[status as RepositoryStatus];
+        console.log(`  ${colorFn(statusDisplay[status as RepositoryStatus])}: ${count}`);
+      });
+      
+      console.log(`\n  Total: ${repositories.length} repositories`);
+      
+      // Show repositories needing attention
+      const problemRepos = repositories.filter(r => r.status !== 'active');
+      if (problemRepos.length > 0) {
+        console.log(chalk.yellow('\nRepositories needing attention:'));
+        problemRepos.forEach(repo => {
+          console.log(`  - ${repo.name} (${statusColors[repo.status](repo.status)})`);
+        });
+      }
+      
+      // Show numbered list of all repositories
+      console.log(chalk.bold('\nAll Repositories:\n'));
+      displayNumberedRepositories(repositories);
+    } else {
+      // For other formats (json, yaml), show full details
+      const formatterOptions: FormatterOptions = {
+        format: options.format,
+        verbose: options.verbose,
+        colors: true,
+        terminalWidth: process.stdout.columns
+      };
+      
+      // For JSON/YAML formats, output raw repository data
+      if (options.format === 'json') {
+        console.log(JSON.stringify(repositories, null, 2));
+      } else if (options.format === 'yaml') {
+        // Simple YAML-like output
+        repositories.forEach(repo => {
+          console.log(`- name: ${repo.name}`);
+          console.log(`  id: ${repo.id}`);
+          console.log(`  url: ${repo.url}`);
+          console.log(`  status: ${repo.status}`);
+          console.log(`  registeredAt: ${repo.registeredAt}`);
+          if (repo.lastUpdatedAt) {
+            console.log(`  lastUpdatedAt: ${repo.lastUpdatedAt}`);
+          }
+          console.log('');
+        });
+      }
+    }
+  }
 }
 
 
@@ -266,6 +361,7 @@ interface ShowOptions {
   verbose?: boolean;
   skipDeployments?: boolean;
   tree?: boolean;
+  summary?: boolean;
 }
 
 /**
@@ -281,14 +377,15 @@ export function createShowCommand(
   const showCommand = new ShowCommand(registryService, deploymentMapper, statusService, formatter, stateManager);
   
   return new Command('show')
-    .description('Show detailed information about a specific repository')
-    .argument('<repository>', 'Repository number, name, or ID to show')
+    .description('Show repository information')
+    .argument('[repository]', 'Repository number, name, or ID to show (optional)')
     .option('--files-only', 'Show only deployed files list')
     .option('--format <format>', 'Output format (table, json, yaml, tree)', 'table')
     .option('-v, --verbose', 'Show detailed status information')
     .option('--skip-deployments', 'Skip deployment information')
     .option('--tree', 'Show files in tree format')
-    .action((repositoryName: string, options: ShowOptions) => 
+    .option('--summary', 'Show summary view (when showing all repositories)')
+    .action((repositoryName: string | undefined, options: ShowOptions) => 
       showCommand.execute(repositoryName, options)
     );
 }

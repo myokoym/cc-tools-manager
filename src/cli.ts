@@ -22,7 +22,7 @@ import { OutputFormatter } from './formatters/output-formatter';
 
 // 同期的にコマンドを登録
 import createRegisterCommand from './commands/register';
-import { updateCommand, listCommand, statusCommand, createShowCommand, installCommand, uninstallCommand, unregisterCommand } from './commands';
+import { updateCommand, listCommand, createShowCommand, installCommand, uninstallCommand, unregisterCommand } from './commands';
 import createEditCommand from './commands/edit';
 
 // Initialize core services
@@ -38,7 +38,6 @@ program.addCommand(createRegisterCommand());
 program.addCommand(updateCommand);
 program.addCommand(listCommand);
 program.addCommand(createShowCommand(registryService, deploymentMapper, repositoryStatusService, outputFormatter));
-program.addCommand(statusCommand);
 program.addCommand(createEditCommand());
 program.addCommand(installCommand);
 program.addCommand(uninstallCommand);
