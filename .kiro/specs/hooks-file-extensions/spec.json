@@ -1,0 +1,23 @@
+{
+  "feature_name": "hooks-file-extensions",
+  "project_description": "support-hooks md以外の拡張子の対応状況などを確認して",
+  "created_at": "2025-08-04T20:35:00Z",
+  "updated_at": "2025-08-04T21:00:00Z",
+  "language": "japanese",
+  "phase": "requirements-generated",
+  "approvals": {
+    "requirements": {
+      "generated": true,
+      "approved": false
+    },
+    "design": {
+      "generated": false,
+      "approved": false
+    },
+    "tasks": {
+      "generated": false,
+      "approved": false
+    }
+  },
+  "ready_for_implementation": false
+}

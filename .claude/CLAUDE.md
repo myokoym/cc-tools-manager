@@ -146,3 +146,8 @@ See `blogs/README.md` for standard categories and common tags.
 - **Description**: テキストを登録できる仕組み - リポジトリになっていないコマンドなどを取り込む
 - **Status**: Initialized
 - **Next Step**: Run `/kiro:spec-requirements text-content-management`
+
+### hooks-file-extensions
+- **Description**: Hooksディレクトリにおけるmd以外の拡張子のサポート状況調査と拡張
+- **Status**: Initialized
+- **Next Step**: Run `/kiro:spec-requirements hooks-file-extensions`

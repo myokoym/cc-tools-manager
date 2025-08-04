@@ -308,7 +308,7 @@ Understanding the differences between similar commands:
 CC Tools Manager uses the following directory structure:
 
 ```
-~/.cc-tools/
+~/.ccpm/
 ├── src/                # Source installations
 │   └── claude-code-package-manager/  # CC Tools Manager itself (when installed via curl)
 ├── repos/              # Cloned repositories
@@ -319,7 +319,7 @@ CC Tools Manager uses the following directory structure:
 ├── config/             # Configuration files
 │   └── settings.json   # Custom settings
 └── logs/               # Log files
-    └── cc-tools.log
+    └── ccpm.log
 
 ~/.claude/              # Deployment destination
 ├── commands/           # Slash commands
@@ -445,7 +445,7 @@ Check file write permissions:
 ```bash
 # Fix permissions
 chmod -R u+w ~/.claude
-chmod -R u+w ~/.cc-tools
+chmod -R u+w ~/.ccpm
 ```
 
 ### Check Logs
@@ -454,7 +454,7 @@ View detailed logs:
 
 ```bash
 # Display log file
-tail -f ~/.cc-tools/logs/cc-tools.log
+tail -f ~/.ccpm/logs/cc-tools.log
 
 # Run in debug mode
 CCPM_LOG_LEVEL=DEBUG ccpm update
