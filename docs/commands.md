@@ -380,8 +380,7 @@ Understanding the differences between commands:
 | `update --install` | Keeps | Updates (git pull) | Deploys automatically |
 | `install` | Keeps | No change | Deploys (with prompt) |
 | `uninstall` | Keeps | No change | Removes |
-| `unregister` | Removes | No change | Keeps |
-| `remove` | Removes | Removes | Removes |
+| `unregister` | Removes | No change | Keeps (or removes with prompt) |
 
 ### When to use each command:
 
@@ -389,8 +388,7 @@ Understanding the differences between commands:
 - **`update --install`**: Get latest changes and automatically deploy files
 - **`install`**: Deploy files from current repository state without updating
 - **`uninstall`**: Remove deployed files but keep repository registered
-- **`unregister`**: Stop tracking repository but keep deployed files
-- **`remove`**: Completely remove repository and all associated files
+- **`unregister`**: Stop tracking repository (with option to remove deployed files)
 
 ## Key Features
 
