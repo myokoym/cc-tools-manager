@@ -69,7 +69,7 @@ describe('Register Command', () => {
       const option = command.options.find(opt => opt.long === '--data-dir');
       expect(option).toBeDefined();
       expect(option?.short).toBe('-d');
-      expect(option?.defaultValue).toBe(path.join(process.cwd(), '.cc-tools'));
+      expect(option?.defaultValue).toBe(path.join(process.cwd(), '.ccpm'));
     });
   });
 

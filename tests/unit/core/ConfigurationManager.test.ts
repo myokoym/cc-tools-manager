@@ -239,7 +239,7 @@ describe('ConfigurationManager', () => {
       await configManager.update({ behavior: { autoUpdate: true } });
 
       expect(mockFs.mkdir).toHaveBeenCalledWith(
-        expect.stringContaining('.cc-tools'),
+        expect.stringContaining('.ccpm'),
         { recursive: true }
       );
       expect(mockFs.writeFile).toHaveBeenCalledWith(

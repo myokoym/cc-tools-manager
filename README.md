@@ -454,7 +454,7 @@ View detailed logs:
 
 ```bash
 # Display log file
-tail -f ~/.ccpm/logs/cc-tools.log
+tail -f ~/.ccpm/logs/ccpm.log
 
 # Run in debug mode
 CCPM_LOG_LEVEL=DEBUG ccpm update

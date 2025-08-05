@@ -218,7 +218,7 @@ export class ConfigurationManager {
   private applyCLIOptions(options: GlobalCLIOptions): void {
     if (options.home) {
       this.configuration.paths.home = options.home;
-      this.configuration.logging.file = path.join(options.home, 'cc-tools.log');
+      this.configuration.logging.file = path.join(options.home, 'ccpm.log');
     }
 
     if (options.claudeDir) {

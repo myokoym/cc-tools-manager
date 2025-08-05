@@ -60,7 +60,7 @@ export class DeploymentService implements IDeploymentService {
     
     try {
       // CC_TOOLS_HOMEディレクトリを取得
-      const CC_TOOLS_HOME = process.env.CC_TOOLS_HOME || path.join(process.env.HOME || '', '.ccpm');
+      const CC_TOOLS_HOME = process.env.CCPM_HOME || path.join(process.env.HOME || '', '.ccpm');
       const textContentDir = path.join(CC_TOOLS_HOME, 'text-contents');
       const contentFile = path.join(textContentDir, `${repo.name}.md`);
       
