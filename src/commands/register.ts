@@ -9,7 +9,7 @@ import ora from 'ora';
 import { RegistryService } from '../core/RegistryService';
 import { Logger } from '../utils/logger';
 import { ValidationError, ConflictError } from '../utils/errors';
-import { CC_TOOLS_HOME } from '../constants/paths';
+import { CCPM_HOME } from '../constants/paths';
 import { RepositoryType } from '../types';
 import * as path from 'path';
 import * as fs from 'fs/promises';
@@ -27,7 +27,7 @@ export function createRegisterCommand(): Command {
     .alias('reg')
     .description('Register a GitHub repository or text content to the tools registry')
     .argument('<url>', 'GitHub repository URL or "text" for text content')
-    .option('-d, --data-dir <dir>', 'Data directory path', CC_TOOLS_HOME)
+    .option('-d, --data-dir <dir>', 'Data directory path', CCPM_HOME)
     .option('-t, --type <type>', 'Repository type (agents, commands, hooks)')
     .option('-n, --name <name>', 'Name for text content')
     .action(async (url: string, options: { dataDir: string; type?: string; name?: string }) => {

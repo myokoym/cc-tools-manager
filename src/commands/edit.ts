@@ -9,7 +9,7 @@ import ora from 'ora';
 import { RegistryService } from '../core/RegistryService';
 import { Logger } from '../utils/logger';
 import { NotFoundError } from '../utils/errors';
-import { CC_TOOLS_HOME } from '../constants/paths';
+import { CCPM_HOME } from '../constants/paths';
 import * as path from 'path';
 import * as fs from 'fs/promises';
 import { spawn } from 'child_process';
@@ -24,7 +24,7 @@ export function createEditCommand(): Command {
   const command = new Command('edit')
     .description('Edit text content')
     .argument('<name>', 'Name of the text content to edit')
-    .option('-d, --data-dir <dir>', 'Data directory path', CC_TOOLS_HOME)
+    .option('-d, --data-dir <dir>', 'Data directory path', CCPM_HOME)
     .action(async (name: string, options: { dataDir: string }) => {
       await handleEdit(name, options);
     });

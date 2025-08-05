@@ -9,7 +9,7 @@ import { createHash } from 'crypto';
 import chalk from 'chalk';
 import { IRegistryService } from './interfaces/IRegistryService';
 import { Repository, RepositoryDeployments, RepositoryType, DeploymentMode } from '../types';
-import { CC_TOOLS_HOME } from '../constants/paths';
+import { CCPM_HOME } from '../constants/paths';
 import { ValidationError, ConflictError, NotFoundError } from '../utils/errors';
 import { RepositoryValidator } from './RepositoryValidator';
 import { ValidationError as TypeValidationError } from '../types/deployment';
@@ -21,8 +21,8 @@ export class RegistryService implements IRegistryService {
   private validator: RepositoryValidator;
 
   constructor(dataDir?: string) {
-    // dataDir引数を受け付けるが、デフォルトはCC_TOOLS_HOME
-    const dir = dataDir || CC_TOOLS_HOME;
+    // dataDir引数を受け付けるが、デフォルトはCCPM_HOME
+    const dir = dataDir || CCPM_HOME;
     this.registryPath = path.join(dir, 'repositories.json');
     this.validator = new RepositoryValidator();
   }
@@ -91,7 +91,7 @@ export class RegistryService implements IRegistryService {
     // リポジトリをクローンして構造を検証
     // 注意: 実際のクローン処理はGitServiceで行われるため、ここではダミーパスを使用
     // 実際の実装では、GitServiceと連携してクローンしてから検証する必要がある
-    const tempRepoPath = path.join(CC_TOOLS_HOME, 'temp', this.generateId(normalizedUrl));
+    const tempRepoPath = path.join(CCPM_HOME, 'temp', this.generateId(normalizedUrl));
     
     // 構造検証（タイプ指定がある場合のみ）
     const validationResult = await this.validator.validateStructure(tempRepoPath, types.map(t => t));

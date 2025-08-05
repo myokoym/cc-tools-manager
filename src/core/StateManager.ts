@@ -3,7 +3,7 @@ import { IStateManager, RepositoryState, RepositoryUpdate } from './interfaces/I
 import { Repository } from '../types';
 import { GitUpdateResult } from './interfaces/IGitManager';
 import { DeploymentResult } from './interfaces/IDeploymentService';
-import { CC_TOOLS_HOME } from '../constants/paths';
+import { CCPM_HOME } from '../constants/paths';
 import {
   ensureDir,
   fileExists,
@@ -49,7 +49,7 @@ export class StateManager implements IStateManager {
   private readonly lockFilePath: string;
 
   constructor(stateFile?: string) {
-    this.stateFilePath = stateFile || path.join(CC_TOOLS_HOME, 'state.json');
+    this.stateFilePath = stateFile || path.join(CCPM_HOME, 'state.json');
     this.lockFilePath = `${this.stateFilePath}.lock`;
   }
 

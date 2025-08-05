@@ -1,7 +1,7 @@
 import winston from 'winston';
 import path from 'path';
 import fs from 'fs';
-import { CC_TOOLS_HOME, LOGS_DIR } from '../constants/paths';
+import { CCPM_HOME, LOGS_DIR } from '../constants/paths';
 
 // ログディレクトリの遅延作成
 let logDirCreated = false;

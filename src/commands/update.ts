@@ -11,7 +11,7 @@ import { GitManager } from '../core/GitManager';
 import { DeploymentService } from '../core/DeploymentService';
 import { StateManager } from '../core/StateManager';
 import { Repository } from '../types/repository';
-import { CC_TOOLS_HOME, REPOS_DIR } from '../constants/paths';
+import { CCPM_HOME, REPOS_DIR } from '../constants/paths';
 import { ensureDir } from '../utils/file-system';
 import { promptYesNo } from '../utils/prompt';
 import * as fs from 'fs/promises';
