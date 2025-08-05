@@ -8,7 +8,7 @@
   - _要件: 2.1_
 
 - [ ] 2. 環境変数定数の更新
-- [ ] 2.1 src/constants/paths.tsの環境変数プレフィックス変更
+- [x] 2.1 src/constants/paths.tsの環境変数プレフィックス変更 (completed: 2025-08-05 09:26:40)
   - CC_TOOLS_HOMEをCCPM_HOMEに変更し、デフォルト値を~/.ccpmに更新
   - CC_TOOLS_CLAUDE_DIRをCCPM_CLAUDE_DIRに変更
   - CC_TOOLS_LOG_LEVELをCCPM_LOG_LEVELに変更
@@ -28,7 +28,7 @@
   - バージョン表示時のアプリケーション名を更新
   - _要件: 3.1_
 
-- [ ] 3.2 src/utils/logger.tsのアプリケーション名更新
+- [x] 3.2 src/utils/logger.tsのアプリケーション名更新 (completed: 2025-08-05 09:27:57)
   - Winstonロガーのdefaultメタデータでアプリケーション名を'ccpm'に変更
   - ログファイル名をcc-tools.logからccpm.logに変更
   - コンソール出力のプレフィックスを更新
