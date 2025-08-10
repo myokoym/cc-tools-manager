@@ -10,7 +10,7 @@ const program = new Command();
 program
   .name('ccpm')
   .description('Claude Code Package Manager - Manage MCP servers and tools')
-  .version(packageJson.version);
+  .version(packageJson.version, '-v, --version');
 
 // Core services
 import { RegistryService } from './core/RegistryService';
