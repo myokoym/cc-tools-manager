@@ -124,13 +124,14 @@ async function uninstallRepository(repositoryName: string | undefined, options: 
           repoState.lastSync = new Date().toISOString();
           await stateManager.saveState(state);
           
-          // レジストリのdeploymentsフィールドもクリア
+          // レジストリのdeploymentsフィールドをクリアし、ステータスをuninitializedに更新
           await registryService.update(repo.id, { 
             deployments: {
               commands: [],
               agents: [],
               hooks: []
-            }
+            },
+            status: 'uninitialized'
           });
         } else {
           spinner.warn('No files were removed');
