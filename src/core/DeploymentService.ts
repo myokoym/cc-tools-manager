@@ -28,22 +28,22 @@ import { logger } from '../utils/logger';
 export class DeploymentService implements IDeploymentService {
   private readonly patterns = {
     commands: [
-      '.claude/commands/**/*.{js,ts,mjs,md}',
-      'commands/**/*.{js,ts,mjs,md}',
-      '.claude/commands.{js,ts,mjs,md}',
-      'commands.{js,ts,mjs,md}'
+      '.claude/commands/**/*.md',
+      'commands/**/*.md',
+      '.claude/commands.md',
+      'commands.md'
     ],
     agents: [
-      '.claude/agents/**/*.{js,ts,mjs,md}',
-      'agents/**/*.{js,ts,mjs,md}',
-      '.claude/agents.{js,ts,mjs,md}',
-      'agents.{js,ts,mjs,md}'
+      '.claude/agents/**/*.md',
+      'agents/**/*.md',
+      '.claude/agents.md',
+      'agents.md'
     ],
     hooks: [
-      '.claude/hooks/**/*.{js,ts,mjs,md}',
-      'hooks/**/*.{js,ts,mjs,md}',
-      '.claude/hooks.{js,ts,mjs,md}',
-      'hooks.{js,ts,mjs,md}'
+      '.claude/hooks/**/*',
+      'hooks/**/*',
+      '.claude/hooks/*',
+      'hooks/*'
     ]
   };
   
