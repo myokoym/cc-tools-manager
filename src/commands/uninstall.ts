@@ -123,6 +123,15 @@ async function uninstallRepository(repositoryName: string | undefined, options: 
           repoState.deployedFiles = [];
           repoState.lastSync = new Date().toISOString();
           await stateManager.saveState(state);
+          
+          // レジストリのdeploymentsフィールドもクリア
+          await registryService.update(repo.id, { 
+            deployments: {
+              commands: [],
+              agents: [],
+              hooks: []
+            }
+          });
         } else {
           spinner.warn('No files were removed');
         }

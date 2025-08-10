@@ -11,24 +11,11 @@ import { GitManager } from '../core/GitManager';
 import { DeploymentService } from '../core/DeploymentService';
 import { StateManager } from '../core/StateManager';
 import { Repository } from '../types/repository';
-import { CCPM_HOME, REPOS_DIR } from '../constants/paths';
 import { ensureDir } from '../utils/file-system';
 import { promptYesNo } from '../utils/prompt';
-import * as fs from 'fs/promises';
 import ora from 'ora';
 import { selectRepository, displayNumberedRepositories } from '../utils/repository-selector';
-
-/**
- * ディレクトリがGitリポジトリかどうかを確認
- */
-async function isGitRepository(dirPath: string): Promise<boolean> {
-  try {
-    await fs.access(path.join(dirPath, '.git'));
-    return true;
-  } catch {
-    return false;
-  }
-}
+import { ensureRepositoryCloned, createCloneResult } from '../utils/repository-utils';
 
 /**
  * 更新オプション
@@ -88,35 +75,17 @@ async function updateRepository(repositoryName: string | undefined, options: Upd
         
         let gitUpdateResult;
         
-        if (!repo.localPath || !(await isGitRepository(repo.localPath))) {
-          // リポジトリがまだクローンされていない場合、クローンする
-          spinner.text = 'Cloning repository...';
-          const repoDir = repo.localPath || path.join(REPOS_DIR, repo.name.replace('/', '-'));
-          
-          // localPathを設定
-          repo.localPath = repoDir;
-          
-          // ディレクトリを作成
-          await ensureDir(path.dirname(repoDir));
-          
-          const gitManager = new GitManager();
-          await gitManager.clone(repo);
-          
-          // データベースのlocalPathを更新
-          await registryService.update(repo.id, { localPath: repoDir });
-          
-          // クローンの場合の仮の更新結果
-          gitUpdateResult = {
-            filesChanged: 0,
-            insertions: 0,
-            deletions: 0,
-            currentCommit: await gitManager.getLatestCommit(repo),
-            previousCommit: ''
-          };
-          
+        // リポジトリが存在しない場合はクローン
+        const wasCloned = await ensureRepositoryCloned(repo, registryService);
+        if (wasCloned) {
+          gitUpdateResult = await createCloneResult(repo);
           spinner.succeed('Repository cloned successfully');
         } else {
           // ディレクトリが存在することを確認
+          if (!repo.localPath) {
+            spinner.fail('Repository path not found');
+            continue;
+          }
           await ensureDir(repo.localPath);
           
           const gitManager = new GitManager(path.dirname(repo.localPath));
@@ -177,6 +146,10 @@ async function updateRepository(repositoryName: string | undefined, options: Upd
         } else {
           // 通常のパターンベースデプロイメント
           // パターンを再検出
+          if (!repo.localPath) {
+            spinner.fail('Repository path not found');
+            continue;
+          }
           const patterns = await deploymentService.detectPatterns(repo.localPath);
           
           if (patterns.length > 0) {

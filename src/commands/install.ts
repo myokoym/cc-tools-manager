@@ -12,6 +12,7 @@ import { Repository } from '../types/repository';
 import { promptYesNo } from '../utils/prompt';
 import ora from 'ora';
 import { selectRepository, displayNumberedRepositories } from '../utils/repository-selector';
+import { ensureRepositoryCloned, createCloneResult } from '../utils/repository-utils';
 
 /**
  * インストールオプション
@@ -65,6 +66,12 @@ async function installRepository(repositoryName: string | undefined, options: In
       const spinner = ora();
       
       try {
+        // リポジトリが存在しない場合はクローン
+        const wasCloned = await ensureRepositoryCloned(repo, registryService);
+        if (wasCloned) {
+          spinner.succeed('Repository cloned successfully');
+        }
+        
         // デプロイメントの検出
         spinner.start('Checking for deployment files...');
         
@@ -122,7 +129,11 @@ async function installRepository(repositoryName: string | undefined, options: In
         }
         
         // 通常のパターンベースデプロイメント
-        const patterns = await deploymentService.detectPatterns(repo.localPath!);
+        if (!repo.localPath) {
+          spinner.fail('Repository path not found');
+          continue;
+        }
+        const patterns = await deploymentService.detectPatterns(repo.localPath);
         
         if (patterns.length === 0) {
           spinner.succeed('No deployment files found');
